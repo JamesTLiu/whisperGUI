@@ -1,0 +1,133 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+
+  createrelease:
+    name: Create Release
+    runs-on: [ubuntu-latest]
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+    - name: Output Release URL File
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
+
+  build:
+    name: Build packages
+    needs: createrelease
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # - os: macos-latest
+          #   TARGET: macos
+          #   CMD_BUILD: >
+          #       pyinstaller -F -w -n whisperGUI -i whisperGUI.py &&
+          #       cd dist/ &&
+          #       zip -r9 whisperGUI whisperGUI.app/
+          #   OUT_FILE_NAME: whisperGUI.zip
+          #   ASSET_MIME: application/zip
+          - os: windows-latest
+            TARGET: windows
+            OUT_FILE_NAME: whisperGUI.exe
+            ASSET_MIME: application/vnd.microsoft.portable-executable
+          # - os: windows-latest
+          #   TARGET: windows
+          #   PROJECT_NAME: whisperGUI
+          #   OUT_FILE_NAME: whisperGUI.zip
+          #   ASSET_MIME: application/zip
+    steps:
+    # - name: Failing step
+    #   id: demo
+    #   run: exit 1
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      id: cp38
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install six
+        pip install pyinstaller
+        pip install importlib_metadata
+        pip install wheel
+    # - name: Setup CUDA support for Windows
+    #   if: matrix.os == 'windows-latest'
+    #   run: |
+    #     pip uninstall torch
+    #     pip cache purge
+    #     pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+    - name: print env variables
+      shell: bash
+      run: |
+        env
+    - name: print cwd
+      shell: bash
+      run: |
+        echo $GITHUB_WORKSPACE
+    - name: Build with pyinstaller for ${{matrix.TARGET}}
+      uses: KnicKnic/os-specific-run@v1.0.4
+      with:
+        macos:
+        linux:
+        windows: >
+          pyinstaller -F -c
+          --uac-admin
+          --uac-uiaccess
+          --python-option="u"
+          --paths="$pythonLocation/lib/site-packages"
+          --hidden-import=pytorch --collect-data torch --copy-metadata torch --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --copy-metadata importlib_metadata
+          --add-binary="ffmpeg;ffmpeg"
+          --collect-data "whisper"
+          --runtime-hook=set_env.py
+          whisperGUI.py &&
+          cd dist/ &&
+          Compress-Archive -Path "${{ matrix.PROJECT_NAME }}/*" -DestinationPath ${{ matrix.OUT_FILE_NAME }}
+    - name: Load Release URL File from release job
+      uses: actions/download-artifact@v1
+      with:
+        name: release_url
+    - name: Get Release File Name & Upload URL
+      id: get_release_info
+      shell: bash
+      run: |
+        value=`cat release_url/release_url.txt`
+        echo ::set-output name=upload_url::$value
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./dist/${{ matrix.OUT_FILE_NAME}}
+        asset_name: ${{ matrix.OUT_FILE_NAME}}
+        asset_content_type: ${{ matrix.ASSET_MIME}}
+    - name: Delete tag and release on Fail
+      if: ${{ failure() }}
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true
+        tag_name: ${{ github.ref_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
