@@ -162,11 +162,13 @@ ffmpeg -i "test_video.webm" -q:a 0 -map a test_video.mp3
 ```
 
 Note: `whisper` command line will not work without one of the following:
-* Make an environment variable (basically what `set_env.py` does) or alias for `ffmpeg` with the file path to the `ffmpeg` static binary for your operating system.
+* Add the file path for the directory with the `ffmpeg` static binary for your operating system to the `PATH` environment variable (basically what `set_env.py` does for the GUI application) .
     * Ex. add to `.bashrc` file on amd64 system.
         ```bash
-        alias ffmpeg='~/whisperGUI/ffmpeg/linux/amd64/ffmpeg'
+        export FFMPEGPATH='~/whisperGUI/ffmpeg/linux/amd64/'
+        export PATH=$FFMPEGPATH:$PATH
         ```
+    * Note: Windows uses `;` while Linux uses `:` as the path separator character.
 * Install `ffmpeg`.
     * Not recommended if building a standalone executable using a tool like `pyinstaller`. Your python project may appear to work but actually use an installed `ffmpeg` instead of a static binary `ffmpeg`. This would lead to `ffmpeg` issues when running the standalone executable.
 
@@ -277,5 +279,5 @@ PermissionError: [Errno 13] Permission denied: 'ffmpeg'
         ```
         * The above command assumes the whisperGUI repo is in the user's home directory.
 
-whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and either no preference for device is given or device=CUDA.
+whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and no option to use CPU is given.
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
