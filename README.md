@@ -163,11 +163,16 @@ ffmpeg -i "test_video.webm" -q:a 0 -map a test_video.mp3
 
 Note: `whisper` command line will not work without one of the following:
 * Add the file path for the directory with the `ffmpeg` static binary for your operating system to the `PATH` environment variable (basically what `set_env.py` does for the GUI application) .
-    * Ex. add to `.bashrc` file on amd64 system.
+    * Linux: Add to `.bashrc` file.
         ```bash
         export FFMPEGPATH='~/whisperGUI/ffmpeg/linux/amd64/'
         export PATH=$FFMPEGPATH:$PATH
         ```
+    * Windows: Add to powershell profile
+        ```bash
+        $env:Path += [IO.Path]::PathSeparator + 'C:\path\to\whisperGUI\ffmpeg\windows'
+        ```
+        * If you don't know how to set up a powershell profile, a decent guide is at https://lazyadmin.nl/powershell/powershell-profile/. I used the Current user – Current host profile.
     * Note: Windows uses `;` while Linux uses `:` as the path separator character.
 * Install `ffmpeg`.
     * Not recommended if building a standalone executable using a tool like `pyinstaller`. Your python project may appear to work but actually use an installed `ffmpeg` instead of a static binary `ffmpeg`. This would lead to `ffmpeg` issues when running the standalone executable.
