@@ -162,13 +162,17 @@ ffmpeg -i "test_video.webm" -q:a 0 -map a test_video.mp3
 ```
 
 Note: `whisper` command line will not work without one of the following:
-* Add the file path for the directory with the `ffmpeg` static binary for your operating system to the `PATH` environment variable (basically what `set_env.py` does for the GUI application) .
-    * Linux: Add to `.bashrc` file.
+* Add the file path of the directory for the `ffmpeg` static binary for your operating system to the `PATH` environment variable (basically what `set_env.py` does for the GUI application) .
+    * Linux: Add directory for amd64 `ffmpeg` using `.bashrc` file.
         ```bash
         export FFMPEGPATH='~/whisperGUI/ffmpeg/linux/amd64/'
-        export PATH=$FFMPEGPATH:$PATH
+        export PATH=$PATH:$FFMPEGPATH
         ```
-    * Windows: Add to powershell profile
+        Or in 1 line without a `FFMPEGPATH` environment variable.
+        ```bash
+        export PATH=$PATH:~/whisperGUI/ffmpeg/linux/amd64/
+        ```
+    * Windows: Add directory for windows `ffmpeg` using powershell profile.
         ```bash
         $env:Path += [IO.Path]::PathSeparator + 'C:\path\to\whisperGUI\ffmpeg\windows'
         ```
