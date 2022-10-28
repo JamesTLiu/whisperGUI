@@ -162,11 +162,22 @@ ffmpeg -i "test_video.webm" -q:a 0 -map a test_video.mp3
 ```
 
 Note: `whisper` command line will not work without one of the following:
-* Make an environment variable (basically what `set_env.py` does) or alias for `ffmpeg` with the file path to the `ffmpeg` static binary for your operating system.
-    * Ex. add to `.bashrc` file on amd64 system.
+* Add the file path of the directory for the `ffmpeg` static binary for your operating system to the `PATH` environment variable (basically what `set_env.py` does for the GUI application) .
+    * Linux: Add directory for amd64 `ffmpeg` using `.bashrc` file.
         ```bash
-        alias ffmpeg='~/whisperGUI/ffmpeg/linux/amd64/ffmpeg'
+        export FFMPEGPATH='~/whisperGUI/ffmpeg/linux/amd64/'
+        export PATH=$PATH:$FFMPEGPATH
         ```
+        Or in 1 line without a `FFMPEGPATH` environment variable.
+        ```bash
+        export PATH=$PATH:~/whisperGUI/ffmpeg/linux/amd64/
+        ```
+    * Windows: Add directory for windows `ffmpeg` using powershell profile.
+        ```bash
+        $env:Path += [IO.Path]::PathSeparator + 'C:\path\to\whisperGUI\ffmpeg\windows'
+        ```
+        * If you don't know how to set up a powershell profile, a decent guide is at https://lazyadmin.nl/powershell/powershell-profile/. I used the Current user – Current host profile.
+    * Note: Windows uses `;` while Linux uses `:` as the path separator character.
 * Install `ffmpeg`.
     * Not recommended if building a standalone executable using a tool like `pyinstaller`. Your python project may appear to work but actually use an installed `ffmpeg` instead of a static binary `ffmpeg`. This would lead to `ffmpeg` issues when running the standalone executable.
 
@@ -277,5 +288,5 @@ PermissionError: [Errno 13] Permission denied: 'ffmpeg'
         ```
         * The above command assumes the whisperGUI repo is in the user's home directory.
 
-whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and either no preference for device is given or device=CUDA.
+whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and no option to use CPU is given.
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
