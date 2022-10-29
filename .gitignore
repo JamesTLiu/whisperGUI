@@ -128,9 +128,19 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Audio / Video files
 *.mp3*
 *.mp4*
+
+# GUI app settings file
 whisperGUI.config
+
+# Releases folder
 releases/
+
+# Compressed tar* files
 *.tar
 *.tar.*
+
+# .dist-info folders
+*.dist-info
