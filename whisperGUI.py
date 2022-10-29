@@ -39,7 +39,7 @@ else:
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
-from whisper.tokenizer import TO_LANGUAGE_CODE
+from whisper.tokenizer import TO_LANGUAGE_CODE, LANGUAGES as TO_LANGUAGES
 from whisper.utils import write_srt, write_txt, write_vtt
 
 import set_env
@@ -1599,16 +1599,22 @@ def write_transcript_to_files(
     output_dir = Path(output_dir_path)
     audio_basename = Path(audio_path).stem
 
-    def write_file(write_fn: Callable, file_suffix: str):
+    language_specifier = str(transcribe_result["language"])
+
+    # Convert language code to full language name
+    if language_specifier in TO_LANGUAGES:
+        language_specifier = TO_LANGUAGES[language_specifier]
+
+    def write_file(write_fn: Callable, language_code: str, file_suffix: str):
         with open(
-            output_dir / (audio_basename + file_suffix), "w", encoding="utf-8"
+            output_dir / ''.join((audio_basename, '.', language_code, file_suffix)), "w", encoding="utf-8"
         ) as file:
             write_fn(transcribe_result["segments"], file=file)
             return file.name
 
-    srt_path = write_file(write_srt, ".srt")
-    txt_path = write_file(write_txt, ".txt")
-    vtt_path = write_file(write_vtt, ".vtt")
+    srt_path = write_file(write_srt, language_specifier, ".srt")
+    txt_path = write_file(write_txt, language_specifier, ".txt")
+    vtt_path = write_file(write_vtt, language_specifier, ".vtt")
     return (srt_path, txt_path, vtt_path)
 
 
