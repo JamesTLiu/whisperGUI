@@ -65,7 +65,8 @@ def start_GUI():
     language_text_key = "-LANGUAGE-TEXT-"
     model_key = "-MODEL-"
     model_text_key = "-MODEL-TEXT-"
-    translate_to_english_key = "-CHECKBOX-TRANSLATE-"
+    translate_to_english_text_key = "-TRANSLATE-OPTION-TEXT-"
+    translate_to_english_checkbox_key = "-CHECKBOX-TRANSLATE-"
     model_info_toggle_key = "-TOGGLE-MODEL-TABLE-"
     model_info_table_key = "-MODEL-TABLE-"
     start_key = "-START-"
@@ -205,10 +206,13 @@ def start_GUI():
                 ),
             ],
             [
-                sg.Text("Translate results to English"),
+                sg.Text(
+                    "Translate all results to English",
+                    key=translate_to_english_text_key,
+                ),
                 sg.Image(
                     unchecked_box_image,
-                    key=translate_to_english_key,
+                    key=translate_to_english_checkbox_key,
                     metadata=False,
                     enable_events=True,
                 ),
@@ -356,7 +360,9 @@ def start_GUI():
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
         # align language and model text by setting them to the same width
-        set_same_width(window, (language_text_key, model_text_key))
+        set_same_width(
+            window, (language_text_key, model_text_key, translate_to_english_text_key)
+        )
 
         return window
 
@@ -525,7 +531,7 @@ def start_GUI():
             model_selected = values[model_key]
 
             # Get the user's choice of whether to translate the results into english
-            translate_to_english = window[translate_to_english_key].metadata
+            translate_to_english = window[translate_to_english_checkbox_key].metadata
 
             # Ensure timer is not running
             with suppress(TimerError):
