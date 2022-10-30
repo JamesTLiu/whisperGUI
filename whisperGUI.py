@@ -12,6 +12,7 @@ import threading
 import time
 from contextlib import suppress
 from decimal import Decimal
+from itertools import zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from pathlib import Path
@@ -30,18 +31,16 @@ from typing import (
     Union,
 )
 
-from click import prompt
-
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
     from multiprocessing.connection import Connection as PipeConnection  # type: ignore
 
-
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
-from whisper.tokenizer import TO_LANGUAGE_CODE, LANGUAGES as TO_LANGUAGES
+from whisper.tokenizer import LANGUAGES as TO_LANGUAGES
+from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
 import set_env
@@ -230,25 +229,8 @@ def start_GUI():
             language_code_checkbox_setting_key, False
         )
 
-        # main tab
-        tab1_layout = [
-            [sg.Text("Select audio/video file(s)")],
-            [sg.Input(disabled=True, expand_x=True), sg.FilesBrowse(key=in_file_key)],
-            [sg.Text("Output folder:")],
-            [
-                sg.Input(
-                    default_text=sg.user_settings_get_entry(out_dir_key, ""),
-                    key=out_dir_field_key,
-                    disabled=True,
-                    expand_x=True,
-                    enable_events=True,
-                ),
-                sg.FolderBrowse(
-                    target=out_dir_field_key,
-                    key=out_dir_key,
-                    initial_folder=sg.user_settings_get_entry(out_dir_key),
-                ),
-            ],
+        # The tab1 option elements as rows
+        tab1_options_rows = [
             [
                 sg.Text("Language:", key=language_text_key),
                 sg.Combo(
@@ -292,6 +274,31 @@ def start_GUI():
                 ),
                 sg.Input(key=initial_prompt_input_key, expand_x=True),
             ],
+        ]
+
+        # Put the options in columns to align their components
+        tab1_options_layout = convert_rows_to_columns_for_elements(tab1_options_rows)
+
+        # main tab
+        tab1_layout = [
+            [sg.Text("Select audio/video file(s)")],
+            [sg.Input(disabled=True, expand_x=True), sg.FilesBrowse(key=in_file_key)],
+            [sg.Text("Output folder:")],
+            [
+                sg.Input(
+                    default_text=sg.user_settings_get_entry(out_dir_key, ""),
+                    key=out_dir_field_key,
+                    disabled=True,
+                    expand_x=True,
+                    enable_events=True,
+                ),
+                sg.FolderBrowse(
+                    target=out_dir_field_key,
+                    key=out_dir_key,
+                    initial_folder=sg.user_settings_get_entry(out_dir_key),
+                ),
+            ],
+            tab1_options_layout,
             [
                 sg.Text("Model Information"),
                 sg.Button(
@@ -437,11 +444,6 @@ def start_GUI():
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
-
-        # align language and model text by setting them to the same width
-        set_same_width(
-            window, (language_text_key, model_text_key, translate_to_english_text_key)
-        )
 
         return window
 
@@ -750,6 +752,33 @@ def start_GUI():
 
     # Finish up by removing from the screen
     window.close()
+
+
+def convert_rows_to_columns_for_elements(
+    rows: Sequence[Sequence[sg.Element]],
+) -> List[sg.Column]:
+    """Convert a Sequence of rows (Sequence) with PySimpleGUI elements into a list of PySimpleGUI columns.
+
+    Args:
+        rows (Sequence[Sequence[sg.Element]]): A Sequence of rows (Sequence) with PySimpleGUI elements.
+
+    Returns:
+        List[sg.Column]: A list of PySimpleGUI columns.
+    """
+    # Group the elements into columns
+    column_grouped_elements_list = zip_longest(*rows, fillvalue=None)
+
+    # Make a list of PySimpleGUI Column elements from the column grouped elements
+    columns = []
+    for column_elements in column_grouped_elements_list:
+        # Replace None values with PySimpleGUI Text elements
+        column_layout = [
+            [element if element else sg.Text()] for element in column_elements
+        ]
+        column = sg.Column(column_layout, pad=(0, 0))
+        columns.append(column)
+
+    return columns
 
 
 def save_checkbox_state(window: sg.Window, checkbox_key: str):
