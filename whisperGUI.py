@@ -30,6 +30,8 @@ from typing import (
     Union,
 )
 
+from click import prompt
+
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
@@ -66,6 +68,8 @@ def start_GUI():
     translate_to_english_checkbox_key = "-CHECKBOX-TRANSLATE-"
     model_info_toggle_key = "-TOGGLE-MODEL-TABLE-"
     model_info_table_key = "-MODEL-TABLE-"
+    initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
+    initial_prompt_input_key = "-INITIAL-PROMPT-"
     start_key = "-START-"
     progress_key = "-PROGRESS-"
 
@@ -275,6 +279,19 @@ def start_GUI():
                 checkbox_key=translate_to_english_checkbox_key,
                 checked=translate_to_english_last_choice,
             ),
+            [
+                sg.Text(
+                    "Initial prompt for ALL selected files: ",
+                    tooltip=(
+                        "Use this when a dialect/style of a language is desired.\n"
+                        "Does NOT guarantee the result will follow the initial prompt.\n"
+                        "Initial prompt will NOT be included in the result.\n"
+                        "Try a larger model if the result does not follow the initial prompt."
+                    ),
+                    key=initial_prompt_text_key,
+                ),
+                sg.Input(key=initial_prompt_input_key, expand_x=True),
+            ],
             [
                 sg.Text("Model Information"),
                 sg.Button(
@@ -606,6 +623,9 @@ def start_GUI():
                 language_code_checkbox_setting_key, False
             )
 
+            #  Get the user's initial prompt for all transcriptions in this task
+            initial_prompt = values[initial_prompt_input_key]
+
             # Ensure timer is not running
             with suppress(TimerError):
                 transcription_timer.stop()
@@ -640,6 +660,7 @@ def start_GUI():
                     "stop_flag": stop_flag,
                     "translate_to_english": translate_to_english,
                     "language_code_as_specifier": language_code_as_specifier,
+                    "initial_prompt": initial_prompt,
                 },
                 daemon=True,
             )
@@ -1377,6 +1398,7 @@ def transcribe_audio_video_files(
     stop_flag: threading.Event,
     translate_to_english: bool = False,
     language_code_as_specifier: bool = False,
+    initial_prompt: str = None,
 ):
     """Transcribe a list of audio/video files.
 
@@ -1399,6 +1421,7 @@ def transcribe_audio_video_files(
         language_code_as_specifier (bool): If True, the detected language's language code will be used in the
             output file name if possible. Otherwise, the detected language's name will be used in the output
             file name if possible.
+        initial_prompt (str, optional): User provided text that guides the transcription to a certain dialect/language/style. Defaults to None.
     """
 
     # Paths for the transcription result files
@@ -1428,6 +1451,7 @@ def transcribe_audio_video_files(
                 "write_connection": write_connection,
                 "process_done_flag": process_done_flag,
                 "translate_to_english": translate_to_english,
+                "initial_prompt": initial_prompt,
             },
             daemon=True,
         )
@@ -1497,6 +1521,7 @@ def transcribe_audio_video(
     write_connection: Union[Connection, PipeConnection],
     process_done_flag: EventClass,
     translate_to_english: bool = False,
+    initial_prompt: str = None,
 ):
     """Transcribe an audio/video file.
 
@@ -1508,6 +1533,7 @@ def transcribe_audio_video(
         write_connection (Union[Connection, PipeConnection]): A writeable Connection to redirect prints into.
         process_done_flag (EventClass): The flag that signals process completion to the parent thread.
         translate_to_english (bool): True if the user has chosen to translate the transcription to English, False otherwise.
+        initial_prompt (str, optional): User provided text that guides the transcription to a certain dialect/language/style. Defaults to None.
     """
     redirector = OutputRedirector(write_connection)
 
@@ -1528,7 +1554,6 @@ def transcribe_audio_video(
 
     print(f"\nTranscribing file: {audio_video_path}", end="\n\n")
 
-    # task = "transcribe"
     if translate_to_english:
         task = "translate"
     else:
@@ -1543,6 +1568,7 @@ def transcribe_audio_video(
             beam_size=5,
             best_of=5,
             task=task,
+            initial_prompt=initial_prompt,
         )
     except Exception as e:
         queue.put(e)
