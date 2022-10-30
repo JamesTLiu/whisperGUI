@@ -112,6 +112,7 @@ def start_GUI():
             scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
         ),
         font=GUI_FONT,
+        tooltip_font=GUI_FONT,
     )
 
     # number of rows for the table
@@ -143,6 +144,7 @@ def start_GUI():
         checkbox_key: str,
         checked: bool = False,
         checkbox_before_text: bool = False,
+        text_tooltip: str = None,
     ) -> List[sg.Element]:
         """Return the PySimpleGUI elements for a fancy checkbox with text.
 
@@ -160,6 +162,7 @@ def start_GUI():
             sg.Text(
                 text,
                 key=text_key,
+                tooltip=text_tooltip,
             ),
             sg.Image(
                 checked_box_image if checked else unchecked_box_image,
@@ -361,10 +364,11 @@ def start_GUI():
             ),
             [sg.HorizontalSeparator()],
             fancy_checkbox(
-                text="Use language code as specifier in output filenames",
+                text="Use language code instead of language in output filenames",
                 text_key=language_code_text_setting_key,
                 checkbox_key=language_code_checkbox_setting_key,
                 checked=use_language_code,
+                text_tooltip="Ex. 'video.en.txt' instead of 'video.english.txt'",
             ),
             [sg.Button("Save settings", key=save_settings_key)],
         ]
