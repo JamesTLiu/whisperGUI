@@ -58,7 +58,7 @@ def start_GUI():
     multiline_key = "-CONSOLE-OUTPUT-"
     in_file_key = "-IN-FILE-"
     out_dir_key = "-OUT-FOLDER-"
-    out_dir_field_key = "-OUT-FOLDER-FIELD-"
+    output_dir_field_key = "-OUT-FOLDER-FIELD-"
     language_key = "-LANGUAGE-"
     language_text_key = "-LANGUAGE-TEXT-"
     model_key = "-MODEL-"
@@ -69,6 +69,8 @@ def start_GUI():
     model_info_table_key = "-MODEL-TABLE-"
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
     initial_prompt_input_key = "-INITIAL-PROMPT-"
+    save_prompt_key = "-SAVE-PROMPT-"
+    load_prompt_key = "-LOAD-PROMPT-"
     start_key = "-START-"
     progress_key = "-PROGRESS-"
 
@@ -274,6 +276,18 @@ def start_GUI():
                 ),
                 sg.Input(key=initial_prompt_input_key, expand_x=True),
             ],
+            [
+                sg.Text(),
+                sg.Column(
+                    [
+                        [
+                            sg.Button("Save prompt", key=save_prompt_key),
+                            sg.Button("Load prompt", key=load_prompt_key),
+                        ]
+                    ],
+                    pad=(0, 0),
+                ),
+            ],
         ]
 
         # Put the options in columns to align their components
@@ -287,13 +301,13 @@ def start_GUI():
             [
                 sg.Input(
                     default_text=sg.user_settings_get_entry(out_dir_key, ""),
-                    key=out_dir_field_key,
+                    key=output_dir_field_key,
                     disabled=True,
                     expand_x=True,
                     enable_events=True,
                 ),
                 sg.FolderBrowse(
-                    target=out_dir_field_key,
+                    target=output_dir_field_key,
                     key=out_dir_key,
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
@@ -487,7 +501,8 @@ def start_GUI():
             break
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
-        elif event == out_dir_field_key:
+        # User selected an output directory
+        elif event == output_dir_field_key:
             # Save the output directory when setting is on
             if sg.user_settings_get_entry(save_output_dir_checkbox_key):
                 sg.user_settings_set_entry(out_dir_key, values[out_dir_key])
@@ -506,8 +521,19 @@ def start_GUI():
                 checked_box_image if window[event].metadata else unchecked_box_image
             )
 
-            # Save the checkbox state to the config file
+            # Save the translate to english checkbox state to the config file
             save_checkbox_state(window, translate_to_english_checkbox_key)
+        # User wants to save the current prompt
+        elif event == save_prompt_key:
+            saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
+
+            # Add current prompt with user given prompt name to dict
+            saved_prompts[...] = ...
+
+            sg.user_settings_set_entry(save_prompt_key, saved_prompts)
+        # User wants to load a saved prompt
+        elif event == load_prompt_key:
+            ...
         # User saved settings
         elif event == save_settings_key:
 
