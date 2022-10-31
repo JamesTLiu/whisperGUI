@@ -71,6 +71,7 @@ def start_GUI():
     initial_prompt_input_key = "-INITIAL-PROMPT-"
     save_prompt_key = "-SAVE-PROMPT-"
     load_prompt_key = "-LOAD-PROMPT-"
+    prompt_manager_key = "-PROMPT-MANAGER-"
     start_key = "-START-"
     progress_key = "-PROGRESS-"
 
@@ -281,8 +282,7 @@ def start_GUI():
                 sg.Column(
                     [
                         [
-                            sg.Button("Save prompt", key=save_prompt_key),
-                            sg.Button("Load prompt", key=load_prompt_key),
+                            sg.Button("Prompt Manager", key=prompt_manager_key),
                         ]
                     ],
                     pad=(0, 0),
@@ -523,14 +523,18 @@ def start_GUI():
 
             # Save the translate to english checkbox state to the config file
             save_checkbox_state(window, translate_to_english_checkbox_key)
+        # Popup prompt manager window
+        elif event == prompt_manager_key:
+            ...
         # User wants to save the current prompt
         elif event == save_prompt_key:
-            saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
+            # saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
 
-            # Add current prompt with user given prompt name to dict
-            saved_prompts[...] = ...
+            # # Add current prompt with user given prompt name to dict
+            # saved_prompts[...] = ...
 
-            sg.user_settings_set_entry(save_prompt_key, saved_prompts)
+            # sg.user_settings_set_entry(save_prompt_key, saved_prompts)
+            ...
         # User wants to load a saved prompt
         elif event == load_prompt_key:
             ...
@@ -840,16 +844,8 @@ def popup_tracked(
     tracked_windows.add(popup_window)
 
 
-def set_same_width(window: sg.Window, element_keys: Iterable[str]):
-    """Resize the elements in the given window to the max text length among the elements.
-
-    Args:
-        window (sg.Window): The window containing the elements.
-        element_keys (Iterable[str]): Iterable with the keys (str) of the elements to resize.
-    """
-    text_lengths = [len(window[key].get()) for key in element_keys]
-    for key in element_keys:
-        window[key].set_size((max(text_lengths), None))
+def popup_prompt_manager(key: str) -> sg.Window:
+    ...
 
 
 class CustomTimer(Timer):
@@ -1792,6 +1788,18 @@ def write_transcript_to_files(
 # ===================================================#
 # =============== Unused f(x)s below ================#
 # ===================================================#
+
+
+def set_same_width(window: sg.Window, element_keys: Iterable[str]):
+    """Resize the elements in the given window to the max text length among the elements.
+
+    Args:
+        window (sg.Window): The window containing the elements.
+        element_keys (Iterable[str]): Iterable with the keys (str) of the elements to resize.
+    """
+    text_lengths = [len(window[key].get()) for key in element_keys]
+    for key in element_keys:
+        window[key].set_size((max(text_lengths), None))
 
 
 def get_abs_resource_path(relative_path: str) -> str:
