@@ -69,6 +69,8 @@ def start_GUI():
     model_info_table_key = "-MODEL-TABLE-"
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
     initial_prompt_input_key = "-INITIAL-PROMPT-"
+    prompt_profile_key = "-PROMPT-PROFILE-"
+    use_prompt_profile_checkbox_key = "-CHECKBOX-USE-PROMPT-PROFILE-"
     save_prompt_key = "-SAVE-PROMPT-"
     load_prompt_key = "-LOAD-PROMPT-"
     prompt_manager_key = "-PROMPT-MANAGER-"
@@ -146,8 +148,8 @@ def start_GUI():
 
     def fancy_checkbox(
         text: str,
-        text_key: str,
-        checkbox_key: str,
+        text_key: str = None,
+        checkbox_key: str = None,
         checked: bool = False,
         checkbox_before_text: bool = False,
         text_tooltip: str = None,
@@ -156,8 +158,8 @@ def start_GUI():
 
         Args:
             text (str): Text for the PySimpleGUI Text element that goes with the checkbox.
-            text_key (str): The key to assign the PySimpleGUI Text element that goes with the checkbox
-            checkbox_key (str): The key to assign the PySimpleGUI Image element which represents the checkbox.
+            text_key (str, optional): The key to assign the PySimpleGUI Text element that goes with the checkbox. Defaults to None.
+            checkbox_key (str, optional): The key to assign the PySimpleGUI Image element which represents the checkbox. Defaults to None.
             checked (bool, optional): If True, starts the checkbox checked. Defaults to False.
             checkbox_before_text (bool, optional): Put the checkbox before (to the left) of the text. Defaults to False.
 
@@ -278,16 +280,29 @@ def start_GUI():
                 sg.Input(key=initial_prompt_input_key, expand_x=True),
             ],
             [
-                sg.Text(),
+                sg.Text("Initial prompt profile:"),
                 sg.Column(
                     [
                         [
-                            sg.Button("Prompt Manager", key=prompt_manager_key),
+                            sg.Combo(
+                                [
+                                    "Chinese (Traditional)",
+                                    "Chinese (Simplified)",
+                                    "English (England)",
+                                ],
+                                key=prompt_profile_key,
+                                readonly=True,
+                                disabled=True,
+                            ),
+                            sg.Button("Prompt profile manager", key=prompt_manager_key),
                         ]
                     ],
                     pad=(0, 0),
                 ),
             ],
+            fancy_checkbox(
+                text="Use prompt profile", checkbox_key=use_prompt_profile_checkbox_key
+            ),
         ]
 
         # Put the options in columns to align their components
@@ -521,8 +536,21 @@ def start_GUI():
                 checked_box_image if window[event].metadata else unchecked_box_image
             )
 
-            # Save the translate to english checkbox state to the config file
-            save_checkbox_state(window, translate_to_english_checkbox_key)
+            # Save the checkbox state to the config file for save-on-click checkboxes
+            save_on_click_checkboxes = (
+                translate_to_english_checkbox_key,
+                use_prompt_profile_checkbox_key,
+            )
+            if event in save_on_click_checkboxes:
+                save_checkbox_state(window, event)
+
+            # Disable the initial prompt input and enable the prompt profile when the use
+            # prompt profile option is checked. Do the opposite if it's not checked.
+            if event == use_prompt_profile_checkbox_key:
+                use_prompt_profile = window[use_prompt_profile_checkbox_key].metadata
+                window[initial_prompt_input_key].update(disabled=use_prompt_profile)
+                window[prompt_profile_key].update(disabled=not use_prompt_profile)
+                window.refresh()
         # Popup prompt manager window
         elif event == prompt_manager_key:
             ...
