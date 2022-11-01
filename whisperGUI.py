@@ -76,6 +76,11 @@ def start_GUI():
     start_key = "-START-"
     progress_key = "-PROGRESS-"
 
+    # Keys for prompt manager window
+    add_prompt_key = "-ADD-PROMPT-"
+    edit_prompt_key = "-EDIT-PROMPT-"
+    delete_prompt_key = "-DELETE-PROMPT-"
+
     # Keys for settings tab
     save_settings_key = "-SAVE-SETTINGS-"
     scaling_input_setting_key = "-GLOBAL-SCALING-"
@@ -480,6 +485,93 @@ def start_GUI():
     # make a tracked main window
     window = track_window(make_main_window())
 
+    def popup_prompt_manager(non_blocking: bool = True) -> sg.Window:
+        """Pop up the prompt manager window.
+
+        Args:
+            non_blocking (bool, optional): If True, window is non-blocking. Defaults to True.
+
+        Returns:
+            sg.Window: The prompt manager window.
+        """
+        if non_blocking:
+            PopupButton = DummyButton  # important to use or else button will close other windows too!
+        else:
+            PopupButton = sg.Button
+
+        layout = [
+            [
+                # sg.Column(
+                #     [
+                #         [
+                #             sg.Table(
+                #                 [
+                #                     ["test_profile", "test test test"],
+                #                 ],
+                #                 headings=["Profile", "Prompt"],
+                #                 expand_x=True,
+                #                 expand_y=True,
+                #                 justification="center",
+                #             )
+                #         ]
+                #     ],
+                #     expand_x=True,
+                #     expand_y=True,
+                # ),
+                sg.Table(
+                    [
+                        [
+                            "test_profile",
+                            "test test test test test test test test test test test test test test test",
+                        ],
+                    ],
+                    headings=["Profile", "Prompt"],
+                    expand_x=True,
+                    expand_y=True,
+                    justification="center",
+                    auto_size_columns=True,
+                    max_col_width=100,
+                    alternating_row_color="LightBlue3",
+                    selected_row_colors="black on white",
+                    enable_events=True,
+                ),
+                # sg.Push(),
+                sg.Column(
+                    [
+                        [sg.Button("Add new", key=add_prompt_key, expand_x=True)],
+                        [sg.Button("Edit selected", key=edit_prompt_key, expand_x=True)],
+                        [sg.Button("Delete selected", key=delete_prompt_key, expand_x=True)],
+                        [sg.Text("")],
+                        [sg.Text("")],
+                        [sg.Text("")],
+                        [
+                            PopupButton(
+                                "Close",
+                                focus=True,
+                                bind_return_key=True,
+                                expand_x=True,
+                            )
+                        ],
+                    ],
+                    vertical_alignment="top",
+                    expand_x=False,
+                    pad=(0, 0),
+                ),
+            ]
+        ]
+
+        # Create the window
+        win = sg.Window(
+            "Prompt Manager",
+            layout,
+            finalize=True,
+            resizable=True,
+            auto_size_buttons=True,
+            auto_size_text=True,
+        )
+
+        return win
+
     # timer for transcription task
     transcription_timer = CustomTimer()
 
@@ -540,7 +632,7 @@ def start_GUI():
                 save_checkbox_state(window, event)
         # Popup prompt manager window
         elif event == prompt_manager_key:
-            ...
+            track_window(popup_prompt_manager())
         # User wants to save the current prompt
         elif event == save_prompt_key:
             # saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
@@ -857,10 +949,6 @@ def popup_tracked(
     """
     popup_window, popup_button = popup_fn(*args, non_blocking=non_blocking, **kwargs)
     tracked_windows.add(popup_window)
-
-
-def popup_prompt_manager(key: str) -> sg.Window:
-    ...
 
 
 class CustomTimer(Timer):
@@ -1403,6 +1491,118 @@ def _GetNumLinesNeeded(text: str, max_line_width: int) -> int:
         lines_used.append(len(L) // max_line_width + (len(L) % max_line_width > 0))
     total_lines_needed = sum(lines_used)
     return total_lines_needed
+
+
+# Taken from Pysimplegui.DummyButton(). Added extra arguments for called Button().
+# -------------------------  Dummy BUTTON Element lazy function  ------------------------- #
+def DummyButton(
+    button_text,
+    image_filename=None,
+    image_data=None,
+    image_size=(None, None),
+    image_subsample=None,
+    border_width=None,
+    tooltip=None,
+    size=(None, None),
+    s=(None, None),
+    auto_size_button=None,
+    button_color=None,
+    font=None,
+    disabled=False,
+    bind_return_key=False,
+    focus=False,
+    pad=None,
+    p=None,
+    key=None,
+    k=None,
+    visible=True,
+    metadata=None,
+    expand_x=False,
+    expand_y=False,
+):
+    """
+    This is a special type of Button.
+
+    It will close the window but NOT send an event that the window has been closed.
+
+    It's used in conjunction with non-blocking windows to silently close them.  They are used to
+    implement the non-blocking popup windows. They're also found in some Demo Programs, so look there for proper use.
+
+    :param button_text:      text in the button
+    :type button_text:       (str)
+    :param image_filename:   image filename if there is a button image
+    :type image_filename:    image filename if there is a button image
+    :param image_data:       in-RAM image to be displayed on button
+    :type image_data:        in-RAM image to be displayed on button
+    :param image_size:       image size (O.K.)
+    :type image_size:        (Default = (None))
+    :param image_subsample:  amount to reduce the size of the image
+    :type image_subsample:   amount to reduce the size of the image
+    :param border_width:     width of border around element
+    :type border_width:      (int)
+    :param tooltip:          text, that will appear when mouse hovers over the element
+    :type tooltip:           (str)
+    :param size:             (w,h) w=characters-wide, h=rows-high
+    :type size:              (int, int)
+    :param s:                Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+    :type s:                 (int, int)  | (None, None) | int
+    :param auto_size_button: True if button size is determined by button text
+    :type auto_size_button:  (bool)
+    :param button_color:     button color (foreground, background)
+    :type button_color:      (str, str) or str
+    :param font:             specifies the  font family, size, etc. Tuple or Single string format 'name size styles'. Styles: italic * roman bold normal underline overstrike
+    :type font:              (str or (str, int[, str]) or None)
+    :param disabled:         set disable state for element (Default = False)
+    :type disabled:          (bool)
+    :param bind_return_key:  (Default = False) If True, then the return key will cause a the Listbox to generate an event
+    :type bind_return_key:   (bool)
+    :param focus:            if focus should be set to this
+    :type focus:             (bool)
+    :param pad:              Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+    :type pad:               (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+    :param p:                Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+    :type p:                 (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+    :param key:              key for uniquely identify this element (for window.find_element)
+    :type key:               str | int | tuple | object
+    :param k:                Same as the Key. You can use either k or key. Which ever is set will be used.
+    :type k:                 str | int | tuple | object
+    :param visible:          set initial visibility state of the Button
+    :type visible:           (bool)
+    :param metadata:         Anything you want to store along with this button
+    :type metadata:          (Any)
+    :param expand_x:         If True the element will automatically expand in the X direction to fill available space
+    :type expand_x:          (bool)
+    :param expand_y:         If True the element will automatically expand in the Y direction to fill available space
+    :type expand_y:          (bool)
+    :return:                 returns a button
+    :rtype:                  (Button)
+    """
+    return sg.Button(
+        button_text=button_text,
+        button_type=sg.BUTTON_TYPE_CLOSES_WIN_ONLY,
+        image_filename=image_filename,
+        image_data=image_data,
+        image_size=image_size,
+        image_subsample=image_subsample,
+        border_width=border_width,
+        tooltip=tooltip,
+        size=size,
+        s=s,
+        auto_size_button=auto_size_button,
+        button_color=button_color,
+        font=font,
+        disabled=disabled,
+        bind_return_key=bind_return_key,
+        focus=focus,
+        pad=pad,
+        p=p,
+        key=key,
+        k=k,
+        visible=visible,
+        metadata=metadata,
+        expand_x=expand_x,
+        expand_y=expand_y,
+    )
 
 
 def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[str, ...]:
