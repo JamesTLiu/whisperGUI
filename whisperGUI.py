@@ -267,8 +267,16 @@ def start_GUI():
                 checked=translate_to_english_last_choice,
             ),
             [
+                sg.Column(
+                    [
+                        [
+                            sg.Text("Prompt profile"),
+                        ],
+                    ],
+                    pad=(0, 0),
+                ),
                 sg.Text(
-                    "Initial prompt for ALL selected files: ",
+                    "Initial prompt for ALL selected files",
                     tooltip=(
                         "Use this when a dialect/style of a language is desired.\n"
                         "Does NOT guarantee the result will follow the initial prompt.\n"
@@ -277,32 +285,21 @@ def start_GUI():
                     ),
                     key=initial_prompt_text_key,
                 ),
-                sg.Input(key=initial_prompt_input_key, expand_x=True),
             ],
             [
-                sg.Text("Initial prompt profile:"),
-                sg.Column(
+                sg.Combo(
                     [
-                        [
-                            sg.Combo(
-                                [
-                                    "Chinese (Traditional)",
-                                    "Chinese (Simplified)",
-                                    "English (England)",
-                                ],
-                                key=prompt_profile_key,
-                                readonly=True,
-                                disabled=True,
-                            ),
-                            sg.Button("Prompt profile manager", key=prompt_manager_key),
-                        ]
+                        "(Custom)",
+                        "Chinese (Traditional)",
+                        "Chinese (Simplified)",
+                        "English (England)",
                     ],
-                    pad=(0, 0),
+                    key=prompt_profile_key,
+                    readonly=True,
+                    enable_events=True,
                 ),
+                sg.Input(key=initial_prompt_input_key, expand_x=True),
             ],
-            fancy_checkbox(
-                text="Use prompt profile", checkbox_key=use_prompt_profile_checkbox_key
-            ),
         ]
 
         # Put the options in columns to align their components
@@ -328,6 +325,7 @@ def start_GUI():
                 ),
             ],
             tab1_options_layout,
+            [sg.Button("Prompt Manager", key=prompt_manager_key)],
             [
                 sg.Text("Model Information"),
                 sg.Button(
