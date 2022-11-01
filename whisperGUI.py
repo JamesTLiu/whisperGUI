@@ -478,8 +478,7 @@ def start_GUI():
         return win
 
     # make a tracked main window
-    window = make_main_window()
-    track_window(window)
+    window = track_window(make_main_window())
 
     # timer for transcription task
     transcription_timer = CustomTimer()
@@ -606,8 +605,7 @@ def start_GUI():
             tracked_windows.clear()
 
             # Remake the tracked main window and go back to the settings tab
-            window = make_main_window()
-            track_window(window)
+            window = track_window(make_main_window())
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
