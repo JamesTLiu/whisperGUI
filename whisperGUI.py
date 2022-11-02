@@ -654,6 +654,7 @@ def start_GUI():
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid scaling factor",
+                    non_blocking=True,
                 )
 
             # Ensure the scaling input is a decimal
@@ -734,6 +735,7 @@ def start_GUI():
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Missing selections",
+                    non_blocking=True,
                 )
                 continue
 
@@ -822,6 +824,7 @@ def start_GUI():
                 title="Complete",
                 size=(40, 20),
                 disabled=True,
+                non_blocking=True,
             )
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
@@ -834,6 +837,7 @@ def start_GUI():
                 popup_fn=popup,
                 tracked_windows=tracked_windows,
                 title="ERROR",
+                non_blocking=True,
             )
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
@@ -936,7 +940,7 @@ def popup_tracked(
     *args: Any,
     popup_fn: Callable,
     tracked_windows: Set[sg.Window],
-    non_blocking: bool = True,
+    non_blocking: bool = False,
     **kwargs: Any,
 ):
     """Pop up a tracked window.
