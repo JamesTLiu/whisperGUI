@@ -483,7 +483,7 @@ def start_GUI():
         return win
 
     # make a tracked main window
-    window = track_window(make_main_window())
+    main_window = track_window(make_main_window())
 
     def popup_prompt_manager(non_blocking: bool = True) -> sg.Window:
         """Pop up the prompt manager window.
@@ -595,7 +595,7 @@ def start_GUI():
 
     while True:
         # Display and interact with the Window
-        event, values = window.read(timeout=10)
+        window, event, values = sg.read_all_windows(timeout=1)
 
         if event in (sg.WIN_CLOSED, "Exit"):
             # Tell the thread to end the ongoing transcription
@@ -856,12 +856,11 @@ def start_GUI():
 
         # Transcriptions in progress
         if is_transcribing:
-            # Turn \r into \n in the multiline's text
             format_multiline_text(
-                window[multiline_key], is_multiline_rstripping_on_update
+                main_window[multiline_key], is_multiline_rstripping_on_update
             )
 
-            # Update the progress meter unless the user has clicked the cancel button alraedy
+            # Update the progress meter unless the user has clicked the cancel button already
             if not stop_flag.is_set():
                 # Get the current file being worked on
                 if num_tasks_done < num_tasks:
@@ -888,7 +887,7 @@ def start_GUI():
                 stop_flag.set()
 
     # Finish up by removing from the screen
-    window.close()
+    main_window.close()
 
 
 def convert_rows_to_columns_for_elements(
