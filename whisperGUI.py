@@ -485,11 +485,11 @@ def start_GUI():
     # make a tracked main window
     main_window = track_window(make_main_window())
 
-    def popup_prompt_manager(non_blocking: bool = True) -> sg.Window:
+    def popup_prompt_manager(non_blocking: bool = False) -> sg.Window:
         """Pop up the prompt manager window.
 
         Args:
-            non_blocking (bool, optional): If True, window is non-blocking. Defaults to True.
+            non_blocking (bool, optional): If True, window is non-blocking. Defaults to False.
 
         Returns:
             sg.Window: The prompt manager window.
@@ -632,7 +632,7 @@ def start_GUI():
                 save_checkbox_state(window, event)
         # Popup prompt manager window
         elif event == prompt_manager_key:
-            track_window(popup_prompt_manager())
+            track_window(popup_prompt_manager(non_blocking=True))
         # User wants to save the current prompt
         elif event == save_prompt_key:
             # saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
