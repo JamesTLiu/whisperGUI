@@ -726,14 +726,7 @@ def start_GUI():
                 # Save the updated saved prompt profiles
                 sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
-            # Close the add new prompt window
-            window.close()
-            add_new_prompt_window = None
-
             if prompt_manager_window:
-                # Make the prompt manager window modal again
-                prompt_manager_window.make_modal()
-
                 # Update the prompt profile table
                 prompt_manager_window[saved_prompts_table_key].update(
                     values=list(saved_prompts.items())
@@ -749,6 +742,10 @@ def start_GUI():
                 value=selected_prompt_profile_dropdown,
                 values=get_prompt_profile_list(),
             )
+
+            # Close the add new prompt window
+            window.close()
+            add_new_prompt_window = None
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
