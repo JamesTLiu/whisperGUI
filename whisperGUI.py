@@ -516,7 +516,7 @@ def start_GUI():
         layout = [
             [
                 sg.Table(
-                    list(saved_prompts.items()),
+                    list(sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts).items()),
                     headings=["Profile", "Prompt"],
                     key=saved_prompts_table_key,
                     expand_x=True,
