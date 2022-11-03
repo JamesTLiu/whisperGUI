@@ -753,6 +753,9 @@ def start_GUI():
         elif event == delete_prompt_key:
             # Delete the saved prompt profile
             selected_rows_prompts_table = values[saved_prompts_table_key]
+
+            # Ensure user has selected a row in the prompt profile table
+            if selected_rows_prompts_table:
             prompt_profile_names = list(saved_prompts.keys())
             prompt_name_to_delete = prompt_profile_names[selected_rows_prompts_table[0]]
             del saved_prompts[prompt_name_to_delete]
@@ -777,6 +780,15 @@ def start_GUI():
                 value=selected_prompt_profile_dropdown,
                 values=get_prompt_profile_list(),
             )
+            # User has not selected a row in the prompt profile table
+            else:
+                popup_tracked(
+                    f"Please select a profile in the table.",
+                    popup_fn=popup,
+                    tracked_windows=tracked_windows,
+                    title="Invalid selection",
+                    modal=True,
+                )
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the custom prompt profile
