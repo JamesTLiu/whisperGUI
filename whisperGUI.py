@@ -578,13 +578,10 @@ def start_GUI():
 
         return win
 
-    def popup_add_new_prompt(non_blocking: bool = False) -> sg.Window:
-        if non_blocking:
-            # important to use or else button will close other windows too!
-            PopupButton = DummyButton
-        else:
-            PopupButton = sg.Button
+    # keep track of the prompt manager window
+    prompt_manager_window = None
 
+    def popup_add_new_prompt() -> sg.Window:
         layout = [
             [
                 [sg.Text("Prompt profile name")],
@@ -592,14 +589,14 @@ def start_GUI():
                 [sg.Text("Prompt")],
                 [sg.Input(key=new_prompt_key, expand_x=True)],
                 [
-                    PopupButton(
+                    sg.Button(
                         "Save prompt",
                         key=add_prompt_profile_key,
                         focus=True,
                         bind_return_key=True,
                         expand_x=True,
                     ),
-                    PopupButton(
+                    sg.Button(
                         "Cancel",
                         expand_x=True,
                     ),
@@ -615,9 +612,13 @@ def start_GUI():
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
+            modal=True,
         )
 
         return win
+
+    # keep track of the add new prompt window
+    add_new_prompt_window = None
 
     # timer for transcription task
     transcription_timer = CustomTimer()
