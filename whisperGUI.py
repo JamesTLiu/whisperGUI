@@ -573,6 +573,7 @@ def start_GUI():
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
+            modal=True,
         )
 
         return win
