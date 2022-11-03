@@ -652,7 +652,13 @@ def start_GUI():
                     print("Window closed but transcription is in progress.")
                     stop_flag.set()
                 break
-            else:
+            elif window is add_new_prompt_window:
+                add_new_prompt_window = None
+                # Make the prompt manager window modal again
+                prompt_manager_window.make_modal()
+            elif window is prompt_manager_window:
+                prompt_manager_window = None
+
                 window.close()
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
