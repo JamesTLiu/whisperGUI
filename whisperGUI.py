@@ -30,6 +30,7 @@ from typing import (
     Tuple,
     Union,
     TYPE_CHECKING,
+    Protocol,
 )
 
 if platform.system() == "Windows":
@@ -1012,10 +1013,13 @@ def save_checkbox_state(window: sg.Window, checkbox_key: str):
         window[checkbox_key].metadata,
     )
 
+class Popup_Callable(Protocol):
+    def __call__(self, *args, **kwargs) -> Tuple[sg.Window, Optional[str]]:
+        ...
 
 def popup_tracked(
     *args: Any,
-    popup_fn: Callable,
+    popup_fn: Popup_Callable,
     tracked_windows: Set[sg.Window],
     non_blocking: bool = False,
     **kwargs: Any,
@@ -1023,7 +1027,7 @@ def popup_tracked(
     """Pop up a tracked window.
 
     Args:
-        popup_fn (Callable): The function to call to create a popup.
+        popup_fn (Popup_Callable): The function to call to create a popup.
         tracked_windows (Set[sg.Window]): Set containing all currently tracked windows which the created popup will be added to.
         non_blocking (bool, optional): If True, then will immediately return from the function without waiting for the user's input. Defaults to True.
     """
