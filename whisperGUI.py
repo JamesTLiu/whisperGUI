@@ -689,11 +689,11 @@ def start_GUI():
                 save_checkbox_state(window, event)
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
-            track_window(popup_prompt_manager(non_blocking=True))
+            prompt_manager_window = track_window(popup_prompt_manager())
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
-            popup_add_new_prompt(non_blocking=True)
+            add_new_prompt_window = popup_add_new_prompt()
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
             # saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
