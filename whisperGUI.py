@@ -79,9 +79,14 @@ def start_GUI():
     progress_key = "-PROGRESS-"
 
     # Keys for prompt manager window
-    add_prompt_key = "-ADD-PROMPT-"
+    open_add_prompt_window_key = "-ADD-PROMPT-"
     edit_prompt_key = "-EDIT-PROMPT-"
     delete_prompt_key = "-DELETE-PROMPT-"
+
+    # Keys for add new prompt window
+    new_prompt_name_key = "-NEW-PROMPT-NAME-"
+    new_prompt_key = "-NEW-PROMPT-"
+    add_prompt_profile_key = "-NEW-PROMPT-ADD-"
 
     # Keys for settings tab
     save_settings_key = "-SAVE-SETTINGS-"
@@ -106,6 +111,9 @@ def start_GUI():
 
     # Events that indicate that transcription has ended
     TRANSCRIBE_DONE_EVENTS = (TRANSCRIBE_SUCCESS, TRANSCRIBE_ERROR, TRANSCRIBE_STOPPED)
+
+    # Key for saved prompts in the settings file
+    SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -528,7 +536,7 @@ def start_GUI():
                 # sg.Push(),
                 sg.Column(
                     [
-                        [sg.Button("Add new", key=add_prompt_key, expand_x=True)],
+                        [sg.Button("Add new", key=open_add_prompt_window_key, expand_x=True)],
                         [
                             sg.Button(
                                 "Edit selected", key=edit_prompt_key, expand_x=True
@@ -570,6 +578,47 @@ def start_GUI():
 
         return win
 
+    def popup_add_new_prompt(non_blocking: bool = False) -> sg.Window:
+        if non_blocking:
+            # important to use or else button will close other windows too!
+            PopupButton = DummyButton
+        else:
+            PopupButton = sg.Button
+
+        layout = [
+            [
+                [sg.Text("Prompt profile name")],
+                [sg.Input(key=new_prompt_name_key, expand_x=True)],
+                [sg.Text("Prompt")],
+                [sg.Input(key=new_prompt_key, expand_x=True)],
+                [
+                    PopupButton(
+                        "Save prompt",
+                        key=add_prompt_profile_key,
+                        focus=True,
+                        bind_return_key=True,
+                        expand_x=True,
+                    ),
+                    PopupButton(
+                        "Cancel",
+                        expand_x=True,
+                    ),
+                ],
+            ],
+        ]
+
+        # Create the window
+        win = sg.Window(
+            "Add new prompt profile",
+            layout,
+            finalize=True,
+            resizable=True,
+            auto_size_buttons=True,
+            auto_size_text=True,
+        )
+
+        return win
+
     # timer for transcription task
     transcription_timer = CustomTimer()
 
@@ -596,11 +645,14 @@ def start_GUI():
         window, event, values = sg.read_all_windows(timeout=1)
 
         if event in (sg.WIN_CLOSED, "Exit"):
-            # Tell the thread to end the ongoing transcription
-            if transcribe_thread:
-                print("Window closed but transcription is in progress.")
-                stop_flag.set()
-            break
+            if window is main_window:
+                # Tell the thread to end the ongoing transcription
+                if transcribe_thread:
+                    print("Window closed but transcription is in progress.")
+                    stop_flag.set()
+                break
+            else:
+                window.close()
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
         # User selected an output directory
@@ -631,17 +683,36 @@ def start_GUI():
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
             track_window(popup_prompt_manager(non_blocking=True))
-        # User wants to save the current prompt
-        elif event == ...:
-            # saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
+        # Popup add new prompt profile window
+        elif event == open_add_prompt_window_key:
+            # Pop up a window to get a prompt name and prompt
+            popup_add_new_prompt(non_blocking=True)
+        # Handle adding of new saved prompt
+        elif event == add_prompt_profile_key:
+            saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
 
-            # # Add current prompt with user given prompt name to dict
-            # saved_prompts[...] = ...
+            # Get the name and prompt to be saved
+            new_prompt_name, new_prompt = values[open_add_prompt_window_key]
 
-            # sg.user_settings_set_entry(save_prompt_key, saved_prompts)
+            # Ensure new prompt has an unused name
+            if new_prompt_name in saved_prompts:
+                popup_tracked(
+                    f"Prompt name in use. Please use a new prompt name.",
+                    popup_fn=popup,
+                    tracked_windows=tracked_windows,
+                    title="Invalid prompt name",
+                    non_blocking=True,
+                )
+            else:
+                # Add current prompt with user given prompt name to dict
+                saved_prompts[new_prompt_name] = new_prompt
+
+                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+        # User wants to edit a saved prompt
+        elif event == edit_prompt_key:
             ...
-        # User wants to load a saved prompt
-        elif event == ...:
+        # User wants to delete a saved prompt
+        elif event == delete_prompt_key:
             ...
         # User saved settings
         elif event == save_settings_key:
