@@ -507,21 +507,12 @@ def start_GUI():
     # make a tracked main window
     main_window = track_window(make_main_window())
 
-    def popup_prompt_manager(non_blocking: bool = False) -> sg.Window:
+    def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
-
-        Args:
-            non_blocking (bool, optional): If True, window is non-blocking. Defaults to False.
 
         Returns:
             sg.Window: The prompt manager window.
         """
-        if non_blocking:
-            # important to use or else button will close other windows too!
-            PopupButton = DummyButton
-        else:
-            PopupButton = sg.Button
-
         layout = [
             [
                 sg.Table(
@@ -559,7 +550,7 @@ def start_GUI():
                         [sg.Text("")],
                         [sg.Text("")],
                         [
-                            PopupButton(
+                            sg.Button(
                                 "Close",
                                 focus=True,
                                 bind_return_key=True,
