@@ -534,6 +534,7 @@ def start_GUI():
                     max_col_width=100,
                     alternating_row_color="LightBlue3",
                     selected_row_colors="black on white",
+                    select_mode=sg.TABLE_SELECT_MODE_BROWSE,
                     enable_events=True,
                 ),
                 # sg.Push(),
@@ -704,10 +705,6 @@ def start_GUI():
             add_new_prompt_window = popup_add_new_prompt()
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
-            saved_prompts = sg.user_settings_get_entry(
-                SAVED_PROMPTS_SETTINGS_KEY, saved_prompts
-            )
-
             # Get the name and prompt to be saved
             new_prompt_name = values[new_prompt_name_key]
             new_prompt = values[new_prompt_key]
@@ -723,9 +720,10 @@ def start_GUI():
                     modal=True,
                 )
             else:
-                # Add current prompt with user given prompt name to dict
+                # Add current prompt with user given prompt name to the dict
                 saved_prompts[new_prompt_name] = new_prompt
 
+                # Save the updated saved prompt profiles
                 sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
             # Close the add new prompt window
@@ -741,9 +739,14 @@ def start_GUI():
                     values=list(saved_prompts.items())
                 )
 
+            # Get the currently selected profile in the dropdown
+            selected_prompt_profile_dropdown = main_window[
+                prompt_profile_dropdown_key
+            ].get()
+
             # Update the prompt profile list in the dropdown
             main_window[prompt_profile_dropdown_key].update(
-                value=main_window[prompt_profile_dropdown_key].get(),
+                value=selected_prompt_profile_dropdown,
                 values=get_prompt_profile_list(),
             )
         # User wants to edit a saved prompt
@@ -751,7 +754,32 @@ def start_GUI():
             ...
         # User wants to delete a saved prompt
         elif event == delete_prompt_key:
-            ...
+            # Delete the saved prompt profile
+            selected_rows_prompts_table = values[saved_prompts_table_key]
+            prompt_profile_names = list(saved_prompts.keys())
+            prompt_name_to_delete = prompt_profile_names[selected_rows_prompts_table[0]]
+            del saved_prompts[prompt_name_to_delete]
+
+            # Save the updated saved prompt profiles
+            sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+
+            # Update the prompt profile table
+            window[saved_prompts_table_key].update(values=list(saved_prompts.items()))
+
+            # Get the currently selected profile in the dropdown
+            selected_prompt_profile_dropdown = main_window[
+                prompt_profile_dropdown_key
+            ].get()
+
+            # Select the custom prompt profile if the currently selected profile was just deleted
+            if prompt_name_to_delete == selected_prompt_profile_dropdown:
+                selected_prompt_profile_dropdown = custom_prompt_profile
+
+            # Update the prompt profile list in the dropdown
+            main_window[prompt_profile_dropdown_key].update(
+                value=selected_prompt_profile_dropdown,
+                values=get_prompt_profile_list(),
+            )
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the custom prompt profile
