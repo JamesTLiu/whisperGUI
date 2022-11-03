@@ -1021,7 +1021,6 @@ def popup_tracked(
     *args: Any,
     popup_fn: Popup_Callable,
     tracked_windows: Set[sg.Window],
-    non_blocking: bool = False,
     **kwargs: Any,
 ):
     """Pop up a tracked window.
@@ -1029,9 +1028,13 @@ def popup_tracked(
     Args:
         popup_fn (Popup_Callable): The function to call to create a popup.
         tracked_windows (Set[sg.Window]): Set containing all currently tracked windows which the created popup will be added to.
-        non_blocking (bool, optional): If True, then will immediately return from the function without waiting for the user's input. Defaults to True.
     """
-    popup_window, popup_button = popup_fn(*args, non_blocking=non_blocking, **kwargs)
+    popup_window, popup_button = popup_fn(*args, **kwargs)
+
+    # Make the window modal if the kwarg is True.
+    if kwargs.get('modal', None):
+        popup_window.make_modal()
+
     tracked_windows.add(popup_window)
 
 
