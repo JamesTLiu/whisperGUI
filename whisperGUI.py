@@ -654,7 +654,7 @@ def start_GUI():
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
 
-        if event in (sg.WIN_CLOSED, "Exit", "Close", "Cancel"):
+        if event in (sg.WIN_CLOSED, "Exit", "Close", "Cancel", "OK"):
             if window is main_window:
                 # Tell the thread to end the ongoing transcription
                 if transcribe_thread:
@@ -663,10 +663,12 @@ def start_GUI():
                 break
             elif window is add_new_prompt_window:
                 add_new_prompt_window = None
-                # Make the prompt manager window modal again
-                prompt_manager_window.make_modal()
             elif window is prompt_manager_window:
                 prompt_manager_window = None
+
+            # Make the prompt manager window modal again if it's active
+            if prompt_manager_window:
+                prompt_manager_window.make_modal()
 
             window.close()
         elif event == PRINT_ME:
@@ -709,14 +711,13 @@ def start_GUI():
             new_prompt_name = values[new_prompt_name_key]
             new_prompt = values[new_prompt_key]
 
-            # Ensure new prompt has an unused name
+            # New prompt's name is in use already
             if new_prompt_name in saved_prompts:
                 popup_tracked(
                     f"Prompt name in use. Please use a new prompt name.",
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid prompt name",
-                    non_blocking=True,
                     modal=True,
                 )
             else:
@@ -726,22 +727,22 @@ def start_GUI():
                 # Save the updated saved prompt profiles
                 sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
-            if prompt_manager_window:
-                # Update the prompt profile table
-                prompt_manager_window[saved_prompts_table_key].update(
-                    values=list(saved_prompts.items())
+                if prompt_manager_window:
+                    # Update the prompt profile table
+                    prompt_manager_window[saved_prompts_table_key].update(
+                        values=list(saved_prompts.items())
+                    )
+
+                # Get the currently selected profile in the dropdown
+                selected_prompt_profile_dropdown = main_window[
+                    prompt_profile_dropdown_key
+                ].get()
+
+                # Update the prompt profile list in the dropdown
+                main_window[prompt_profile_dropdown_key].update(
+                    value=selected_prompt_profile_dropdown,
+                    values=get_prompt_profile_list(),
                 )
-
-            # Get the currently selected profile in the dropdown
-            selected_prompt_profile_dropdown = main_window[
-                prompt_profile_dropdown_key
-            ].get()
-
-            # Update the prompt profile list in the dropdown
-            main_window[prompt_profile_dropdown_key].update(
-                value=selected_prompt_profile_dropdown,
-                values=get_prompt_profile_list(),
-            )
 
             # Close the add new prompt window
             window.close()
@@ -756,30 +757,30 @@ def start_GUI():
 
             # Ensure user has selected a row in the prompt profile table
             if selected_rows_prompts_table:
-            prompt_profile_names = list(saved_prompts.keys())
-            prompt_name_to_delete = prompt_profile_names[selected_rows_prompts_table[0]]
-            del saved_prompts[prompt_name_to_delete]
+                prompt_profile_names = list(saved_prompts.keys())
+                prompt_name_to_delete = prompt_profile_names[selected_rows_prompts_table[0]]
+                del saved_prompts[prompt_name_to_delete]
 
-            # Save the updated saved prompt profiles
-            sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+                # Save the updated saved prompt profiles
+                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
-            # Update the prompt profile table
-            window[saved_prompts_table_key].update(values=list(saved_prompts.items()))
+                # Update the prompt profile table
+                window[saved_prompts_table_key].update(values=list(saved_prompts.items()))
 
-            # Get the currently selected profile in the dropdown
-            selected_prompt_profile_dropdown = main_window[
-                prompt_profile_dropdown_key
-            ].get()
+                # Get the currently selected profile in the dropdown
+                selected_prompt_profile_dropdown = main_window[
+                    prompt_profile_dropdown_key
+                ].get()
 
-            # Select the custom prompt profile if the currently selected profile was just deleted
-            if prompt_name_to_delete == selected_prompt_profile_dropdown:
-                selected_prompt_profile_dropdown = custom_prompt_profile
+                # Select the custom prompt profile if the currently selected profile was just deleted
+                if prompt_name_to_delete == selected_prompt_profile_dropdown:
+                    selected_prompt_profile_dropdown = custom_prompt_profile
 
-            # Update the prompt profile list in the dropdown
-            main_window[prompt_profile_dropdown_key].update(
-                value=selected_prompt_profile_dropdown,
-                values=get_prompt_profile_list(),
-            )
+                # Update the prompt profile list in the dropdown
+                main_window[prompt_profile_dropdown_key].update(
+                    value=selected_prompt_profile_dropdown,
+                    values=get_prompt_profile_list(),
+                )
             # User has not selected a row in the prompt profile table
             else:
                 popup_tracked(
@@ -817,7 +818,6 @@ def start_GUI():
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid scaling factor",
-                    non_blocking=True,
                     modal=True,
                 )
 
@@ -899,7 +899,6 @@ def start_GUI():
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Missing selections",
-                    non_blocking=True,
                     modal=True,
                 )
                 continue
@@ -989,7 +988,6 @@ def start_GUI():
                 title="Complete",
                 size=(40, 20),
                 disabled=True,
-                non_blocking=True,
                 modal=True,
             )
         # Error while transcribing
@@ -1003,7 +1001,6 @@ def start_GUI():
                 popup_fn=popup,
                 tracked_windows=tracked_windows,
                 title="ERROR",
-                non_blocking=True,
                 modal=True,
             )
         # User cancelled transcription
@@ -1120,11 +1117,15 @@ def popup_tracked(
         popup_fn (Popup_Callable): The function to call to create a popup.
         tracked_windows (Set[sg.Window]): Set containing all currently tracked windows which the created popup will be added to.
     """
-    popup_window, popup_button = popup_fn(*args, **kwargs)
+    popup_window, popup_event = popup_fn(*args, **kwargs)
 
-    # Make the window modal if the kwarg is True.
-    if kwargs.get("modal", None):
-        popup_window.make_modal()
+    if popup_event != sg.TIMEOUT_EVENT:
+        popup_window.write_event_value(popup_event, None)
+
+    if kwargs.get("non_blocking", None):
+        # Make the window modal if the kwarg is True.
+        if kwargs.get("modal", None):
+            popup_window.make_modal()
 
     tracked_windows.add(popup_window)
 
@@ -1456,13 +1457,14 @@ def popup(
         relative_location=relative_location,
         return_keyboard_events=any_key_closes,
         modal=modal,
+        finalize=True,
     )
 
     if non_blocking:
         button, values = window.read(timeout=0)
     else:
         button, values = window.read()
-        window.close()
+        # window.close()
 
     return window, button
 
