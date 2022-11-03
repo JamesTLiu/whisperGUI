@@ -77,7 +77,7 @@ def start_GUI():
     model_info_table_key = "-MODEL-TABLE-"
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
     initial_prompt_input_key = "-INITIAL-PROMPT-"
-    prompt_profile_key = "-PROMPT-PROFILE-"
+    prompt_profile_dropdown_key = "-PROMPT-PROFILE-"
     start_prompt_manager_key = "-START-PROMPT-MANAGER-"
     start_key = "-START-TRANSCRIPTIONS-"
     progress_key = "-PROGRESS-"
@@ -122,6 +122,9 @@ def start_GUI():
 
     # Load saved prompt profiles
     saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
+
+    # Prompt profile when the user is not using a saved prompt profile
+    custom_prompt_profile = "(Custom)"
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -253,6 +256,9 @@ def start_GUI():
             language_code_checkbox_setting_key, False
         )
 
+        # Default prompt profile
+        prompt_profile_dropdown_default = custom_prompt_profile
+
         # The tab1 option elements as rows
         tab1_options_rows = [
             [
@@ -307,10 +313,9 @@ def start_GUI():
             ],
             [
                 sg.Combo(
-                    [
-                        "(Custom)", *saved_prompts.keys()
-                    ],
-                    key=prompt_profile_key,
+                    [custom_prompt_profile, *saved_prompts.keys()],
+                    key=prompt_profile_dropdown_key,
+                    default_value=prompt_profile_dropdown_default,
                     readonly=True,
                     enable_events=True,
                 ),
@@ -510,7 +515,11 @@ def start_GUI():
         layout = [
             [
                 sg.Table(
-                    list(sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts).items()),
+                    list(
+                        sg.user_settings_get_entry(
+                            SAVED_PROMPTS_SETTINGS_KEY, saved_prompts
+                        ).items()
+                    ),
                     headings=["Profile", "Prompt"],
                     key=saved_prompts_table_key,
                     expand_x=True,
@@ -690,7 +699,9 @@ def start_GUI():
             add_new_prompt_window = popup_add_new_prompt()
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
-            saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+            saved_prompts = sg.user_settings_get_entry(
+                SAVED_PROMPTS_SETTINGS_KEY, saved_prompts
+            )
 
             # Get the name and prompt to be saved
             new_prompt_name = values[new_prompt_name_key]
@@ -721,13 +732,30 @@ def start_GUI():
                 prompt_manager_window.make_modal()
 
                 # Update the prompt profile table
-                prompt_manager_window[saved_prompts_table_key].update(values=list(saved_prompts.items()))
+                prompt_manager_window[saved_prompts_table_key].update(
+                    values=list(saved_prompts.items())
+                )
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
         # User wants to delete a saved prompt
         elif event == delete_prompt_key:
             ...
+        # User has chosen a prompt profile
+        elif event == prompt_profile_dropdown_key:
+            # Update the initial prompt input with the prompt profile's prompt
+            chosen_prompt_profile = values[prompt_profile_dropdown_key]
+
+            if chosen_prompt_profile in saved_prompts:
+                new_initial_prompt_input = saved_prompts[chosen_prompt_profile]
+            elif chosen_prompt_profile == custom_prompt_profile:
+                new_initial_prompt_input = ""
+            else:
+                raise ValueError(
+                    f"{chosen_prompt_profile} is not a saved prompt profile name or the custom prompt profile"
+                )
+
+            window[initial_prompt_input_key].update(value=new_initial_prompt_input)
         # User saved settings
         elif event == save_settings_key:
 
@@ -1022,9 +1050,11 @@ def save_checkbox_state(window: sg.Window, checkbox_key: str):
         window[checkbox_key].metadata,
     )
 
+
 class Popup_Callable(Protocol):
     def __call__(self, *args, **kwargs) -> Tuple[sg.Window, Optional[str]]:
         ...
+
 
 def popup_tracked(
     *args: Any,
@@ -1041,7 +1071,7 @@ def popup_tracked(
     popup_window, popup_button = popup_fn(*args, **kwargs)
 
     # Make the window modal if the kwarg is True.
-    if kwargs.get('modal', None):
+    if kwargs.get("modal", None):
         popup_window.make_modal()
 
     tracked_windows.add(popup_window)
