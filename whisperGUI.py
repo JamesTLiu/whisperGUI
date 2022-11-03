@@ -29,12 +29,16 @@ from typing import (
     Set,
     Tuple,
     Union,
+    TYPE_CHECKING,
 )
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
     from multiprocessing.connection import Connection as PipeConnection  # type: ignore
+
+if TYPE_CHECKING:
+    import PySimpleGUI
 
 import PySimpleGUI as sg
 import whisper
