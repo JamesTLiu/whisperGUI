@@ -411,7 +411,11 @@ def start_GUI():
             ],
             [sg.HorizontalSeparator()],
             [sg.Text(f"Settings file location:")],
-            [sg.Input(f"{config_file_path}", size=len(config_file_path)-8, disabled=True)],
+            [
+                sg.Input(
+                    f"{config_file_path}", size=len(config_file_path) - 8, disabled=True
+                )
+            ],
             [sg.HorizontalSeparator()],
             fancy_checkbox(
                 text="Remember output directory",
@@ -497,29 +501,13 @@ def start_GUI():
             sg.Window: The prompt manager window.
         """
         if non_blocking:
-            PopupButton = DummyButton  # important to use or else button will close other windows too!
+            # important to use or else button will close other windows too!
+            PopupButton = DummyButton
         else:
             PopupButton = sg.Button
 
         layout = [
             [
-                # sg.Column(
-                #     [
-                #         [
-                #             sg.Table(
-                #                 [
-                #                     ["test_profile", "test test test"],
-                #                 ],
-                #                 headings=["Profile", "Prompt"],
-                #                 expand_x=True,
-                #                 expand_y=True,
-                #                 justification="center",
-                #             )
-                #         ]
-                #     ],
-                #     expand_x=True,
-                #     expand_y=True,
-                # ),
                 sg.Table(
                     [
                         [
@@ -541,8 +529,16 @@ def start_GUI():
                 sg.Column(
                     [
                         [sg.Button("Add new", key=add_prompt_key, expand_x=True)],
-                        [sg.Button("Edit selected", key=edit_prompt_key, expand_x=True)],
-                        [sg.Button("Delete selected", key=delete_prompt_key, expand_x=True)],
+                        [
+                            sg.Button(
+                                "Edit selected", key=edit_prompt_key, expand_x=True
+                            )
+                        ],
+                        [
+                            sg.Button(
+                                "Delete selected", key=delete_prompt_key, expand_x=True
+                            )
+                        ],
                         [sg.Text("")],
                         [sg.Text("")],
                         [sg.Text("")],
