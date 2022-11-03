@@ -208,6 +208,9 @@ def start_GUI():
 
         return checkbox_elements
 
+    def get_prompt_profile_list():
+        return [custom_prompt_profile, *saved_prompts.keys()]
+
     def make_main_window() -> sg.Window:
         # Supported language options for the model
         AUTODETECT_OPTION = "autodetect"
@@ -313,7 +316,7 @@ def start_GUI():
             ],
             [
                 sg.Combo(
-                    [custom_prompt_profile, *saved_prompts.keys()],
+                    get_prompt_profile_list(),
                     key=prompt_profile_dropdown_key,
                     default_value=prompt_profile_dropdown_default,
                     readonly=True,
@@ -735,6 +738,12 @@ def start_GUI():
                 prompt_manager_window[saved_prompts_table_key].update(
                     values=list(saved_prompts.items())
                 )
+
+            # Update the prompt profile list in the dropdown
+            main_window[prompt_profile_dropdown_key].update(
+                value=main_window[prompt_profile_dropdown_key].get(),
+                values=get_prompt_profile_list(),
+            )
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
