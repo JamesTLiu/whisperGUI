@@ -659,7 +659,7 @@ def start_GUI():
             elif window is prompt_manager_window:
                 prompt_manager_window = None
 
-                window.close()
+            window.close()
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
         # User selected an output directory
@@ -696,26 +696,34 @@ def start_GUI():
             add_new_prompt_window = popup_add_new_prompt()
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
-            # saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
+            saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
-            # # Get the name and prompt to be saved
-            # new_prompt_name, new_prompt = values[open_add_prompt_window_key]
+            # Get the name and prompt to be saved
+            new_prompt_name = values[new_prompt_name_key]
+            new_prompt = values[new_prompt_key]
 
-            # # Ensure new prompt has an unused name
-            # if new_prompt_name in saved_prompts:
-            #     popup_tracked(
-            #         f"Prompt name in use. Please use a new prompt name.",
-            #         popup_fn=popup,
-            #         tracked_windows=tracked_windows,
-            #         title="Invalid prompt name",
-            #         non_blocking=True,
-            #     )
-            # else:
-            #     # Add current prompt with user given prompt name to dict
-            #     saved_prompts[new_prompt_name] = new_prompt
+            # Ensure new prompt has an unused name
+            if new_prompt_name in saved_prompts:
+                popup_tracked(
+                    f"Prompt name in use. Please use a new prompt name.",
+                    popup_fn=popup,
+                    tracked_windows=tracked_windows,
+                    title="Invalid prompt name",
+                    non_blocking=True,
+                    modal=True,
+                )
+            else:
+                # Add current prompt with user given prompt name to dict
+                saved_prompts[new_prompt_name] = new_prompt
 
-            #     sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
-            ...
+                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+
+            # Close the add new prompt window
+            window.close()
+            add_new_prompt_window = None
+
+            # Make the prompt manager window modal again
+            prompt_manager_window.make_modal()
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
