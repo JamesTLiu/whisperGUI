@@ -645,7 +645,7 @@ def start_GUI():
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
 
-        if event in (sg.WIN_CLOSED, "Exit"):
+        if event in (sg.WIN_CLOSED, "Exit", "Close", "Cancel"):
             if window is main_window:
                 # Tell the thread to end the ongoing transcription
                 if transcribe_thread:
