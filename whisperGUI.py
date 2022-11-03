@@ -322,7 +322,9 @@ def start_GUI():
                     readonly=True,
                     enable_events=True,
                 ),
-                sg.Input(key=initial_prompt_input_key, expand_x=True),
+                sg.Input(
+                    key=initial_prompt_input_key, expand_x=True, enable_events=True
+                ),
             ],
         ]
 
@@ -750,6 +752,10 @@ def start_GUI():
         # User wants to delete a saved prompt
         elif event == delete_prompt_key:
             ...
+        # User modified the initial prompt.
+        elif event == initial_prompt_input_key:
+            # Select the custom prompt profile
+            window[prompt_profile_dropdown_key].update(value=custom_prompt_profile)
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
             # Update the initial prompt input with the prompt profile's prompt
