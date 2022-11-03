@@ -411,7 +411,7 @@ def start_GUI():
             ],
             [sg.HorizontalSeparator()],
             [sg.Text(f"Settings file location:")],
-            [sg.Text(f"{config_file_path}", relief=sg.RELIEF_SOLID)],
+            [sg.Input(f"{config_file_path}", size=len(config_file_path)-8, disabled=True)],
             [sg.HorizontalSeparator()],
             fancy_checkbox(
                 text="Remember output directory",
