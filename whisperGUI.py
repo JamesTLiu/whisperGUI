@@ -59,6 +59,9 @@ def main():
 def start_GUI():
     sg.theme("Dark Blue 3")
 
+    # Config file
+    config_file_path = sg.user_settings_filename(filename="whisperGUI.config")
+
     # Keys for main tab
     multiline_key = "-CONSOLE-OUTPUT-"
     in_file_key = "-IN-FILE-"
@@ -132,9 +135,6 @@ def start_GUI():
 
     # Default global font for the GUI
     GUI_FONT = ("Arial", 20)
-
-    # Config file
-    config_file_path = sg.user_settings_filename(filename="whisperGUI.config")
 
     # Set global GUI options
     sg.set_options(
