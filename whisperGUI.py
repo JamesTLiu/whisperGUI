@@ -120,11 +120,8 @@ def start_GUI():
     # Key for saved prompts in the settings file
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
-    # Saved prompt profiles
-    saved_prompts = {
-        "Chinese (Traditional)": "以下是普通話的句子。",
-        "Chinese (Simplified)": "以下是普通话的句子。",
-    }
+    # Load saved prompt profiles
+    saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -311,10 +308,7 @@ def start_GUI():
             [
                 sg.Combo(
                     [
-                        "(Custom)",
-                        "Chinese (Traditional)",
-                        "Chinese (Simplified)",
-                        "English (England)",
+                        "(Custom)", *saved_prompts.keys()
                     ],
                     key=prompt_profile_key,
                     readonly=True,
