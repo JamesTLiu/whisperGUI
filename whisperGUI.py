@@ -70,10 +70,8 @@ def start_GUI():
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
     initial_prompt_input_key = "-INITIAL-PROMPT-"
     prompt_profile_key = "-PROMPT-PROFILE-"
-    save_prompt_key = "-SAVE-PROMPT-"
-    load_prompt_key = "-LOAD-PROMPT-"
-    prompt_manager_key = "-PROMPT-MANAGER-"
-    start_key = "-START-"
+    start_prompt_manager_key = "-START-PROMPT-MANAGER-"
+    start_key = "-START-TRANSCRIPTIONS-"
     progress_key = "-PROGRESS-"
 
     # Keys for prompt manager window
@@ -329,7 +327,7 @@ def start_GUI():
                 ),
             ],
             tab1_options_layout,
-            [sg.Button("Prompt Manager", key=prompt_manager_key)],
+            [sg.Button("Prompt Manager", key=start_prompt_manager_key)],
             [
                 sg.Text("Model Information"),
                 sg.Button(
@@ -631,10 +629,10 @@ def start_GUI():
             if event in save_on_click_checkboxes:
                 save_checkbox_state(window, event)
         # Popup prompt manager window
-        elif event == prompt_manager_key:
+        elif event == start_prompt_manager_key:
             track_window(popup_prompt_manager(non_blocking=True))
         # User wants to save the current prompt
-        elif event == save_prompt_key:
+        elif event == ...:
             # saved_prompts = sg.user_settings_get_entry(save_prompt_key, {})
 
             # # Add current prompt with user given prompt name to dict
@@ -643,7 +641,7 @@ def start_GUI():
             # sg.user_settings_set_entry(save_prompt_key, saved_prompts)
             ...
         # User wants to load a saved prompt
-        elif event == load_prompt_key:
+        elif event == ...:
             ...
         # User saved settings
         elif event == save_settings_key:
