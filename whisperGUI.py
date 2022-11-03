@@ -79,6 +79,7 @@ def start_GUI():
     progress_key = "-PROGRESS-"
 
     # Keys for prompt manager window
+    saved_prompts_table_key = "-SAVED-PROMPTS-TABLE-"
     open_add_prompt_window_key = "-ADD-PROMPT-"
     edit_prompt_key = "-EDIT-PROMPT-"
     delete_prompt_key = "-DELETE-PROMPT-"
@@ -114,6 +115,12 @@ def start_GUI():
 
     # Key for saved prompts in the settings file
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
+
+    # Saved prompt profiles
+    saved_prompts = {
+        "Chinese (Traditional)": "以下是普通話的句子。",
+        "Chinese (Simplified)": "以下是普通话的句子。",
+    }
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -517,13 +524,9 @@ def start_GUI():
         layout = [
             [
                 sg.Table(
-                    [
-                        [
-                            "test_profile",
-                            "test test test test test test test test test test test test test test test",
-                        ],
-                    ],
+                    list(saved_prompts.items()),
                     headings=["Profile", "Prompt"],
+                    key=saved_prompts_table_key,
                     expand_x=True,
                     expand_y=True,
                     justification="center",
@@ -536,7 +539,11 @@ def start_GUI():
                 # sg.Push(),
                 sg.Column(
                     [
-                        [sg.Button("Add new", key=open_add_prompt_window_key, expand_x=True)],
+                        [
+                            sg.Button(
+                                "Add new", key=open_add_prompt_window_key, expand_x=True
+                            )
+                        ],
                         [
                             sg.Button(
                                 "Edit selected", key=edit_prompt_key, expand_x=True
@@ -689,25 +696,26 @@ def start_GUI():
             popup_add_new_prompt(non_blocking=True)
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
-            saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
+            # saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
 
-            # Get the name and prompt to be saved
-            new_prompt_name, new_prompt = values[open_add_prompt_window_key]
+            # # Get the name and prompt to be saved
+            # new_prompt_name, new_prompt = values[open_add_prompt_window_key]
 
-            # Ensure new prompt has an unused name
-            if new_prompt_name in saved_prompts:
-                popup_tracked(
-                    f"Prompt name in use. Please use a new prompt name.",
-                    popup_fn=popup,
-                    tracked_windows=tracked_windows,
-                    title="Invalid prompt name",
-                    non_blocking=True,
-                )
-            else:
-                # Add current prompt with user given prompt name to dict
-                saved_prompts[new_prompt_name] = new_prompt
+            # # Ensure new prompt has an unused name
+            # if new_prompt_name in saved_prompts:
+            #     popup_tracked(
+            #         f"Prompt name in use. Please use a new prompt name.",
+            #         popup_fn=popup,
+            #         tracked_windows=tracked_windows,
+            #         title="Invalid prompt name",
+            #         non_blocking=True,
+            #     )
+            # else:
+            #     # Add current prompt with user given prompt name to dict
+            #     saved_prompts[new_prompt_name] = new_prompt
 
-                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+            #     sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+            ...
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
