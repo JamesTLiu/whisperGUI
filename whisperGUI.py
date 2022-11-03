@@ -733,6 +733,7 @@ def start_GUI():
                     tracked_windows=tracked_windows,
                     title="Invalid scaling factor",
                     non_blocking=True,
+                    modal=True,
                 )
 
             # Ensure the scaling input is a decimal
@@ -814,6 +815,7 @@ def start_GUI():
                     tracked_windows=tracked_windows,
                     title="Missing selections",
                     non_blocking=True,
+                    modal=True,
                 )
                 continue
 
@@ -903,6 +905,7 @@ def start_GUI():
                 size=(40, 20),
                 disabled=True,
                 non_blocking=True,
+                modal=True,
             )
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
@@ -916,6 +919,7 @@ def start_GUI():
                 tracked_windows=tracked_windows,
                 title="ERROR",
                 non_blocking=True,
+                modal=True,
             )
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
