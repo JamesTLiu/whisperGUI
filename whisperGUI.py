@@ -700,9 +700,9 @@ def start_GUI():
                     values=get_prompt_profile_list(),
                 )
 
-            # Close the add new prompt window
-            window.close()
-            add_new_prompt_window = None
+                # Close the add new prompt window
+                window.close()
+                add_new_prompt_window = None
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
