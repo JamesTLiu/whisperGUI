@@ -788,23 +788,25 @@ def start_GUI():
                 scaling_input = Decimal(values[scaling_input_setting_key])
             except decimal.InvalidOperation:
                 popup_tracked_scaling_invalid()
-            else:
-                # Ensure scaling factor is within accepted range
-                if Decimal(MIN_SCALING) <= scaling_input <= Decimal(MAX_SCALING):
-                    # Save the settings to the config file
-                    sg.user_settings_set_entry(
-                        scaling_input_setting_key, values[scaling_input_setting_key]
-                    )
+                continue
 
-                    # Use the new scaling globally
-                    sg.set_options(
-                        scaling=sg.user_settings_get_entry(
-                            scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
-                        )
+            # Ensure scaling factor is within accepted range
+            if Decimal(MIN_SCALING) <= scaling_input <= Decimal(MAX_SCALING):
+                # Save the settings to the config file
+                sg.user_settings_set_entry(
+                    scaling_input_setting_key, values[scaling_input_setting_key]
+                )
+
+                # Use the new scaling globally
+                sg.set_options(
+                    scaling=sg.user_settings_get_entry(
+                        scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
                     )
-                # Scaling factor is out of accepted range
-                else:
-                    popup_tracked_scaling_invalid()
+                )
+            # Scaling factor is out of accepted range
+            else:
+                popup_tracked_scaling_invalid()
+                continue
 
             # Update save output directory setting
             is_saving_output_directory = window[save_output_dir_checkbox_key].metadata[
