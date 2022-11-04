@@ -295,14 +295,7 @@ def start_GUI():
                 checked=translate_to_english_last_choice,
             ),
             [
-                sg.Column(
-                    [
-                        [
-                            sg.Text("Prompt profile"),
-                        ],
-                    ],
-                    pad=(0, 0),
-                ),
+                sg.Text("Prompt profile"),
                 sg.Text(
                     "Initial prompt for ALL selected files",
                     tooltip=(
