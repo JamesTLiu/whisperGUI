@@ -1157,6 +1157,8 @@ def save_checkbox_state(window: sg.Window, checkbox_key: str):
 
 
 class Popup_Callable(Protocol):
+    """A typing.Protocol for a popup window Callable."""
+
     def __call__(self, *args, **kwargs) -> Tuple[sg.Window, Optional[str]]:
         ...
 
