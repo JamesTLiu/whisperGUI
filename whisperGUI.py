@@ -654,12 +654,12 @@ def start_GUI():
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
             prompt_manager_window = track_window(popup_prompt_manager())
-            modal_window_manager.add(prompt_manager_window)
+            modal_window_manager.add_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_new_prompt()
-            modal_window_manager.add(add_new_prompt_window)
+            modal_window_manager.add_modal_window(add_new_prompt_window)
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
             # Get the name and prompt to be saved
@@ -675,7 +675,7 @@ def start_GUI():
                     title="Invalid prompt name",
                     modal=True,
                 )
-                modal_window_manager.add(popup_window)
+                modal_window_manager.add_modal_window(popup_window)
             else:
                 # Add current prompt with user given prompt name to the dict
                 saved_prompts[new_prompt_name] = new_prompt
@@ -750,7 +750,7 @@ def start_GUI():
                     title="Invalid selection",
                     modal=True,
                 )
-                modal_window_manager.add(popup_window)
+                modal_window_manager.add_modal_window(popup_window)
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the custom prompt profile
@@ -781,7 +781,7 @@ def start_GUI():
                     title="Invalid scaling factor",
                     modal=True,
                 )
-                modal_window_manager.add(popup_window)
+                modal_window_manager.add_modal_window(popup_window)
 
             # Ensure the scaling input is a decimal
             try:
@@ -938,7 +938,7 @@ def start_GUI():
                     title="Missing selections",
                     modal=True,
                 )
-                modal_window_manager.add(popup_window)
+                modal_window_manager.add_modal_window(popup_window)
         # 1 transcription completed
         elif event == TRANSCRIBE_PROGRESS:
             num_tasks_done += 1
@@ -958,7 +958,7 @@ def start_GUI():
                 disabled=True,
                 modal=True,
             )
-            modal_window_manager.add(popup_window)
+            modal_window_manager.add_modal_window(popup_window)
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
@@ -972,7 +972,7 @@ def start_GUI():
                 title="ERROR",
                 modal=True,
             )
-            modal_window_manager.add(popup_window)
+            modal_window_manager.add_modal_window(popup_window)
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
             transcription_timer.stop(log_time=False)
@@ -1040,7 +1040,7 @@ class ModalWindowManager:
         self.modal_window_stack: List[sg.Window] = []
         self.most_recent_modal_window: sg.Window = None
 
-    def add(self, win: sg.Window):
+    def add_modal_window(self, win: sg.Window):
         """Add a modal window as the most recent tracked modal window.
 
         Args:
