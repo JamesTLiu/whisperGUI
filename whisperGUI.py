@@ -383,7 +383,7 @@ def start_GUI():
             [sg.Text(f"Settings file location:")],
             [
                 sg.Input(
-                    f"{config_file_path}", size=len(config_file_path) - 8, disabled=True
+                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
                 )
             ],
             [sg.HorizontalSeparator()],
