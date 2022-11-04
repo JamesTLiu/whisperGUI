@@ -650,16 +650,7 @@ def start_GUI():
     # stop flag for the thread
     stop_flag = threading.Event()
 
-    # track the modal windows in order to remodal them when a more recent one is closed
-    modal_window_stack: List[sg.Window] = []
-
-    # the most recently tracked modal window
-    most_recent_modal_window = None
-
-    def track_modal_window(win: sg.Window):
-        modal_window_stack.append(win)
-        nonlocal most_recent_modal_window
-        most_recent_modal_window = win
+    modal_window_manager = ModalWindowManager()
 
     while True:
         # Display and interact with the Window
@@ -708,12 +699,12 @@ def start_GUI():
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
             prompt_manager_window = track_window(popup_prompt_manager())
-            track_modal_window(prompt_manager_window)
+            modal_window_manager.add(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_new_prompt()
-            track_modal_window(add_new_prompt_window)
+            modal_window_manager.add(add_new_prompt_window)
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
             # Get the name and prompt to be saved
@@ -729,7 +720,7 @@ def start_GUI():
                     title="Invalid prompt name",
                     modal=True,
                 )
-                track_modal_window(popup_window)
+                modal_window_manager.add(popup_window)
             else:
                 # Add current prompt with user given prompt name to the dict
                 saved_prompts[new_prompt_name] = new_prompt
@@ -768,14 +759,18 @@ def start_GUI():
             # Ensure user has selected a row in the prompt profile table
             if selected_rows_prompts_table:
                 prompt_profile_names = list(saved_prompts.keys())
-                prompt_name_to_delete = prompt_profile_names[selected_rows_prompts_table[0]]
+                prompt_name_to_delete = prompt_profile_names[
+                    selected_rows_prompts_table[0]
+                ]
                 del saved_prompts[prompt_name_to_delete]
 
                 # Save the updated saved prompt profiles
                 sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
 
                 # Update the prompt profile table
-                window[saved_prompts_table_key].update(values=list(saved_prompts.items()))
+                window[saved_prompts_table_key].update(
+                    values=list(saved_prompts.items())
+                )
 
                 # Get the currently selected profile in the dropdown
                 selected_prompt_profile_dropdown = main_window[
@@ -800,7 +795,7 @@ def start_GUI():
                     title="Invalid selection",
                     modal=True,
                 )
-                track_modal_window(popup_window)
+                modal_window_manager.add(popup_window)
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the custom prompt profile
@@ -831,7 +826,7 @@ def start_GUI():
                     title="Invalid scaling factor",
                     modal=True,
                 )
-                track_modal_window(popup_window)
+                modal_window_manager.add(popup_window)
 
             # Ensure the scaling input is a decimal
             try:
@@ -924,7 +919,9 @@ def start_GUI():
                 model_selected = values[model_key]
 
                 # Get the user's choice of whether to translate the results into english
-                translate_to_english = window[translate_to_english_checkbox_key].metadata
+                translate_to_english = window[
+                    translate_to_english_checkbox_key
+                ].metadata
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
                 language_code_as_specifier = sg.user_settings_get_entry(
@@ -943,7 +940,9 @@ def start_GUI():
                 window.refresh()
 
                 # Convert string with file paths into a list
-                audio_video_file_paths = list(str_to_file_paths(audio_video_file_paths_str))
+                audio_video_file_paths = list(
+                    str_to_file_paths(audio_video_file_paths_str)
+                )
 
                 # Setup for task progress
                 num_tasks_done = 0
@@ -982,7 +981,7 @@ def start_GUI():
                     title="Missing selections",
                     modal=True,
                 )
-                track_modal_window(popup_window)
+                modal_window_manager.add(popup_window)
         # 1 transcription completed
         elif event == TRANSCRIBE_PROGRESS:
             num_tasks_done += 1
@@ -1002,7 +1001,7 @@ def start_GUI():
                 disabled=True,
                 modal=True,
             )
-            track_modal_window(popup_window)
+            modal_window_manager.add(popup_window)
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
@@ -1016,7 +1015,7 @@ def start_GUI():
                 title="ERROR",
                 modal=True,
             )
-            track_modal_window(popup_window)
+            modal_window_manager.add(popup_window)
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
             transcription_timer.stop(log_time=False)
@@ -1068,19 +1067,47 @@ def start_GUI():
                 # Flag the thread to stop
                 stop_flag.set()
 
-        # Clear closed modal windows from the top of the modal window tracking stack
-        while modal_window_stack and modal_window_stack[-1].is_closed():
-            modal_window_stack.pop()
-
-        # Restore as modal the most recent non-closed tracked modal window
-        if modal_window_stack:
-            current_modal_window = modal_window_stack[-1]
-            if current_modal_window is not most_recent_modal_window:
-                most_recent_modal_window = current_modal_window
-                current_modal_window.make_modal()
+        # Set as modal the most recent non-closed tracked modal window
+        modal_window_manager.update()
 
     # Finish up by removing from the screen
     main_window.close()
+
+
+class ModalWindowManager:
+    """A manager for tracking modal windows in order to remodal a previous window
+    when a more recent one is closed.
+    """
+
+    def __init__(self):
+        self.modal_window_stack: List[sg.Window] = []
+        self.most_recent_modal_window: sg.Window = None
+
+    def add(self, win: sg.Window):
+        """Add a modal window as the most recent tracked modal window.
+
+        Args:
+            win (sg.Window): A modal window.
+                Note: If a non-modal window is added, a later call to update()
+                will set the non-modal window as a modal window if there was a
+                more recent closed modal window.
+        """
+        self.modal_window_stack.append(win)
+        self.most_recent_modal_window = win
+
+    def update(self):
+        """Set as modal the most recent non-closed tracked modal window"""
+
+        # Clear closed modal windows from the top of the modal window tracking stack
+        while self.modal_window_stack and self.modal_window_stack[-1].is_closed():
+            self.modal_window_stack.pop()
+
+        # Restore as modal the most recent non-closed tracked modal window
+        if self.modal_window_stack:
+            current_modal_window = self.modal_window_stack[-1]
+            if current_modal_window is not self.most_recent_modal_window:
+                self.most_recent_modal_window = current_modal_window
+                self.most_recent_modal_window.make_modal()
 
 
 def convert_rows_to_columns_for_elements(
@@ -1151,7 +1178,6 @@ def popup_tracked(
         # Make the window modal if the kwarg is True.
         if kwargs.get("modal", None):
             popup_window.make_modal()
-
 
     tracked_windows.add(popup_window)
 
