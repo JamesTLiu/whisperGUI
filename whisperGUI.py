@@ -17,7 +17,6 @@ from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from pathlib import Path
 from signal import SIGTERM, signal
-from tkinter import Button
 from typing import (
     Any,
     Callable,
@@ -1638,7 +1637,7 @@ def popup_scrolled(
     ]
     pad = max_line_total - 15 if max_line_total > 15 else 1
     # show either an OK or Yes/No depending on paramater
-    button = sg.DummyButton if non_blocking else Button
+    button = sg.DummyButton if non_blocking else sg.Button
     if yes_no:
         layout += [
             [
