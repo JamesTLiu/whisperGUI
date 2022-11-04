@@ -1990,6 +1990,7 @@ def transcribe_audio_video_files(
             audio_path=audio_video_path,
             output_dir_path=output_dir_path,
             language_code_as_specifier=language_code_as_specifier,
+            is_translated_to_english=translate_to_english,
         )
 
         # Track the paths for the transcription result files
@@ -2176,6 +2177,7 @@ def write_transcript_to_files(
     audio_path: str,
     output_dir_path: str,
     language_code_as_specifier: bool,
+    is_translated_to_english: bool,
 ) -> Tuple[str, str, str]:
     """Write the results of a whisper transcription to .txt, .vtt, and .srt files with the
     same name as the source file and a language specifier.
@@ -2203,17 +2205,23 @@ def write_transcript_to_files(
 
     language_specifier = str(transcribe_result["language"]).strip()
 
+    # A translated result will be in English even though the detected language may be different
+    if is_translated_to_english:
+        language_specifier = "english"
+
     # Try to convert language specifier to the selected type
     to_lang_specifier_type = (
         TO_LANGUAGE_CODE if language_code_as_specifier else TO_LANGUAGES
     )
+
     language_specifier = to_lang_specifier_type.get(
         language_specifier, language_specifier
     )
 
-    def write_file(write_fn: Callable, language_code: str, file_suffix: str):
+    def write_file(write_fn: Callable, language_specifier: str, file_suffix: str):
         with open(
-            output_dir / "".join((audio_basename, ".", language_code, file_suffix)),
+            output_dir
+            / "".join((audio_basename, ".", language_specifier, file_suffix)),
             "w",
             encoding="utf-8",
         ) as file:
