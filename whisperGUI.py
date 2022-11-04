@@ -18,6 +18,7 @@ from multiprocessing.synchronize import Event as EventClass
 from pathlib import Path
 from signal import SIGTERM, signal
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -25,13 +26,12 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Protocol,
     Sequence,
     Set,
+    TextIO,
     Tuple,
     Union,
-    TextIO,
-    TYPE_CHECKING,
-    Protocol,
 )
 
 if platform.system() == "Windows":
@@ -2235,7 +2235,12 @@ def write_transcript_to_files(
         language_specifier, language_specifier
     )
 
-    def write_transcript(write_fn: Callable[[Iterator[dict], TextIO], None], transcript: Iterator[dict], language_specifier: str, file_suffix: str) -> str:
+    def write_transcript(
+        write_fn: Callable[[Iterator[dict], TextIO], None],
+        transcript: Iterator[dict],
+        language_specifier: str,
+        file_suffix: str,
+    ) -> str:
         """Write a transcript to a file.
 
         Args:
@@ -2256,7 +2261,7 @@ def write_transcript_to_files(
             write_fn(transcript, file)
             return file.name
 
-    transcript: Iterator[dict] = transcribe_result["segments"] # type: ignore
+    transcript: Iterator[dict] = transcribe_result["segments"]  # type: ignore
     srt_path = write_transcript(write_srt, transcript, language_specifier, ".srt")
     txt_path = write_transcript(write_txt, transcript, language_specifier, ".txt")
     vtt_path = write_transcript(write_vtt, transcript, language_specifier, ".vtt")
