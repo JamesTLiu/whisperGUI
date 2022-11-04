@@ -2185,7 +2185,7 @@ def close_connections(connections: Iterable[Union[Connection, PipeConnection]]):
 
 
 def write_transcript_to_files(
-    transcribe_result: Dict[str, Union[dict, Any]],
+    transcribe_result: Dict[str, Union[dict, Any, str]],
     audio_path: str,
     output_dir_path: str,
     language_code_as_specifier: bool,
@@ -2208,6 +2208,7 @@ def write_transcript_to_files(
         language_code_as_specifier (bool): If True, the detected language's language code will be used in the
             output file name if possible. Otherwise, the detected language's name will be used in the output
             file name if possible.
+        is_translated_to_english (bool): If True, the result was translated into English.
 
     Returns:
         Tuple[str, str, str]: A Tuple with the file paths for the transcription result files.
