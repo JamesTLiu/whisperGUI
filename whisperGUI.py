@@ -650,6 +650,17 @@ def start_GUI():
     # stop flag for the thread
     stop_flag = threading.Event()
 
+    # track the modal windows in order to remodal them when a more recent one is closed
+    modal_window_stack: List[sg.Window] = []
+
+    # the most recently tracked modal window
+    most_recent_modal_window = None
+
+    def track_modal_window(win: sg.Window):
+        modal_window_stack.append(win)
+        nonlocal most_recent_modal_window
+        most_recent_modal_window = win
+
     while True:
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
@@ -665,10 +676,6 @@ def start_GUI():
                 add_new_prompt_window = None
             elif window is prompt_manager_window:
                 prompt_manager_window = None
-
-            # Make the prompt manager window modal again if it's active
-            if prompt_manager_window:
-                prompt_manager_window.make_modal()
 
             window.close()
         elif event == PRINT_ME:
@@ -701,10 +708,12 @@ def start_GUI():
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
             prompt_manager_window = track_window(popup_prompt_manager())
+            track_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_new_prompt()
+            track_modal_window(add_new_prompt_window)
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
             # Get the name and prompt to be saved
@@ -713,13 +722,14 @@ def start_GUI():
 
             # New prompt's name is in use already
             if new_prompt_name in saved_prompts:
-                popup_tracked(
+                popup_window = popup_tracked(
                     f"Prompt name in use. Please use a new prompt name.",
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid prompt name",
                     modal=True,
                 )
+                track_modal_window(popup_window)
             else:
                 # Add current prompt with user given prompt name to the dict
                 saved_prompts[new_prompt_name] = new_prompt
@@ -783,13 +793,14 @@ def start_GUI():
                 )
             # User has not selected a row in the prompt profile table
             else:
-                popup_tracked(
+                popup_window = popup_tracked(
                     f"Please select a profile in the table.",
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid selection",
                     modal=True,
                 )
+                track_modal_window(popup_window)
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the custom prompt profile
@@ -813,13 +824,14 @@ def start_GUI():
         elif event == save_settings_key:
 
             def popup_tracked_scaling_invalid():
-                popup_tracked(
+                popup_window = popup_tracked(
                     f"Please enter a number for the scaling factor between {MIN_SCALING} and {MAX_SCALING}.",
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Invalid scaling factor",
                     modal=True,
                 )
+                track_modal_window(popup_window)
 
             # Ensure the scaling input is a decimal
             try:
@@ -893,84 +905,84 @@ def start_GUI():
             output_dir_path = str(values[out_dir_key]).strip()
 
             # Require audio/video file(s) and output folder
-            if not audio_video_file_paths_str or not output_dir_path:
-                popup_tracked(
+            if audio_video_file_paths_str and output_dir_path:
+                # Disable buttons during transcription
+                disable_elements(
+                    (
+                        window[start_key],
+                        window[save_settings_key],
+                        window[out_dir_key],
+                        window[in_file_key],
+                    )
+                )
+
+                # Get user selected language and model
+                language_selected = values[language_key]
+                if language_selected not in TO_LANGUAGE_CODE:
+                    language_selected = None
+
+                model_selected = values[model_key]
+
+                # Get the user's choice of whether to translate the results into english
+                translate_to_english = window[translate_to_english_checkbox_key].metadata
+
+                # Get the user's choice of whether to use a language code as the language specifier in output files
+                language_code_as_specifier = sg.user_settings_get_entry(
+                    language_code_checkbox_setting_key, False
+                )
+
+                #  Get the user's initial prompt for all transcriptions in this task
+                initial_prompt = values[initial_prompt_input_key]
+
+                # Ensure timer is not running
+                with suppress(TimerError):
+                    transcription_timer.stop()
+
+                # Clear the console output element
+                window[multiline_key].update("")
+                window.refresh()
+
+                # Convert string with file paths into a list
+                audio_video_file_paths = list(str_to_file_paths(audio_video_file_paths_str))
+
+                # Setup for task progress
+                num_tasks_done = 0
+                num_tasks = len(audio_video_file_paths)
+
+                transcription_timer.start()
+
+                # Start transcription
+                transcribe_thread = threading.Thread(
+                    target=transcribe_audio_video_files,
+                    kwargs={
+                        "window": window,
+                        "audio_video_file_paths": audio_video_file_paths,
+                        "output_dir_path": output_dir_path,
+                        "language": language_selected,
+                        "model": model_selected,
+                        "success_event": TRANSCRIBE_SUCCESS,
+                        "fail_event": TRANSCRIBE_ERROR,
+                        "progress_event": TRANSCRIBE_PROGRESS,
+                        "process_stopped_event": TRANSCRIBE_STOPPED,
+                        "print_event": PRINT_ME,
+                        "stop_flag": stop_flag,
+                        "translate_to_english": translate_to_english,
+                        "language_code_as_specifier": language_code_as_specifier,
+                        "initial_prompt": initial_prompt,
+                    },
+                    daemon=True,
+                )
+                transcribe_thread.start()
+                is_transcribing = True
+            else:
+                popup_window = popup_tracked(
                     f"Please select audio/video file(s) and an output folder.",
                     popup_fn=popup,
                     tracked_windows=tracked_windows,
                     title="Missing selections",
                     modal=True,
                 )
-                continue
-
-            # Disable buttons during transcription
-            disable_elements(
-                (
-                    window[start_key],
-                    window[save_settings_key],
-                    window[out_dir_key],
-                    window[in_file_key],
-                )
-            )
-
-            # Get user selected language and model
-            language_selected = values[language_key]
-            if language_selected not in TO_LANGUAGE_CODE:
-                language_selected = None
-
-            model_selected = values[model_key]
-
-            # Get the user's choice of whether to translate the results into english
-            translate_to_english = window[translate_to_english_checkbox_key].metadata
-
-            # Get the user's choice of whether to use a language code as the language specifier in output files
-            language_code_as_specifier = sg.user_settings_get_entry(
-                language_code_checkbox_setting_key, False
-            )
-
-            #  Get the user's initial prompt for all transcriptions in this task
-            initial_prompt = values[initial_prompt_input_key]
-
-            # Ensure timer is not running
-            with suppress(TimerError):
-                transcription_timer.stop()
-
-            # Clear the console output element
-            window[multiline_key].update("")
-            window.refresh()
-
-            # Convert string with file paths into a list
-            audio_video_file_paths = list(str_to_file_paths(audio_video_file_paths_str))
-
-            # Setup for task progress
-            num_tasks_done = 0
-            num_tasks = len(audio_video_file_paths)
-
-            transcription_timer.start()
-
-            # Start transcription
-            transcribe_thread = threading.Thread(
-                target=transcribe_audio_video_files,
-                kwargs={
-                    "window": window,
-                    "audio_video_file_paths": audio_video_file_paths,
-                    "output_dir_path": output_dir_path,
-                    "language": language_selected,
-                    "model": model_selected,
-                    "success_event": TRANSCRIBE_SUCCESS,
-                    "fail_event": TRANSCRIBE_ERROR,
-                    "progress_event": TRANSCRIBE_PROGRESS,
-                    "process_stopped_event": TRANSCRIBE_STOPPED,
-                    "print_event": PRINT_ME,
-                    "stop_flag": stop_flag,
-                    "translate_to_english": translate_to_english,
-                    "language_code_as_specifier": language_code_as_specifier,
-                    "initial_prompt": initial_prompt,
-                },
-                daemon=True,
-            )
-            transcribe_thread.start()
-            is_transcribing = True
+                track_modal_window(popup_window)
         # 1 transcription completed
         elif event == TRANSCRIBE_PROGRESS:
             num_tasks_done += 1
@@ -981,7 +993,7 @@ def start_GUI():
             # Show output file paths in a popup
             output_paths = values[TRANSCRIBE_SUCCESS]
             output_paths_formatted = "\n".join(output_paths)
-            popup_tracked(
+            popup_window = popup_tracked(
                 f"Status: COMPLETE\n\nTime taken: {transcription_time:.4f} secs\n\nOutput locations: \n\n{output_paths_formatted}",
                 popup_fn=popup_scrolled,
                 tracked_windows=tracked_windows,
@@ -990,19 +1002,21 @@ def start_GUI():
                 disabled=True,
                 modal=True,
             )
+            track_modal_window(popup_window)
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
             sg.one_line_progress_meter_cancel(key=progress_key)
 
             error_msg = values[TRANSCRIBE_ERROR]
-            popup_tracked(
+            popup_window = popup_tracked(
                 f"Status: FAILED\n\n{error_msg}\n\nPlease see the console output for details.",
                 popup_fn=popup,
                 tracked_windows=tracked_windows,
                 title="ERROR",
                 modal=True,
             )
+            track_modal_window(popup_window)
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
             transcription_timer.stop(log_time=False)
@@ -1053,6 +1067,17 @@ def start_GUI():
                 sg.one_line_progress_meter_cancel(key=progress_key)
                 # Flag the thread to stop
                 stop_flag.set()
+
+        # Clear closed modal windows from the top of the modal window tracking stack
+        while modal_window_stack and modal_window_stack[-1].is_closed():
+            modal_window_stack.pop()
+
+        # Restore as modal the most recent non-closed tracked modal window
+        if modal_window_stack:
+            current_modal_window = modal_window_stack[-1]
+            if current_modal_window is not most_recent_modal_window:
+                most_recent_modal_window = current_modal_window
+                current_modal_window.make_modal()
 
     # Finish up by removing from the screen
     main_window.close()
@@ -1110,7 +1135,7 @@ def popup_tracked(
     popup_fn: Popup_Callable,
     tracked_windows: Set[sg.Window],
     **kwargs: Any,
-):
+) -> sg.Window:
     """Pop up a tracked window.
 
     Args:
@@ -1119,15 +1144,18 @@ def popup_tracked(
     """
     popup_window, popup_event = popup_fn(*args, **kwargs)
 
-    if popup_event != sg.TIMEOUT_EVENT:
-        popup_window.write_event_value(popup_event, None)
+    # if popup_event != sg.TIMEOUT_EVENT:
+    #     popup_window.write_event_value(popup_event, None)
 
     if kwargs.get("non_blocking", None):
         # Make the window modal if the kwarg is True.
         if kwargs.get("modal", None):
             popup_window.make_modal()
 
+
     tracked_windows.add(popup_window)
+
+    return popup_window
 
 
 class CustomTimer(Timer):
@@ -1464,7 +1492,7 @@ def popup(
         button, values = window.read(timeout=0)
     else:
         button, values = window.read()
-        # window.close()
+        window.close()
 
     return window, button
 
