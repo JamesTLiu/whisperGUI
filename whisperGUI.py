@@ -1731,7 +1731,7 @@ def _GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     return total_lines_needed
 
 
-# Taken from Pysimplegui.DummyButton(). Added extra arguments for called Button().
+# Taken from Pysimplegui.DummyButton(). Added extra arguments to pass to called Button().
 # -------------------------  Dummy BUTTON Element lazy function  ------------------------- #
 def DummyButton(
     button_text,
