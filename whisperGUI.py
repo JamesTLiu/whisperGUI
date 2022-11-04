@@ -188,7 +188,7 @@ def start_GUI():
         Returns:
             List[sg.Element]: A list with the PySimpleGUI elements that make up a fancy checkbox.
         """
-        checkbox_elements = [
+        checkbox_layout = [
             sg.Text(
                 text,
                 key=text_key,
@@ -204,9 +204,9 @@ def start_GUI():
 
         # Flip the element order to put the checkbox before (to the left) of the text
         if checkbox_before_text:
-            checkbox_elements.reverse()
+            checkbox_layout.reverse()
 
-        return checkbox_elements
+        return checkbox_layout
 
     def get_prompt_profile_list():
         return [custom_prompt_profile, *saved_prompts.keys()]
