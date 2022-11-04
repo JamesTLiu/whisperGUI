@@ -2230,19 +2230,31 @@ def write_transcript_to_files(
         language_specifier, language_specifier
     )
 
-    def write_file(write_fn: Callable, language_specifier: str, file_suffix: str):
+    def write_transcript(write_fn: Callable[[Iterator[dict], TextIO], None], transcript: Iterator[dict], language_specifier: str, file_suffix: str) -> str:
+        """Write a transcript to a file.
+
+        Args:
+            write_fn (Callable[[Iterator[dict], TextIO], None]): A Callable that writes a transcript to a file.
+            transcript (Iterator[dict]): The segment-level details from a transcription result.
+            language_specifier (str): The language specifier to put in the file's name.
+            file_suffix (str): The extension for the file.
+
+        Returns:
+            str: Name of the resulting file.
+        """
         with open(
             output_dir
             / "".join((audio_basename, ".", language_specifier, file_suffix)),
             "w",
             encoding="utf-8",
         ) as file:
-            write_fn(transcribe_result["segments"], file=file)
+            write_fn(transcript, file)
             return file.name
 
-    srt_path = write_file(write_srt, language_specifier, ".srt")
-    txt_path = write_file(write_txt, language_specifier, ".txt")
-    vtt_path = write_file(write_vtt, language_specifier, ".vtt")
+    transcript: Iterator[dict] = transcribe_result["segments"] # type: ignore
+    srt_path = write_transcript(write_srt, transcript, language_specifier, ".srt")
+    txt_path = write_transcript(write_txt, transcript, language_specifier, ".txt")
+    vtt_path = write_transcript(write_vtt, transcript, language_specifier, ".vtt")
     return (srt_path, txt_path, vtt_path)
 
 
