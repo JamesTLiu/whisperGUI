@@ -1079,9 +1079,9 @@ def fancy_checkbox(
         text (str): Text for the PySimpleGUI Text element that goes with the checkbox.
         text_key (str, optional): The key to assign the PySimpleGUI Text element that goes with the checkbox. Defaults to None.
         checkbox_key (str, optional): The key to assign the PySimpleGUI Image element which represents the checkbox. Defaults to None.
-        checked (bool, optional): If True, starts the checkbox checked. Defaults to False.
-        checkbox_before_text (bool, optional): Put the checkbox before (to the left) of the text. Defaults to False.
-
+        is_checked (bool, optional): If True, starts the checkbox checked. Defaults to False.
+        is_checkbox_before_text (bool, optional): Put the checkbox before (to the left) of the text. Defaults to False.
+        text_tooltip (str, optional): Tooltip for the Text element that goes with the checkbox.
     Returns:
         List[sg.Element]: A list with the PySimpleGUI elements that make up a fancy checkbox.
     """
