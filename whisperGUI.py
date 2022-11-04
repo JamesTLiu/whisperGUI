@@ -858,15 +858,8 @@ def start_GUI():
 
             # Require audio/video file(s) and output folder
             if audio_video_file_paths_str and output_dir_path:
-                # Disable buttons during transcription
-                disable_elements(
-                    (
-                        window[start_key],
-                        window[save_settings_key],
-                        window[out_dir_key],
-                        window[in_file_key],
-                    )
-                )
+                # Disable the main window during transcription
+                main_window.disable()
 
                 # Get user selected language and model
                 language_selected = values[language_key]
@@ -979,18 +972,12 @@ def start_GUI():
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
-        # Transcriptions complete. Enable the starting of the next task.
+        # Transcriptions complete. Enable the main window for the user.
         if event in TRANSCRIBE_DONE_EVENTS:
             transcribe_thread = None
-            enable_elements(
-                (
-                    window[start_key],
-                    window[save_settings_key],
-                    window[out_dir_key],
-                    window[in_file_key],
-                )
-            )
             is_transcribing = False
+            main_window.enable()
+            main_window.bring_to_front()
 
         # Transcriptions in progress
         if is_transcribing:
