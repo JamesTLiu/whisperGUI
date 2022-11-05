@@ -162,8 +162,8 @@ def start_GUI():
     # whether the table is shown
     is_table_shown = False
 
-    # tracked windows
-    tracked_windows: Set[sg.Window] = set()
+    # tracker for possibly active windows
+    window_tracker = WindowTracker()
 
     def get_prompt_profile_list():
         return [custom_prompt_profile, *saved_prompts.keys()]
@@ -454,12 +454,8 @@ def start_GUI():
 
         return window
 
-    def track_window(win: sg.Window):
-        tracked_windows.add(win)
-        return win
-
     # make a tracked main window
-    main_window = track_window(make_main_window())
+    main_window = window_tracker.add(make_main_window())
 
     def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
@@ -653,7 +649,7 @@ def start_GUI():
                 save_checkbox_state(window, event)
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
-            prompt_manager_window = track_window(popup_prompt_manager())
+            prompt_manager_window = window_tracker.add(popup_prompt_manager())
             modal_window_manager.add_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
@@ -671,7 +667,7 @@ def start_GUI():
                 popup_window = popup_tracked(
                     f"Prompt name in use. Please use a new prompt name.",
                     popup_fn=popup,
-                    tracked_windows=tracked_windows,
+                    window_tracker=window_tracker,
                     title="Invalid prompt name",
                     modal=True,
                 )
@@ -746,7 +742,7 @@ def start_GUI():
                 popup_window = popup_tracked(
                     f"Please select a profile in the table.",
                     popup_fn=popup,
-                    tracked_windows=tracked_windows,
+                    window_tracker=window_tracker,
                     title="Invalid selection",
                     modal=True,
                 )
@@ -777,7 +773,7 @@ def start_GUI():
                 popup_window = popup_tracked(
                     f"Please enter a number for the scaling factor between {MIN_SCALING} and {MAX_SCALING}.",
                     popup_fn=popup,
-                    tracked_windows=tracked_windows,
+                    window_tracker=window_tracker,
                     title="Invalid scaling factor",
                     modal=True,
                 )
@@ -823,12 +819,12 @@ def start_GUI():
             save_checkbox_state(window, language_code_checkbox_setting_key)
 
             # Close all windows and remove them from tracking
-            for win in tracked_windows:
+            for win in window_tracker.windows:
                 win.close()
-            tracked_windows.clear()
+            del window_tracker.windows
 
             # Remake the tracked main window and go back to the settings tab
-            window = track_window(make_main_window())
+            window = window_tracker.add(make_main_window())
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
@@ -929,7 +925,7 @@ def start_GUI():
                 popup_window = popup_tracked(
                     f"Please select audio/video file(s) and an output folder.",
                     popup_fn=popup,
-                    tracked_windows=tracked_windows,
+                    window_tracker=window_tracker,
                     title="Missing selections",
                     modal=True,
                 )
@@ -947,7 +943,7 @@ def start_GUI():
             popup_window = popup_tracked(
                 f"Status: COMPLETE\n\nTime taken: {transcription_time:.4f} secs\n\nOutput locations: \n\n{output_paths_formatted}",
                 popup_fn=popup_scrolled,
-                tracked_windows=tracked_windows,
+                window_tracker=window_tracker,
                 title="Complete",
                 size=(40, 20),
                 disabled=True,
@@ -963,7 +959,7 @@ def start_GUI():
             popup_window = popup_tracked(
                 f"Status: FAILED\n\n{error_msg}\n\nPlease see the console output for details.",
                 popup_fn=popup,
-                tracked_windows=tracked_windows,
+                window_tracker=window_tracker,
                 title="ERROR",
                 modal=True,
             )
@@ -1054,6 +1050,24 @@ class ModalWindowManager:
             if current_modal_window is not self.most_recent_modal_window:
                 self.most_recent_modal_window = current_modal_window
                 self.most_recent_modal_window.make_modal()
+
+
+class WindowTracker:
+    def __init__(self) -> None:
+        self._tracked_windows: Set[sg.Window] = set()
+
+    def add(self, win: sg.Window):
+        self._tracked_windows.add(win)
+        return win
+
+    @property
+    def windows(self) -> Set[sg.Window]:
+        """The currently tracked windows."""
+        return self._tracked_windows
+
+    @windows.deleter
+    def windows(self):
+        self._tracked_windows.clear()
 
 
 def fancy_checkbox(
@@ -1157,14 +1171,14 @@ class Popup_Callable(Protocol):
 def popup_tracked(
     *args: Any,
     popup_fn: Popup_Callable,
-    tracked_windows: Set[sg.Window],
+    window_tracker: WindowTracker,
     **kwargs: Any,
 ) -> sg.Window:
     """Pop up a tracked window.
 
     Args:
         popup_fn (Popup_Callable): The function to call to create a popup.
-        tracked_windows (Set[sg.Window]): Set containing all currently tracked windows which the created popup will be added to.
+        window_tracker (WindowTracker): Tracker for possibly active windows which the created popup will be added to.
     """
     popup_window, popup_event = popup_fn(*args, **kwargs)
 
@@ -1176,7 +1190,7 @@ def popup_tracked(
         if kwargs.get("modal", None):
             popup_window.make_modal()
 
-    tracked_windows.add(popup_window)
+    window_tracker.add(popup_window)
 
     return popup_window
 
