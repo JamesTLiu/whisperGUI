@@ -648,14 +648,8 @@ def start_GUI():
             new_prompt_name = values[new_prompt_name_key]
             new_prompt = values[new_prompt_key]
 
-            # Add a new saved prompt
-            if prompt_manager.add_prompt_profile(new_prompt_name, new_prompt):                # Add current prompt with user given prompt name to the dict
-                if prompt_manager_window:
-                    # Update the prompt profile table
-                    prompt_manager_window[saved_prompts_table_key].update(
-                        values=prompt_manager.prompt_profiles
-                    )
-
+            # Add a new saved prompt profile
+            if prompt_manager.add_prompt_profile(new_prompt_name, new_prompt):
                 # Get the currently selected profile in the dropdown
                 selected_prompt_profile_dropdown = main_window[
                     prompt_profile_dropdown_key
@@ -670,6 +664,12 @@ def start_GUI():
                 # Close the add new prompt window
                 window.close()
                 add_new_prompt_window = None
+
+                # Refresh the prompt manager
+                if prompt_manager_window:
+                    prompt_manager_window.close()
+                    prompt_manager_window = window_tracker.add(popup_prompt_manager())
+                    modal_window_manager.add_modal_window(prompt_manager_window)
             # Failed to add new prompt
             else:
                 popup_window = popup_tracked(
@@ -699,11 +699,6 @@ def start_GUI():
                 ]
                 prompt_manager.delete_prompt_profile(prompt_name_to_delete)
 
-                # Update the prompt profile table
-                window[saved_prompts_table_key].update(
-                    values=prompt_manager.prompt_profiles
-                )
-
                 # Get the currently selected profile in the dropdown
                 selected_prompt_profile_dropdown = main_window[
                     prompt_profile_dropdown_key
@@ -718,6 +713,12 @@ def start_GUI():
                     value=selected_prompt_profile_dropdown,
                     values=prompt_manager.prompt_profile_names_with_custom,
                 )
+
+                # Refresh the prompt manager
+                if prompt_manager_window:
+                    prompt_manager_window.close()
+                    prompt_manager_window = window_tracker.add(popup_prompt_manager())
+                    modal_window_manager.add_modal_window(prompt_manager_window)
             # User has not selected a row in the prompt profile table
             else:
                 popup_window = popup_tracked(
