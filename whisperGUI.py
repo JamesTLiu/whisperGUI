@@ -209,9 +209,6 @@ def start_GUI():
             language_code_checkbox_setting_key, False
         )
 
-        # Default prompt profile
-        prompt_profile_dropdown_default = prompt_manager.unsaved_prompt_name
-
         # The tab1 option elements as rows
         tab1_options_rows = [
             [
@@ -261,7 +258,7 @@ def start_GUI():
                 sg.Combo(
                     prompt_manager.prompt_profile_names_with_custom,
                     key=prompt_profile_dropdown_key,
-                    default_value=prompt_profile_dropdown_default,
+                    default_value=sg.user_settings_get_entry(prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name),
                     readonly=True,
                     enable_events=True,
                 ),
@@ -750,6 +747,9 @@ def start_GUI():
                 )
 
             window[initial_prompt_input_key].update(value=new_initial_prompt_input)
+
+            # Save the user's selected prompt profile to the settings file
+            sg.user_settings_set_entry(prompt_profile_dropdown_key, chosen_prompt_profile)
         # User saved settings
         elif event == save_settings_key:
 
