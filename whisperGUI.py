@@ -673,10 +673,13 @@ def start_GUI():
                 # Close the add new prompt window
                 window.close()
                 add_new_prompt_window = None
-            # Failed to add new prompt. New prompt's name is already in use.
+            # Failed to add new prompt
             else:
                 popup_window = popup_tracked(
-                    f"Prompt name in use. Please use a new prompt name.",
+                    (
+                        f"Invalid prompt name. Empty or whitespace only prompt names are invalid."
+                        "\n\nPlease enter a new prompt name."
+                    ),
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid prompt name",
@@ -1090,8 +1093,8 @@ class PromptManager:
         self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, self.saved_prompts)
 
     def add_prompt_profile(self, prompt_name: str, prompt: str):
-        # Prompt name already in use
-        if prompt_name in self.saved_prompts:
+        # Invalid prompt name. Prompt name already in use, empty, or only whitespaces.
+        if prompt_name in self.saved_prompts or not prompt_name.strip():
             return False
 
         self.saved_prompts[prompt_name] = prompt
@@ -1218,9 +1221,6 @@ def popup_tracked(
         window_tracker (WindowTracker): Tracker for possibly active windows which the created popup will be added to.
     """
     popup_window, popup_event = popup_fn(*args, **kwargs)
-
-    # if popup_event != sg.TIMEOUT_EVENT:
-    #     popup_window.write_event_value(popup_event, None)
 
     if kwargs.get("non_blocking", None):
         # Make the window modal if the kwarg is True.
