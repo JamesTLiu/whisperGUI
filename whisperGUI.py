@@ -445,7 +445,7 @@ def start_GUI():
         return window
 
     # make a tracked main window
-    main_window = window_tracker.add(make_main_window())
+    main_window = window_tracker.track_window(make_main_window())
 
     def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
@@ -635,13 +635,13 @@ def start_GUI():
                 save_checkbox_state(window, event)
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
-            prompt_manager_window = window_tracker.add(popup_prompt_manager())
-            modal_window_manager.add_modal_window(prompt_manager_window)
+            prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+            modal_window_manager.track_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_new_prompt()
-            modal_window_manager.add_modal_window(add_new_prompt_window)
+            modal_window_manager.track_modal_window(add_new_prompt_window)
         # Handle adding of new saved prompt
         elif event == add_prompt_profile_key:
             # Get the name and prompt to be saved
@@ -668,8 +668,8 @@ def start_GUI():
                 # Refresh the prompt manager
                 if prompt_manager_window:
                     prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.add(popup_prompt_manager())
-                    modal_window_manager.add_modal_window(prompt_manager_window)
+                    prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                    modal_window_manager.track_modal_window(prompt_manager_window)
             # Failed to add new prompt
             else:
                 popup_window = popup_tracked(
@@ -682,7 +682,7 @@ def start_GUI():
                     title="Invalid prompt name",
                     modal=True,
                 )
-                modal_window_manager.add_modal_window(popup_window)
+                modal_window_manager.track_modal_window(popup_window)
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
@@ -717,8 +717,8 @@ def start_GUI():
                 # Refresh the prompt manager
                 if prompt_manager_window:
                     prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.add(popup_prompt_manager())
-                    modal_window_manager.add_modal_window(prompt_manager_window)
+                    prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                    modal_window_manager.track_modal_window(prompt_manager_window)
             # User has not selected a row in the prompt profile table
             else:
                 popup_window = popup_tracked(
@@ -728,7 +728,7 @@ def start_GUI():
                     title="Invalid selection",
                     modal=True,
                 )
-                modal_window_manager.add_modal_window(popup_window)
+                modal_window_manager.track_modal_window(popup_window)
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the unsaved prompt profile
@@ -762,7 +762,7 @@ def start_GUI():
                     title="Invalid scaling factor",
                     modal=True,
                 )
-                modal_window_manager.add_modal_window(popup_window)
+                modal_window_manager.track_modal_window(popup_window)
 
             # Ensure the scaling input is a decimal
             try:
@@ -809,7 +809,7 @@ def start_GUI():
             del window_tracker.windows
 
             # Remake the tracked main window and go back to the settings tab
-            window = window_tracker.add(make_main_window())
+            window = window_tracker.track_window(make_main_window())
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
@@ -914,7 +914,7 @@ def start_GUI():
                     title="Missing selections",
                     modal=True,
                 )
-                modal_window_manager.add_modal_window(popup_window)
+                modal_window_manager.track_modal_window(popup_window)
         # 1 transcription completed
         elif event == TRANSCRIBE_PROGRESS:
             num_tasks_done += 1
@@ -934,7 +934,7 @@ def start_GUI():
                 disabled=True,
                 modal=True,
             )
-            modal_window_manager.add_modal_window(popup_window)
+            modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
@@ -948,7 +948,7 @@ def start_GUI():
                 title="ERROR",
                 modal=True,
             )
-            modal_window_manager.add_modal_window(popup_window)
+            modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
         elif event == TRANSCRIBE_STOPPED:
             transcription_timer.stop(log_time=False)
@@ -1010,7 +1010,7 @@ class ModalWindowManager:
         self.modal_window_stack: List[sg.Window] = []
         self.most_recent_modal_window: sg.Window = None
 
-    def add_modal_window(self, win: sg.Window):
+    def track_modal_window(self, win: sg.Window):
         """Add a modal window as the most recent tracked modal window.
 
         Args:
@@ -1041,7 +1041,7 @@ class WindowTracker:
     def __init__(self) -> None:
         self._tracked_windows: Set[sg.Window] = set()
 
-    def add(self, win: sg.Window):
+    def track_window(self, win: sg.Window):
         self._tracked_windows.add(win)
         return win
 
@@ -1228,7 +1228,7 @@ def popup_tracked(
         if kwargs.get("modal", None):
             popup_window.make_modal()
 
-    window_tracker.add(popup_window)
+    window_tracker.track_window(popup_window)
 
     return popup_window
 
