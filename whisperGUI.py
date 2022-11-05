@@ -121,11 +121,7 @@ def start_GUI():
     # Key for saved prompts in the settings file
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
-    # Load saved prompt profiles
-    saved_prompts = sg.user_settings_get_entry(SAVED_PROMPTS_SETTINGS_KEY, {})
-
-    # Prompt profile when the user is not using a saved prompt profile
-    custom_prompt_profile = "(Custom)"
+    prompt_manager = PromptManager(SAVED_PROMPTS_SETTINGS_KEY)
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -164,9 +160,6 @@ def start_GUI():
 
     # tracker for possibly active windows
     window_tracker = WindowTracker()
-
-    def get_prompt_profile_list():
-        return [custom_prompt_profile, *saved_prompts.keys()]
 
     def make_main_window() -> sg.Window:
         # Supported language options for the model
@@ -217,7 +210,7 @@ def start_GUI():
         )
 
         # Default prompt profile
-        prompt_profile_dropdown_default = custom_prompt_profile
+        prompt_profile_dropdown_default = prompt_manager.unsaved_prompt_name
 
         # The tab1 option elements as rows
         tab1_options_rows = [
@@ -266,7 +259,7 @@ def start_GUI():
             ],
             [
                 sg.Combo(
-                    get_prompt_profile_list(),
+                    prompt_manager.prompt_profile_names_with_custom,
                     key=prompt_profile_dropdown_key,
                     default_value=prompt_profile_dropdown_default,
                     readonly=True,
@@ -466,11 +459,7 @@ def start_GUI():
         layout = [
             [
                 sg.Table(
-                    list(
-                        sg.user_settings_get_entry(
-                            SAVED_PROMPTS_SETTINGS_KEY, saved_prompts
-                        ).items()
-                    ),
+                    prompt_manager.prompt_profiles,
                     headings=["Profile", "Prompt"],
                     key=saved_prompts_table_key,
                     expand_x=True,
@@ -662,27 +651,12 @@ def start_GUI():
             new_prompt_name = values[new_prompt_name_key]
             new_prompt = values[new_prompt_key]
 
-            # New prompt's name is in use already
-            if new_prompt_name in saved_prompts:
-                popup_window = popup_tracked(
-                    f"Prompt name in use. Please use a new prompt name.",
-                    popup_fn=popup,
-                    window_tracker=window_tracker,
-                    title="Invalid prompt name",
-                    modal=True,
-                )
-                modal_window_manager.add_modal_window(popup_window)
-            else:
-                # Add current prompt with user given prompt name to the dict
-                saved_prompts[new_prompt_name] = new_prompt
-
-                # Save the updated saved prompt profiles
-                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
-
+            # Add a new saved prompt
+            if prompt_manager.add_prompt_profile(new_prompt_name, new_prompt):                # Add current prompt with user given prompt name to the dict
                 if prompt_manager_window:
                     # Update the prompt profile table
                     prompt_manager_window[saved_prompts_table_key].update(
-                        values=list(saved_prompts.items())
+                        values=prompt_manager.prompt_profiles
                     )
 
                 # Get the currently selected profile in the dropdown
@@ -693,12 +667,22 @@ def start_GUI():
                 # Update the prompt profile list in the dropdown
                 main_window[prompt_profile_dropdown_key].update(
                     value=selected_prompt_profile_dropdown,
-                    values=get_prompt_profile_list(),
+                    values=prompt_manager.prompt_profile_names_with_custom,
                 )
 
                 # Close the add new prompt window
                 window.close()
                 add_new_prompt_window = None
+            # Failed to add new prompt. New prompt's name is already in use.
+            else:
+                popup_window = popup_tracked(
+                    f"Prompt name in use. Please use a new prompt name.",
+                    popup_fn=popup,
+                    window_tracker=window_tracker,
+                    title="Invalid prompt name",
+                    modal=True,
+                )
+                modal_window_manager.add_modal_window(popup_window)
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
@@ -709,18 +693,15 @@ def start_GUI():
 
             # Ensure user has selected a row in the prompt profile table
             if selected_rows_prompts_table:
-                prompt_profile_names = list(saved_prompts.keys())
+                prompt_profile_names = prompt_manager.prompt_profile_names
                 prompt_name_to_delete = prompt_profile_names[
                     selected_rows_prompts_table[0]
                 ]
-                del saved_prompts[prompt_name_to_delete]
-
-                # Save the updated saved prompt profiles
-                sg.user_settings_set_entry(SAVED_PROMPTS_SETTINGS_KEY, saved_prompts)
+                prompt_manager.delete_prompt_profile(prompt_name_to_delete)
 
                 # Update the prompt profile table
                 window[saved_prompts_table_key].update(
-                    values=list(saved_prompts.items())
+                    values=prompt_manager.prompt_profiles
                 )
 
                 # Get the currently selected profile in the dropdown
@@ -730,12 +711,12 @@ def start_GUI():
 
                 # Select the custom prompt profile if the currently selected profile was just deleted
                 if prompt_name_to_delete == selected_prompt_profile_dropdown:
-                    selected_prompt_profile_dropdown = custom_prompt_profile
+                    selected_prompt_profile_dropdown = prompt_manager.unsaved_prompt_name
 
                 # Update the prompt profile list in the dropdown
                 main_window[prompt_profile_dropdown_key].update(
                     value=selected_prompt_profile_dropdown,
-                    values=get_prompt_profile_list(),
+                    values=prompt_manager.prompt_profile_names_with_custom,
                 )
             # User has not selected a row in the prompt profile table
             else:
@@ -749,16 +730,16 @@ def start_GUI():
                 modal_window_manager.add_modal_window(popup_window)
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
-            # Select the custom prompt profile
-            window[prompt_profile_dropdown_key].update(value=custom_prompt_profile)
+            # Select the unsaved prompt profile
+            window[prompt_profile_dropdown_key].update(value=prompt_manager.unsaved_prompt_name)
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
-            if chosen_prompt_profile in saved_prompts:
-                new_initial_prompt_input = saved_prompts[chosen_prompt_profile]
-            elif chosen_prompt_profile == custom_prompt_profile:
+            if chosen_prompt_profile in prompt_manager.prompt_profile_names:
+                new_initial_prompt_input = prompt_manager.saved_prompts[chosen_prompt_profile]
+            elif chosen_prompt_profile == prompt_manager.unsaved_prompt_name:
                 new_initial_prompt_input = ""
             else:
                 raise ValueError(
@@ -1068,6 +1049,62 @@ class WindowTracker:
     @windows.deleter
     def windows(self):
         self._tracked_windows.clear()
+
+
+class PromptManager:
+    # Prompt profile for when the user is not using a saved prompt profile
+    unsaved_prompt_name = "(None)"
+
+    def __init__(self, saved_prompts_settings_key: str) -> None:
+        self._saved_prompts_settings_key = saved_prompts_settings_key
+        self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, {})
+
+    @property
+    def saved_prompts(self):
+        return self._saved_prompts
+
+    @saved_prompts.setter
+    def saved_prompts(self, new_prompt_dict: Dict[str, str]):
+        self._saved_prompts = new_prompt_dict
+
+    @saved_prompts.deleter
+    def saved_prompts(self):
+        self._saved_prompts.clear()
+
+    @property
+    def prompt_profile_names_with_custom(self):
+        self._update_from_settings()
+        return [self.unsaved_prompt_name, *self.saved_prompts.keys()]
+
+    @property
+    def prompt_profiles(self):
+        self._update_from_settings()
+        return list(self.saved_prompts.items())
+
+    @property
+    def prompt_profile_names(self):
+        self._update_from_settings()
+        return list(self.saved_prompts.keys())
+
+    def _update_from_settings(self):
+        self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, self.saved_prompts)
+
+    def add_prompt_profile(self, prompt_name: str, prompt: str):
+        # Prompt name already in use
+        if prompt_name in self.saved_prompts:
+            return False
+
+        self.saved_prompts[prompt_name] = prompt
+
+        # Update the settings file with the updated prompt profiles
+        sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+        return True
+
+    def delete_prompt_profile(self, prompt_name: str):
+        del self.saved_prompts[prompt_name]
+
+        # Update the settings file with the updated prompt profiles
+        sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
 
 
 def fancy_checkbox(
