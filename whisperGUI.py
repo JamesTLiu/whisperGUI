@@ -694,10 +694,10 @@ def start_GUI():
             # Ensure user has selected a row in the prompt profile table
             if selected_rows_prompts_table:
                 prompt_profile_names = prompt_manager.prompt_profile_names
-                prompt_name_to_delete = prompt_profile_names[
+                prompt_profile_name_to_delete = prompt_profile_names[
                     selected_rows_prompts_table[0]
                 ]
-                prompt_manager.delete_prompt_profile(prompt_name_to_delete)
+                prompt_manager.delete_prompt_profile(prompt_profile_name_to_delete)
 
                 # Get the currently selected profile in the dropdown
                 selected_prompt_profile_dropdown = main_window[
@@ -705,7 +705,7 @@ def start_GUI():
                 ].get()
 
                 # Select the custom prompt profile if the currently selected profile was just deleted
-                if prompt_name_to_delete == selected_prompt_profile_dropdown:
+                if prompt_profile_name_to_delete == selected_prompt_profile_dropdown:
                     selected_prompt_profile_dropdown = prompt_manager.unsaved_prompt_name
 
                 # Update the prompt profile list in the dropdown
