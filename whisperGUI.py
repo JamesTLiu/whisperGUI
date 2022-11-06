@@ -1073,8 +1073,8 @@ class PromptManager:
         self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, {})
 
     @property
-    def saved_prompts(self):
-        self._saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, self._saved_prompts)
+    def saved_prompts(self) -> Dict[str, str]:
+        self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(self._saved_prompts_settings_key, self._saved_prompts)
         return self._saved_prompts
 
     @saved_prompts.setter
@@ -1086,18 +1086,18 @@ class PromptManager:
         self._saved_prompts.clear()
 
     @property
-    def prompt_profile_names_with_custom(self):
+    def prompt_profile_names_with_custom(self) -> Tuple[str, ...]:
         return (self.unsaved_prompt_name, *self.saved_prompts.keys())
 
     @property
-    def prompt_profiles(self):
-        return list(self.saved_prompts.items())
+    def prompt_profiles(self) -> Tuple[Tuple[str, str], ...]:
+        return tuple(self.saved_prompts.items())
 
     @property
-    def prompt_profile_names(self):
-        return list(self.saved_prompts.keys())
+    def prompt_profile_names(self) -> Tuple[str, ...]:
+        return tuple(self.saved_prompts.keys())
 
-    def add_prompt_profile(self, prompt_name: str, prompt: str):
+    def add_prompt_profile(self, prompt_name: str, prompt: str) -> bool:
         # Invalid prompt name. Prompt name already in use, empty, or only whitespaces.
         if prompt_name in self.saved_prompts or not prompt_name.strip():
             return False
