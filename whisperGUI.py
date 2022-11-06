@@ -100,7 +100,7 @@ def start_GUI():
     save_output_dir_text_key = "-SAVE-OUTPUT-DIR-OPTION-TEXT-"
     save_output_dir_checkbox_key = "-CHECKBOX-SAVE-OUTPUT-DIR-"
     language_code_text_setting_key = "-LANGUAGE-CODE-SPECIFIER-OPTION-TEXT-"
-    language_code_checkbox_setting_key = "-CHECKBOX-LANGUAGE-CODE-SPECIFIER-OPTION-"
+    language_specifier_setting_key = "-LANGUAGE-SPECIFIER-OPTION-"
 
     # Keys for tabs
     main_tab_key = "-MAIN-TAB-"
@@ -122,6 +122,8 @@ def start_GUI():
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
     prompt_manager = PromptManager(SAVED_PROMPTS_SETTINGS_KEY)
+
+    language_specifier_handler = LanguageSpecifierHandler(language_specifier_setting_key)
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -206,7 +208,7 @@ def start_GUI():
 
         # Load whether to use a language code as the specifier in the output filename or not from the settings file
         use_language_code = sg.user_settings_get_entry(
-            language_code_checkbox_setting_key, False
+            language_specifier_setting_key, False
         )
 
         # The tab1 option elements as rows
@@ -384,13 +386,21 @@ def start_GUI():
                 is_checked=save_output_dir,
             ),
             [sg.HorizontalSeparator()],
-            fancy_checkbox(
-                text="Use language code instead of language in output filenames",
-                text_key=language_code_text_setting_key,
-                checkbox_key=language_code_checkbox_setting_key,
-                is_checked=use_language_code,
-                text_tooltip="Ex. 'video.en.txt' instead of 'video.english.txt'",
-            ),
+            [
+                sg.Text("Language specifier in output filenames", key=language_code_text_setting_key, tooltip="Language-------- 'video.english.txt'\nLanguage code-'video.en.txt'"),
+                sg.Combo(language_specifier_handler.language_specifier_options, key=language_specifier_setting_key, auto_size_text = True, enable_events=True, readonly=True),
+            ],
+            [
+                sg.Column([[sg.Text("      Language:")], [sg.Text("      Language code:")]], pad=0),
+                sg.Column([[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0),
+            ],
+            # fancy_checkbox(
+            #     text="Use language code instead of language in output filenames",
+            #     text_key=language_code_text_setting_key,
+            #     checkbox_key=language_code_checkbox_setting_key,
+            #     is_checked=use_language_code,
+            #     text_tooltip="Ex. 'video.en.txt' instead of 'video.english.txt'",
+            # ),
             [sg.Button("Save settings", key=save_settings_key)],
         ]
 
@@ -807,7 +817,7 @@ def start_GUI():
                     sg.user_settings_delete_entry(out_dir_key)
 
             # Update use language code as specifier setting
-            save_checkbox_state(window, language_code_checkbox_setting_key)
+            save_checkbox_state(window, language_specifier_setting_key)
 
             # Close all windows and remove them from tracking
             for win in window_tracker.windows:
@@ -864,7 +874,7 @@ def start_GUI():
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
                 language_code_as_specifier = sg.user_settings_get_entry(
-                    language_code_checkbox_setting_key, False
+                    language_specifier_setting_key, False
                 )
 
                 #  Get the user's initial prompt for all transcriptions in this task
@@ -1110,6 +1120,23 @@ class PromptManager:
 
         # Update the settings file with the updated prompt profiles
         sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+
+
+class LanguageSpecifierHandler:
+
+
+    def __init__(self, language_specifier_setting_key: str) -> None:
+        self._language_specifier_setting_key = language_specifier_setting_key
+        self.language_specifier_options = ('language', 'language code')
+        self._update_from_settings()
+
+    def _update_from_settings(self):
+        self._selected_specifier = sg.user_settings_get_entry(self._language_specifier_setting_key, self.language_specifier_options[0])
+        return self._selected_specifier
+
+    @property
+    def selected_specifier(self):
+        return self._update_from_settings()
 
 
 def fancy_checkbox(
