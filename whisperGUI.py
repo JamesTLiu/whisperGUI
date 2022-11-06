@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
-from whisper.tokenizer import LANGUAGES as TO_LANGUAGES
+from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
@@ -2319,7 +2319,7 @@ def write_transcript_to_files(
 
     # Try to convert language specifier to the selected type
     to_language_specifier_type = (
-        TO_LANGUAGE_CODE if language_code_as_specifier else TO_LANGUAGES
+        TO_LANGUAGE_CODE if language_code_as_specifier else TO_LANGUAGE
     )
 
     language_specifier = to_language_specifier_type.get(
