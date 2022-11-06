@@ -1065,12 +1065,13 @@ class PromptManager:
     # Prompt profile for when the user is not using a saved prompt profile
     unsaved_prompt_name = "(None)"
 
-    def __init__(self, saved_prompts_settings_key: str) -> None:
+    def __init__(self, saved_prompts_settings_key: str):
         self._saved_prompts_settings_key = saved_prompts_settings_key
         self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, {})
 
     @property
     def saved_prompts(self):
+        self._saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, self._saved_prompts)
         return self._saved_prompts
 
     @saved_prompts.setter
@@ -1083,21 +1084,15 @@ class PromptManager:
 
     @property
     def prompt_profile_names_with_custom(self):
-        self._update_from_settings()
         return [self.unsaved_prompt_name, *self.saved_prompts.keys()]
 
     @property
     def prompt_profiles(self):
-        self._update_from_settings()
         return list(self.saved_prompts.items())
 
     @property
     def prompt_profile_names(self):
-        self._update_from_settings()
         return list(self.saved_prompts.keys())
-
-    def _update_from_settings(self):
-        self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, self.saved_prompts)
 
     def add_prompt_profile(self, prompt_name: str, prompt: str):
         # Invalid prompt name. Prompt name already in use, empty, or only whitespaces.
