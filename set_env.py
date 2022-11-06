@@ -7,7 +7,7 @@ def main():
     set_env_vars()
 
 
-def set_env_vars():
+def set_env_vars() -> None:
     """Set needed environment variables.
 
     Raises:
