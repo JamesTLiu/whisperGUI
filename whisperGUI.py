@@ -207,6 +207,9 @@ def start_GUI():
             save_output_dir_checkbox_key, False
         )
 
+        # Startup prompt profile
+        startup_prompt_profile = sg.user_settings_get_entry(prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name)
+
         # The tab1 option elements as rows
         tab1_options_rows = [
             [
@@ -256,12 +259,12 @@ def start_GUI():
                 sg.Combo(
                     values=prompt_manager.prompt_profile_names_with_custom,
                     key=prompt_profile_dropdown_key,
-                    default_value=sg.user_settings_get_entry(prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name),
+                    default_value=startup_prompt_profile,
                     readonly=True,
                     enable_events=True,
                 ),
                 sg.Input(
-                    key=initial_prompt_input_key, expand_x=True, enable_events=True
+                    default_text=prompt_manager.saved_prompts.get(startup_prompt_profile, ''), key=initial_prompt_input_key, expand_x=True, enable_events=True
                 ),
             ],
         ]
