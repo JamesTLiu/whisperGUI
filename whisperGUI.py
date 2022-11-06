@@ -451,6 +451,9 @@ def start_GUI():
     # make a tracked main window
     main_window = window_tracker.track_window(make_main_window())
 
+    # give the prompt manager the prompt profile dropdown element so that it can be updated on changes
+    prompt_manager.set_prompt_profile_dropdown(main_window[prompt_profile_dropdown_key])
+
     def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
 
@@ -654,17 +657,6 @@ def start_GUI():
 
             # Add a new saved prompt profile
             if prompt_manager.add_prompt_profile(new_prompt_name, new_prompt):
-                # Get the currently selected profile in the dropdown
-                selected_prompt_profile_dropdown = main_window[
-                    prompt_profile_dropdown_key
-                ].get()
-
-                # Update the prompt profile list in the dropdown
-                main_window[prompt_profile_dropdown_key].update(
-                    value=selected_prompt_profile_dropdown,
-                    values=prompt_manager.prompt_profile_names_with_custom,
-                )
-
                 # Close the add new prompt window
                 window.close()
                 add_new_prompt_window = None
@@ -708,21 +700,6 @@ def start_GUI():
                     selected_rows_prompts_table[0]
                 ]
                 prompt_manager.delete_prompt_profile(prompt_profile_name_to_delete)
-
-                # Get the currently selected profile in the dropdown
-                selected_prompt_profile_dropdown = main_window[
-                    prompt_profile_dropdown_key
-                ].get()
-
-                # Select the custom prompt profile if the currently selected profile was just deleted
-                if prompt_profile_name_to_delete == selected_prompt_profile_dropdown:
-                    selected_prompt_profile_dropdown = prompt_manager.unsaved_prompt_name
-
-                # Update the prompt profile list in the dropdown
-                main_window[prompt_profile_dropdown_key].update(
-                    value=selected_prompt_profile_dropdown,
-                    values=prompt_manager.prompt_profile_names_with_custom,
-                )
 
                 # Refresh the prompt manager
                 if prompt_manager_window:
@@ -1071,6 +1048,7 @@ class PromptManager:
     def __init__(self, saved_prompts_settings_key: str):
         self._saved_prompts_settings_key = saved_prompts_settings_key
         self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, {})
+        self._dropdown = None
 
     @property
     def saved_prompts(self) -> Dict[str, str]:
@@ -1106,6 +1084,9 @@ class PromptManager:
 
         # Update the settings file with the updated prompt profiles
         sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+
+        self._update_prompt_profile_dropdown()
+
         return True
 
     def delete_prompt_profile(self, prompt_name: str):
@@ -1113,6 +1094,26 @@ class PromptManager:
 
         # Update the settings file with the updated prompt profiles
         sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+
+        self._update_prompt_profile_dropdown(deleted_prompt_profile_name=prompt_name)
+
+    def set_prompt_profile_dropdown(self, dropdown: sg.Element):
+        self._dropdown = dropdown
+
+    def _update_prompt_profile_dropdown(self, deleted_prompt_profile_name: str = None):
+        if self._dropdown:
+            # Get the currently selected profile in the dropdown
+            selected_prompt_profile_dropdown = self._dropdown.get()
+
+            # Select the unsaved prompt profile if the currently selected profile was just deleted
+            if deleted_prompt_profile_name == selected_prompt_profile_dropdown:
+                selected_prompt_profile_dropdown = self.unsaved_prompt_name
+
+            # Update the prompt profile list in the dropdown
+            self._dropdown.update(
+                value=selected_prompt_profile_dropdown,
+                values=self.prompt_profile_names_with_custom,
+            )
 
 
 class LanguageSpecifierHandler:
