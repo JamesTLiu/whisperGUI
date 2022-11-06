@@ -99,7 +99,6 @@ def start_GUI():
     scaling_input_setting_key = "-GLOBAL-SCALING-"
     save_output_dir_text_key = "-SAVE-OUTPUT-DIR-OPTION-TEXT-"
     save_output_dir_checkbox_key = "-CHECKBOX-SAVE-OUTPUT-DIR-"
-    language_code_text_setting_key = "-LANGUAGE-CODE-SPECIFIER-OPTION-TEXT-"
     language_specifier_setting_key = "-LANGUAGE-SPECIFIER-OPTION-"
 
     # Keys for tabs
@@ -122,8 +121,6 @@ def start_GUI():
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
     prompt_manager = PromptManager(SAVED_PROMPTS_SETTINGS_KEY)
-
-    language_specifier_handler = LanguageSpecifierHandler(language_specifier_setting_key)
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -159,6 +156,10 @@ def start_GUI():
 
     # whether the table is shown
     is_table_shown = False
+
+    # Options used in the language specifier setting
+    LANGUAGE_SPECIFIER_AS_LANG = 'Language'
+    LANGUAGE_SPECIFIER_AS_CODE = 'Language code'
 
     # tracker for possibly active windows
     window_tracker = WindowTracker()
@@ -204,11 +205,6 @@ def start_GUI():
         # Load whether to save the output directory or not from the settings file
         save_output_dir = sg.user_settings_get_entry(
             save_output_dir_checkbox_key, False
-        )
-
-        # Load whether to use a language code as the specifier in the output filename or not from the settings file
-        use_language_code = sg.user_settings_get_entry(
-            language_specifier_setting_key, False
         )
 
         # The tab1 option elements as rows
@@ -258,7 +254,7 @@ def start_GUI():
             ],
             [
                 sg.Combo(
-                    prompt_manager.prompt_profile_names_with_custom,
+                    values=prompt_manager.prompt_profile_names_with_custom,
                     key=prompt_profile_dropdown_key,
                     default_value=sg.user_settings_get_entry(prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name),
                     readonly=True,
@@ -351,6 +347,8 @@ def start_GUI():
             ],
         ]
 
+        language_specifier_options = (LANGUAGE_SPECIFIER_AS_LANG, LANGUAGE_SPECIFIER_AS_CODE)
+
         # settings tab
         tab2_layout = [
             [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
@@ -387,20 +385,13 @@ def start_GUI():
             ),
             [sg.HorizontalSeparator()],
             [
-                sg.Text("Language specifier in output filenames", key=language_code_text_setting_key, tooltip="Language-------- 'video.english.txt'\nLanguage code-'video.en.txt'"),
-                sg.Combo(language_specifier_handler.language_specifier_options, key=language_specifier_setting_key, auto_size_text = True, enable_events=True, readonly=True),
+                sg.Text("Language specifier in output filenames"),
+                sg.Combo(values=language_specifier_options, key=language_specifier_setting_key, default_value=sg.user_settings_get_entry(language_specifier_setting_key, language_specifier_options[0]), auto_size_text = True, readonly=True),
             ],
             [
                 sg.Column([[sg.Text("      Language:")], [sg.Text("      Language code:")]], pad=0),
                 sg.Column([[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0),
             ],
-            # fancy_checkbox(
-            #     text="Use language code instead of language in output filenames",
-            #     text_key=language_code_text_setting_key,
-            #     checkbox_key=language_code_checkbox_setting_key,
-            #     is_checked=use_language_code,
-            #     text_tooltip="Ex. 'video.en.txt' instead of 'video.english.txt'",
-            # ),
             [sg.Button("Save settings", key=save_settings_key)],
         ]
 
@@ -816,8 +807,8 @@ def start_GUI():
                 if sg.user_settings_get_entry(out_dir_key, None):
                     sg.user_settings_delete_entry(out_dir_key)
 
-            # Update use language code as specifier setting
-            save_checkbox_state(window, language_specifier_setting_key)
+            # Update language specifier option setting
+            sg.user_settings_set_entry(language_specifier_setting_key, values[language_specifier_setting_key])
 
             # Close all windows and remove them from tracking
             for win in window_tracker.windows:
@@ -873,9 +864,8 @@ def start_GUI():
                 ].metadata["is_checked"]
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
-                language_code_as_specifier = sg.user_settings_get_entry(
-                    language_specifier_setting_key, False
-                )
+                language_specifier_selection = values[language_specifier_setting_key]
+                use_language_code = True if language_specifier_selection == LANGUAGE_SPECIFIER_AS_CODE else False
 
                 #  Get the user's initial prompt for all transcriptions in this task
                 initial_prompt = values[initial_prompt_input_key]
@@ -915,7 +905,7 @@ def start_GUI():
                         "print_event": PRINT_ME,
                         "stop_flag": stop_flag,
                         "translate_to_english": translate_to_english,
-                        "language_code_as_specifier": language_code_as_specifier,
+                        "use_language_code": use_language_code,
                         "initial_prompt": initial_prompt,
                     },
                     daemon=True,
@@ -1094,7 +1084,7 @@ class PromptManager:
 
     @property
     def prompt_profile_names_with_custom(self):
-        return [self.unsaved_prompt_name, *self.saved_prompts.keys()]
+        return (self.unsaved_prompt_name, *self.saved_prompts.keys())
 
     @property
     def prompt_profiles(self):
@@ -1974,7 +1964,7 @@ def transcribe_audio_video_files(
     print_event: str,
     stop_flag: threading.Event,
     translate_to_english: bool = False,
-    language_code_as_specifier: bool = False,
+    use_language_code: bool = False,
     initial_prompt: str = None,
 ):
     """Transcribe a list of audio/video files.
@@ -1995,7 +1985,7 @@ def transcribe_audio_video_files(
         stop_flag (threading.Event): The flag that causes transcription to abort when it's set.
         translate_to_english (bool): If True, each transcription will be translated to English. Otherwise, no translation will
             occur.
-        language_code_as_specifier (bool): If True, the detected language's language code will be used in the
+        use_language_code (bool): If True, the detected language's language code will be used in the
             output file name if possible. Otherwise, the detected language's name will be used in the output
             file name if possible.
         initial_prompt (str, optional): User provided text that guides the transcription to a certain dialect/language/style. Defaults to None.
@@ -2074,7 +2064,7 @@ def transcribe_audio_video_files(
             transcribe_result=result,
             audio_path=audio_video_path,
             output_dir_path=output_dir_path,
-            language_code_as_specifier=language_code_as_specifier,
+            language_code_as_specifier=use_language_code,
             is_translated_to_english=translate_to_english,
         )
 
@@ -2296,11 +2286,11 @@ def write_transcript_to_files(
         language_specifier = "english"
 
     # Try to convert language specifier to the selected type
-    to_lang_specifier_type = (
+    to_language_specifier_type = (
         TO_LANGUAGE_CODE if language_code_as_specifier else TO_LANGUAGES
     )
 
-    language_specifier = to_lang_specifier_type.get(
+    language_specifier = to_language_specifier_type.get(
         language_specifier, language_specifier
     )
 
