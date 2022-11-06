@@ -380,7 +380,6 @@ def start_GUI():
                     size=(5),
                     key=scaling_input_setting_key,
                 ),
-                # sg.Text("(2 is double size. 0.5 is half size)"),
             ],
             [sg.HorizontalSeparator()],
             [sg.Text(f"Settings file location:")],
@@ -636,7 +635,7 @@ def start_GUI():
             print(values[PRINT_ME], end="")
         # User selected an output directory
         elif event == output_dir_field_key:
-            # Save the output directory when setting is on
+            # Save the output directory to the settings file when the corresponding option is on
             if sg.user_settings_get_entry(save_output_dir_checkbox_key):
                 sg.user_settings_set_entry(out_dir_key, values[out_dir_key])
         # User selected a language
@@ -660,10 +659,15 @@ def start_GUI():
             )
 
             # Save the checkbox state to the config file for save-on-click checkboxes
-            save_on_click_checkboxes = (translate_to_english_checkbox_key,)
+            save_on_click_checkboxes = (translate_to_english_checkbox_key, save_output_dir_checkbox_key)
 
             if event in save_on_click_checkboxes:
                 save_checkbox_state(window, event)
+
+            # Delete the saved output directory from the settings file when the option is off
+            if event == save_output_dir_checkbox_key and not checkbox_info["is_checked"]:
+                if sg.user_settings_get_entry(out_dir_key):
+                    sg.user_settings_delete_entry(out_dir_key)
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
             prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
@@ -815,17 +819,6 @@ def start_GUI():
             else:
                 popup_tracked_scaling_invalid()
                 continue
-
-            # Update save output directory setting
-            is_saving_output_directory = window[save_output_dir_checkbox_key].metadata[
-                "is_checked"
-            ]
-            save_checkbox_state(window, save_output_dir_checkbox_key)
-
-            # Delete the saved output directory in the settings file if not saving output directory
-            if not is_saving_output_directory:
-                if sg.user_settings_get_entry(out_dir_key, None):
-                    sg.user_settings_delete_entry(out_dir_key)
 
             # Close all windows and remove them from tracking
             for win in window_tracker.windows:
