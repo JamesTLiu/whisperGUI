@@ -95,7 +95,7 @@ def start_GUI():
     add_prompt_profile_key = "-NEW-PROMPT-ADD-"
 
     # Keys for settings tab
-    save_settings_key = "-SAVE-SETTINGS-"
+    apply_global_scaling_key = "-SAVE-SETTINGS-"
     scaling_input_setting_key = "-GLOBAL-SCALING-"
     save_output_dir_text_key = "-SAVE-OUTPUT-DIR-OPTION-TEXT-"
     save_output_dir_checkbox_key = "-CHECKBOX-SAVE-OUTPUT-DIR-"
@@ -380,6 +380,7 @@ def start_GUI():
                     size=(5),
                     key=scaling_input_setting_key,
                 ),
+                sg.Button("Apply", key=apply_global_scaling_key),
             ],
             [sg.HorizontalSeparator()],
             [sg.Text(f"Settings file location:")],
@@ -418,7 +419,6 @@ def start_GUI():
                     [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
                 ),
             ],
-            [sg.Button("Save settings", key=save_settings_key)],
         ]
 
         # Define the window's contents
@@ -783,7 +783,7 @@ def start_GUI():
             # Update the language specifier option setting
             sg.user_settings_set_entry(language_specifier_setting_key, values[language_specifier_setting_key])
         # User saved settings
-        elif event == save_settings_key:
+        elif event == apply_global_scaling_key:
 
             def popup_tracked_scaling_invalid():
                 popup_window = popup_tracked(
