@@ -825,7 +825,7 @@ def start_GUI():
             del window_tracker.windows
 
             # Remake the tracked main window and go back to the settings tab
-            window = window_tracker.track_window(make_main_window())
+            window = main_window = window_tracker.track_window(make_main_window())
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
