@@ -1116,23 +1116,6 @@ class PromptManager:
             )
 
 
-class LanguageSpecifierHandler:
-
-
-    def __init__(self, language_specifier_setting_key: str) -> None:
-        self._language_specifier_setting_key = language_specifier_setting_key
-        self.language_specifier_options = ('language', 'language code')
-        self._update_from_settings()
-
-    def _update_from_settings(self):
-        self._selected_specifier = sg.user_settings_get_entry(self._language_specifier_setting_key, self.language_specifier_options[0])
-        return self._selected_specifier
-
-    @property
-    def selected_specifier(self):
-        return self._update_from_settings()
-
-
 def fancy_checkbox(
     text: str = "",
     text_key: str = None,
