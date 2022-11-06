@@ -686,6 +686,12 @@ def start_GUI():
         # User wants to edit a saved prompt
         elif event == edit_prompt_key:
             ...
+
+            # Refresh the prompt manager
+            if prompt_manager_window:
+                prompt_manager_window.close()
+                prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                modal_window_manager.track_modal_window(prompt_manager_window)
         # User wants to delete a saved prompt
         elif event == delete_prompt_key:
             # Delete the saved prompt profile
