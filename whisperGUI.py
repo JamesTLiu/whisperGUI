@@ -158,8 +158,8 @@ def start_GUI():
     is_table_shown = False
 
     # Options used in the language specifier setting
-    LANGUAGE_SPECIFIER_AS_LANG = 'Language'
-    LANGUAGE_SPECIFIER_AS_CODE = 'Language code'
+    LANGUAGE_SPECIFIER_AS_LANG = "Language"
+    LANGUAGE_SPECIFIER_AS_CODE = "Language code"
 
     # tracker for possibly active windows
     window_tracker = WindowTracker()
@@ -208,7 +208,9 @@ def start_GUI():
         )
 
         # Startup prompt profile
-        startup_prompt_profile = sg.user_settings_get_entry(prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name)
+        startup_prompt_profile = sg.user_settings_get_entry(
+            prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name
+        )
 
         # The tab1 option elements as rows
         tab1_options_rows = [
@@ -264,7 +266,12 @@ def start_GUI():
                     enable_events=True,
                 ),
                 sg.Input(
-                    default_text=prompt_manager.saved_prompts.get(startup_prompt_profile, ''), key=initial_prompt_input_key, expand_x=True, enable_events=True
+                    default_text=prompt_manager.saved_prompts.get(
+                        startup_prompt_profile, ""
+                    ),
+                    key=initial_prompt_input_key,
+                    expand_x=True,
+                    enable_events=True,
                 ),
             ],
         ]
@@ -350,7 +357,10 @@ def start_GUI():
             ],
         ]
 
-        language_specifier_options = (LANGUAGE_SPECIFIER_AS_LANG, LANGUAGE_SPECIFIER_AS_CODE)
+        language_specifier_options = (
+            LANGUAGE_SPECIFIER_AS_LANG,
+            LANGUAGE_SPECIFIER_AS_CODE,
+        )
 
         # settings tab
         tab2_layout = [
@@ -389,11 +399,24 @@ def start_GUI():
             [sg.HorizontalSeparator()],
             [
                 sg.Text("Language specifier in output filenames"),
-                sg.Combo(values=language_specifier_options, key=language_specifier_setting_key, default_value=sg.user_settings_get_entry(language_specifier_setting_key, language_specifier_options[0]), auto_size_text = True, readonly=True),
+                sg.Combo(
+                    values=language_specifier_options,
+                    key=language_specifier_setting_key,
+                    default_value=sg.user_settings_get_entry(
+                        language_specifier_setting_key, language_specifier_options[0]
+                    ),
+                    auto_size_text=True,
+                    readonly=True,
+                ),
             ],
             [
-                sg.Column([[sg.Text("      Language:")], [sg.Text("      Language code:")]], pad=0),
-                sg.Column([[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0),
+                sg.Column(
+                    [[sg.Text("      Language:")], [sg.Text("      Language code:")]],
+                    pad=0,
+                ),
+                sg.Column(
+                    [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
+                ),
             ],
             [sg.Button("Save settings", key=save_settings_key)],
         ]
@@ -664,7 +687,9 @@ def start_GUI():
                 # Refresh the prompt manager
                 if prompt_manager_window:
                     prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                    prompt_manager_window = window_tracker.track_window(
+                        popup_prompt_manager()
+                    )
                     modal_window_manager.track_modal_window(prompt_manager_window)
             # Failed to add new prompt
             else:
@@ -686,7 +711,9 @@ def start_GUI():
             # Refresh the prompt manager
             if prompt_manager_window:
                 prompt_manager_window.close()
-                prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                prompt_manager_window = window_tracker.track_window(
+                    popup_prompt_manager()
+                )
                 modal_window_manager.track_modal_window(prompt_manager_window)
         # User wants to delete a saved prompt
         elif event == delete_prompt_key:
@@ -704,7 +731,9 @@ def start_GUI():
                 # Refresh the prompt manager
                 if prompt_manager_window:
                     prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+                    prompt_manager_window = window_tracker.track_window(
+                        popup_prompt_manager()
+                    )
                     modal_window_manager.track_modal_window(prompt_manager_window)
             # User has not selected a row in the prompt profile table
             else:
@@ -719,14 +748,18 @@ def start_GUI():
         # User modified the initial prompt.
         elif event == initial_prompt_input_key:
             # Select the unsaved prompt profile
-            window[prompt_profile_dropdown_key].update(value=prompt_manager.unsaved_prompt_name)
+            window[prompt_profile_dropdown_key].update(
+                value=prompt_manager.unsaved_prompt_name
+            )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
             if chosen_prompt_profile in prompt_manager.prompt_profile_names:
-                new_initial_prompt_input = prompt_manager.saved_prompts[chosen_prompt_profile]
+                new_initial_prompt_input = prompt_manager.saved_prompts[
+                    chosen_prompt_profile
+                ]
             elif chosen_prompt_profile == prompt_manager.unsaved_prompt_name:
                 new_initial_prompt_input = ""
             else:
@@ -737,7 +770,9 @@ def start_GUI():
             window[initial_prompt_input_key].update(value=new_initial_prompt_input)
 
             # Save the user's selected prompt profile to the settings file
-            sg.user_settings_set_entry(prompt_profile_dropdown_key, chosen_prompt_profile)
+            sg.user_settings_set_entry(
+                prompt_profile_dropdown_key, chosen_prompt_profile
+            )
         # User saved settings
         elif event == save_settings_key:
 
@@ -788,7 +823,9 @@ def start_GUI():
                     sg.user_settings_delete_entry(out_dir_key)
 
             # Update language specifier option setting
-            sg.user_settings_set_entry(language_specifier_setting_key, values[language_specifier_setting_key])
+            sg.user_settings_set_entry(
+                language_specifier_setting_key, values[language_specifier_setting_key]
+            )
 
             # Close all windows and remove them from tracking
             for win in window_tracker.windows:
@@ -845,7 +882,11 @@ def start_GUI():
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
                 language_specifier_selection = values[language_specifier_setting_key]
-                use_language_code = True if language_specifier_selection == LANGUAGE_SPECIFIER_AS_CODE else False
+                use_language_code = (
+                    True
+                    if language_specifier_selection == LANGUAGE_SPECIFIER_AS_CODE
+                    else False
+                )
 
                 #  Get the user's initial prompt for all transcriptions in this task
                 initial_prompt = values[initial_prompt_input_key]
@@ -1047,12 +1088,16 @@ class PromptManager:
 
     def __init__(self, saved_prompts_settings_key: str):
         self._saved_prompts_settings_key = saved_prompts_settings_key
-        self.saved_prompts = sg.user_settings_get_entry(self._saved_prompts_settings_key, {})
+        self.saved_prompts = sg.user_settings_get_entry(
+            self._saved_prompts_settings_key, {}
+        )
         self._dropdown = None
 
     @property
     def saved_prompts(self) -> Dict[str, str]:
-        self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(self._saved_prompts_settings_key, self._saved_prompts)
+        self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(
+            self._saved_prompts_settings_key, self._saved_prompts
+        )
         return self._saved_prompts
 
     @saved_prompts.setter
