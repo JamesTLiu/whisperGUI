@@ -407,6 +407,7 @@ def start_GUI():
                     ),
                     auto_size_text=True,
                     readonly=True,
+                    enable_events=True,
                 ),
             ],
             [
@@ -773,6 +774,10 @@ def start_GUI():
             sg.user_settings_set_entry(
                 prompt_profile_dropdown_key, chosen_prompt_profile
             )
+        # User selected a language specifier for the result files
+        elif event == language_specifier_setting_key:
+            # Update the language specifier option setting
+            sg.user_settings_set_entry(language_specifier_setting_key, values[language_specifier_setting_key])
         # User saved settings
         elif event == save_settings_key:
 
@@ -821,11 +826,6 @@ def start_GUI():
             if not is_saving_output_directory:
                 if sg.user_settings_get_entry(out_dir_key, None):
                     sg.user_settings_delete_entry(out_dir_key)
-
-            # Update language specifier option setting
-            sg.user_settings_set_entry(
-                language_specifier_setting_key, values[language_specifier_setting_key]
-            )
 
             # Close all windows and remove them from tracking
             for win in window_tracker.windows:
