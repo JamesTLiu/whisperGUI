@@ -1245,16 +1245,9 @@ def save_checkbox_state(window: sg.Window, checkbox_key: str):
     )
 
 
-class Popup_Callable(Protocol):
-    """A typing.Protocol for a popup window Callable."""
-
-    def __call__(self, *args, **kwargs) -> Tuple[sg.Window, Optional[str]]:
-        ...
-
-
 def popup_tracked(
     *args: Any,
-    popup_fn: Popup_Callable,
+    popup_fn: Callable[..., Tuple[sg.Window, Optional[str]]],
     window_tracker: WindowTracker,
     **kwargs: Any,
 ) -> sg.Window:
@@ -1640,7 +1633,7 @@ def popup_scrolled(
     modal=True,
     no_sizegrip=False,
     disabled=False,
-) -> Optional[Tuple[sg.Window, Optional[str]]]:
+) -> Tuple[Optional[sg.Window], Optional[str]]:
     """
     Show a scrolled Popup window containing the user's text that was supplied.  Use with as many items to print as you
     want, just like a print statement.
@@ -1685,11 +1678,12 @@ def popup_scrolled(
     :type modal:                bool
     :param no_sizegrip:         If True no Sizegrip will be shown when there is no titlebar. It's only shown if there is no titlebar
     :type no_sizegrip:          (bool)
-    :return:                    Returns the window for the popup and text of the button that was pressed.  None will be returned in place of the button text if user closed window with X
-    :rtype:                     (sg.Window, str | None | TIMEOUT_KEY) | None
+    :return:                    Returns the window for the popup and text of the button that was pressed.  None will be returned in place of the button text if user closed window with X.
+                                (None, None) will be returned if no positional arguments are given.
+    :rtype:                     (sg.Window | None, str | None | TIMEOUT_KEY)
     """
     if not args:
-        return None
+        return (None, None)
     width, height = size
     width = width if width else sg.MESSAGE_BOX_LINE_WIDTH
 
