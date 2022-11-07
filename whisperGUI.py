@@ -1090,7 +1090,7 @@ class ModalWindowManager:
 
 
 class WindowTracker:
-    """Track possibly open windows."""
+    """A tracker for possibly open windows."""
 
     def __init__(self) -> None:
         self._tracked_windows: Set[sg.Window] = set()
@@ -1119,7 +1119,8 @@ class WindowTracker:
 
 
 class PromptManager:
-    # Name of the Prompt profile for when the user is not using a saved prompt profile
+    """A manager for prompt profiles."""
+
     _unsaved_prompt_profile_name = "(None)"
 
     def __init__(self, saved_prompts_settings_key: str) -> None:
