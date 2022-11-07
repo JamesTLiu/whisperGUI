@@ -42,7 +42,8 @@ else:
 
 if TYPE_CHECKING:
     import PySimpleGUI
-    from types import FrameType
+
+from types import FrameType
 
 import PySimpleGUI as sg
 import whisper
@@ -2203,7 +2204,7 @@ def transcribe_audio_video(
     # print("In process...")
 
     # Clean up when this process is told to terminate
-    def handler(sig: signal._SIGNUM, frame: FrameType = None) -> None:
+    def handler(sig: int, frame: Optional[FrameType] = None) -> None:
         queue.close()
         nonlocal redirector
         del redirector
