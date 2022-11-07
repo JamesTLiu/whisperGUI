@@ -603,10 +603,10 @@ def start_GUI():
     audio_video_file_paths = []
 
     # current transcription task being worked on
-    num_tasks_done = None
+    num_tasks_done = 0
 
     # total number of transcription tasks
-    num_tasks = None
+    num_tasks = 0
 
     # thread that runs transcriptions as processes
     transcribe_thread = None
