@@ -2131,7 +2131,8 @@ def transcribe_audio_video(
     # Clean up when this process is told to terminate
     def handler(sig: signal._SIGNUM, frame: FrameType = None) -> None:
         queue.close()
-        redirector.close()
+        nonlocal redirector
+        del redirector
         write_connection.close()
         # end the process
         sys.exit(0)
@@ -2168,7 +2169,7 @@ def transcribe_audio_video(
 
     # Clean up
     write_connection.close()
-    redirector.close()
+    del redirector
     queue.close()
 
     # Signal process completion to the parent thread
@@ -2253,9 +2254,6 @@ class OutputRedirector(io.StringIO):
             self.restore_stderr()
         except:
             pass
-
-    def close(self):
-        self.__del__()
 
 
 def close_connections(connections: Iterable[Union[Connection, PipeConnection]]):
