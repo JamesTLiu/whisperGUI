@@ -222,7 +222,7 @@ def start_GUI() -> None:
 
         # Startup prompt profile
         startup_prompt_profile = sg.user_settings_get_entry(
-            prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_name
+            prompt_profile_dropdown_key, prompt_manager._unsaved_prompt_name
         )
 
         # The tab1 option elements as rows
@@ -778,7 +778,7 @@ def start_GUI() -> None:
         elif event == initial_prompt_input_key:
             # Select the unsaved prompt profile
             window[prompt_profile_dropdown_key].update(
-                value=prompt_manager.unsaved_prompt_name
+                value=prompt_manager._unsaved_prompt_name
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
@@ -789,7 +789,7 @@ def start_GUI() -> None:
                 new_initial_prompt_input = prompt_manager.saved_prompts[
                     chosen_prompt_profile
                 ]
-            elif chosen_prompt_profile == prompt_manager.unsaved_prompt_name:
+            elif chosen_prompt_profile == prompt_manager._unsaved_prompt_name:
                 new_initial_prompt_input = ""
             else:
                 raise NonExistentPromptProfileName(
@@ -1058,41 +1058,43 @@ class ModalWindowManager:
     """
 
     def __init__(self) -> None:
-        self.modal_window_stack: List[sg.Window] = []
-        self.most_recent_modal_window: sg.Window = None
+        self._modal_window_stack: List[sg.Window] = []
+        self._most_recent_modal_window: sg.Window = None
 
-    def track_modal_window(self, win: sg.Window) -> None:
+    def track_modal_window(self, window: sg.Window) -> None:
         """Add a modal window as the most recent tracked modal window.
 
         Args:
-            win (sg.Window): A modal window.
+            window (sg.Window): A modal window.
                 Note: If a non-modal window is added, a later call to update()
                 will set the non-modal window as a modal window if there was a
                 more recent closed modal window.
         """
-        self.modal_window_stack.append(win)
-        self.most_recent_modal_window = win
+        self._modal_window_stack.append(window)
+        self._most_recent_modal_window = window
 
     def update(self) -> None:
-        """Set as modal the most recent non-closed tracked modal window"""
+        """Set as modal the most recent non-closed tracked modal window."""
 
         # Clear closed modal windows from the top of the modal window tracking stack
-        while self.modal_window_stack and self.modal_window_stack[-1].is_closed():
-            self.modal_window_stack.pop()
+        while self._modal_window_stack and self._modal_window_stack[-1].is_closed():
+            self._modal_window_stack.pop()
 
         # Restore as modal the most recent non-closed tracked modal window
-        if self.modal_window_stack:
-            current_modal_window = self.modal_window_stack[-1]
-            if current_modal_window is not self.most_recent_modal_window:
-                self.most_recent_modal_window = current_modal_window
-                self.most_recent_modal_window.make_modal()
+        if self._modal_window_stack:
+            current_modal_window = self._modal_window_stack[-1]
+            if current_modal_window is not self._most_recent_modal_window:
+                self._most_recent_modal_window = current_modal_window
+                self._most_recent_modal_window.make_modal()
 
 
 class WindowTracker:
+    """Track possibly open windows.
+    """
     def __init__(self) -> None:
         self._tracked_windows: Set[sg.Window] = set()
 
-    def track_window(self, win: sg.Window) -> sg.Window:
+    def track_window(self, window: sg.Window) -> sg.Window:
         """Track the window.
 
         Args:
@@ -1101,8 +1103,8 @@ class WindowTracker:
         Returns:
             sg.Window: The tracked window.
         """
-        self._tracked_windows.add(win)
-        return win
+        self._tracked_windows.add(window)
+        return window
 
     @property
     def windows(self) -> Set[sg.Window]:
@@ -1111,12 +1113,13 @@ class WindowTracker:
 
     @windows.deleter
     def windows(self) -> None:
+        """Stop tracking the currently tracked windows."""
         self._tracked_windows.clear()
 
 
 class PromptManager:
     # Prompt profile for when the user is not using a saved prompt profile
-    unsaved_prompt_name = "(None)"
+    _unsaved_prompt_name = "(None)"
 
     def __init__(self, saved_prompts_settings_key: str) -> None:
         """
@@ -1148,7 +1151,7 @@ class PromptManager:
     @property
     def prompt_profile_names(self) -> Tuple[str, ...]:
         """The unsaved prompt profile name and the names of the saved prompt profiles."""
-        return (self.unsaved_prompt_name, *self.saved_prompts.keys())
+        return (self._unsaved_prompt_name, *self.saved_prompts.keys())
 
     @property
     def saved_prompt_profiles(self) -> Tuple[Tuple[str, str], ...]:
@@ -1214,7 +1217,7 @@ class PromptManager:
 
             # Select the unsaved prompt profile if the currently selected profile was just deleted
             if deleted_prompt_profile_name == selected_prompt_profile_dropdown:
-                selected_prompt_profile_dropdown = self.unsaved_prompt_name
+                selected_prompt_profile_dropdown = self._unsaved_prompt_name
 
             # Update the prompt profile list in the dropdown
             self._dropdown.update(
@@ -2266,7 +2269,7 @@ class OutputRedirector(io.StringIO):
             reroute_stdout (bool, optional): If True, redirects stdout to the connection. Defaults to True.
             reroute_stderr (bool, optional): If True, redirects stderr to the connection. Defaults to True.
         """
-        self.write_conn = write_conn
+        self._write_conn = write_conn
         if reroute_stdout:
             self.reroute_stdout_to_here()
         if reroute_stderr:
@@ -2274,24 +2277,24 @@ class OutputRedirector(io.StringIO):
 
     def reroute_stdout_to_here(self) -> None:
         """Send stdout (prints) to this element."""
-        self.previous_stdout = sys.stdout
+        self._previous_stdout = sys.stdout
         sys.stdout = self
 
     def reroute_stderr_to_here(self) -> None:
         """Send stderr to this element."""
-        self.previous_stderr = sys.stderr
+        self._previous_stderr = sys.stderr
         sys.stderr = self
 
     def restore_stdout(self) -> None:
         """Restore a previously re-reouted stdout back to the original destination."""
-        if self.previous_stdout:
-            sys.stdout = self.previous_stdout
+        if self._previous_stdout:
+            sys.stdout = self._previous_stdout
             # self.previous_stdout = None  # indicate no longer routed here
 
     def restore_stderr(self) -> None:
         """Restore a previously re-reouted stderr back to the original destination."""
-        if self.previous_stderr:
-            sys.stderr = self.previous_stderr
+        if self._previous_stderr:
+            sys.stderr = self._previous_stderr
             # self.previous_stderr = None  # indicate no longer routed here
 
     def write(self, txt: str) -> int:
@@ -2304,7 +2307,7 @@ class OutputRedirector(io.StringIO):
         """
         # Send text through the write connection and ignore OSError that occurs when the process is killed.
         with suppress(OSError):
-            self.write_conn.send(txt)
+            self._write_conn.send(txt)
 
         return len(txt)
 
@@ -2314,7 +2317,7 @@ class OutputRedirector(io.StringIO):
         For now doing nothing.  Not sure what action should be taken to ensure a flush happens regardless.
         """
         try:
-            self.previous_stdout.flush()
+            self._previous_stdout.flush()
         except:
             pass
 
