@@ -59,7 +59,12 @@ def main():
     start_GUI()
 
 
-def start_GUI():
+def start_GUI() -> None:
+    """Start the GUI.
+
+    Raises:
+        NonExistentPromptProfileName: A non-existent prompt profile name was used.
+    """
     sg.theme("Dark Blue 3")
 
     # Config file
@@ -167,6 +172,11 @@ def start_GUI():
     window_tracker = WindowTracker()
 
     def make_main_window() -> sg.Window:
+        """Create the main window for the GUI.
+
+        Returns:
+            sg.Window: The created main window.
+        """
         # Supported language options for the model
         AUTODETECT_OPTION = "autodetect"
         LANGUAGES = (AUTODETECT_OPTION, *sorted(TO_LANGUAGE_CODE.keys()))
@@ -261,7 +271,7 @@ def start_GUI():
             ],
             [
                 sg.Combo(
-                    values=prompt_manager.prompt_profile_names_with_custom,
+                    values=prompt_manager.prompt_profile_names,
                     key=prompt_profile_dropdown_key,
                     default_value=startup_prompt_profile,
                     readonly=True,
@@ -488,7 +498,7 @@ def start_GUI():
         layout = [
             [
                 sg.Table(
-                    prompt_manager.prompt_profiles,
+                    prompt_manager.saved_prompt_profiles,
                     headings=["Profile", "Prompt"],
                     key=saved_prompts_table_key,
                     expand_x=True,
@@ -555,6 +565,11 @@ def start_GUI():
     prompt_manager_window = None
 
     def popup_add_new_prompt() -> sg.Window:
+        """Pop up the add new prompt window.
+
+        Returns:
+            sg.Window: The add new prompt window.
+        """
         layout = [
             [
                 [sg.Text("Prompt profile name")],
@@ -661,13 +676,19 @@ def start_GUI():
             )
 
             # Save the checkbox state to the config file for save-on-click checkboxes
-            save_on_click_checkboxes = (translate_to_english_checkbox_key, save_output_dir_checkbox_key)
+            save_on_click_checkboxes = (
+                translate_to_english_checkbox_key,
+                save_output_dir_checkbox_key,
+            )
 
             if event in save_on_click_checkboxes:
                 save_checkbox_state(window, event)
 
             # Delete the saved output directory from the settings file when the option is off
-            if event == save_output_dir_checkbox_key and not checkbox_info["is_checked"]:
+            if (
+                event == save_output_dir_checkbox_key
+                and not checkbox_info["is_checked"]
+            ):
                 if sg.user_settings_get_entry(out_dir_key):
                     sg.user_settings_delete_entry(out_dir_key)
         # Popup prompt manager window
@@ -729,7 +750,7 @@ def start_GUI():
 
             # Ensure user has selected a row in the prompt profile table
             if selected_rows_prompts_table:
-                prompt_profile_names = prompt_manager.prompt_profile_names
+                prompt_profile_names = prompt_manager.saved_prompt_profile_names
                 prompt_profile_name_to_delete = prompt_profile_names[
                     selected_rows_prompts_table[0]
                 ]
@@ -763,15 +784,15 @@ def start_GUI():
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
-            if chosen_prompt_profile in prompt_manager.prompt_profile_names:
+            if chosen_prompt_profile in prompt_manager.saved_prompt_profile_names:
                 new_initial_prompt_input = prompt_manager.saved_prompts[
                     chosen_prompt_profile
                 ]
             elif chosen_prompt_profile == prompt_manager.unsaved_prompt_name:
                 new_initial_prompt_input = ""
             else:
-                raise ValueError(
-                    f"{chosen_prompt_profile} is not a saved prompt profile name or the custom prompt profile"
+                raise NonExistentPromptProfileName(
+                    f"{chosen_prompt_profile} is not a saved prompt profile name or the unsaved prompt profile"
                 )
 
             window[initial_prompt_input_key].update(value=new_initial_prompt_input)
@@ -783,11 +804,14 @@ def start_GUI():
         # User selected a language specifier for the result files
         elif event == language_specifier_setting_key:
             # Update the language specifier option setting
-            sg.user_settings_set_entry(language_specifier_setting_key, values[language_specifier_setting_key])
+            sg.user_settings_set_entry(
+                language_specifier_setting_key, values[language_specifier_setting_key]
+            )
         # User saved settings
         elif event == apply_global_scaling_key:
 
-            def popup_tracked_scaling_invalid():
+            def popup_tracked_scaling_invalid() -> None:
+                """Pop up a tracked modal message window indicating an invalid scaling input."""
                 popup_window = popup_tracked(
                     f"Please enter a number for the scaling factor between {MIN_SCALING} and {MAX_SCALING}.",
                     popup_fn=popup,
@@ -1023,6 +1047,10 @@ def start_GUI():
     main_window.close()
 
 
+class NonExistentPromptProfileName(Exception):
+    """A non-existent prompt profile name was used."""
+
+
 class ModalWindowManager:
     """A manager for tracking modal windows in order to remodal a previous window
     when a more recent one is closed.
@@ -1032,7 +1060,7 @@ class ModalWindowManager:
         self.modal_window_stack: List[sg.Window] = []
         self.most_recent_modal_window: sg.Window = None
 
-    def track_modal_window(self, win: sg.Window):
+    def track_modal_window(self, win: sg.Window) -> None:
         """Add a modal window as the most recent tracked modal window.
 
         Args:
@@ -1063,7 +1091,15 @@ class WindowTracker:
     def __init__(self) -> None:
         self._tracked_windows: Set[sg.Window] = set()
 
-    def track_window(self, win: sg.Window):
+    def track_window(self, win: sg.Window) -> sg.Window:
+        """Track the window.
+
+        Args:
+            win (sg.Window): The window to be tracked.
+
+        Returns:
+            sg.Window: The tracked window.
+        """
         self._tracked_windows.add(win)
         return win
 
@@ -1073,7 +1109,7 @@ class WindowTracker:
         return self._tracked_windows
 
     @windows.deleter
-    def windows(self):
+    def windows(self) -> None:
         self._tracked_windows.clear()
 
 
@@ -1081,7 +1117,11 @@ class PromptManager:
     # Prompt profile for when the user is not using a saved prompt profile
     unsaved_prompt_name = "(None)"
 
-    def __init__(self, saved_prompts_settings_key: str):
+    def __init__(self, saved_prompts_settings_key: str) -> None:
+        """
+        Args:
+            saved_prompts_settings_key (str): Key for the saved prompts in the settings file.
+        """
         self._saved_prompts_settings_key = saved_prompts_settings_key
         self.saved_prompts = sg.user_settings_get_entry(
             self._saved_prompts_settings_key, {}
@@ -1090,32 +1130,45 @@ class PromptManager:
 
     @property
     def saved_prompts(self) -> Dict[str, str]:
+        """A dict with the saved prompt profiles names and their prompt values."""
         self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(
             self._saved_prompts_settings_key, self._saved_prompts
         )
         return self._saved_prompts
 
     @saved_prompts.setter
-    def saved_prompts(self, new_prompt_dict: Dict[str, str]):
+    def saved_prompts(self, new_prompt_dict: Dict[str, str]) -> None:
         self._saved_prompts = new_prompt_dict
 
     @saved_prompts.deleter
-    def saved_prompts(self):
+    def saved_prompts(self) -> None:
         self._saved_prompts.clear()
 
     @property
-    def prompt_profile_names_with_custom(self) -> Tuple[str, ...]:
+    def prompt_profile_names(self) -> Tuple[str, ...]:
+        """The unsaved prompt profile name and the names of the saved prompt profiles."""
         return (self.unsaved_prompt_name, *self.saved_prompts.keys())
 
     @property
-    def prompt_profiles(self) -> Tuple[Tuple[str, str], ...]:
+    def saved_prompt_profiles(self) -> Tuple[Tuple[str, str], ...]:
+        """The saved prompt profiles as a tuple of tuples."""
         return tuple(self.saved_prompts.items())
 
     @property
-    def prompt_profile_names(self) -> Tuple[str, ...]:
+    def saved_prompt_profile_names(self) -> Tuple[str, ...]:
+        """The names of the saved prompt profiles."""
         return tuple(self.saved_prompts.keys())
 
     def add_prompt_profile(self, prompt_name: str, prompt: str) -> bool:
+        """Add a new prompt profile.
+
+        Args:
+            prompt_name (str): The name for the new prompt profile.
+            prompt (str): The prompt for the new prompt profile.
+
+        Returns:
+            bool: True, if the prompt profile was successfully created. False, otherwise.
+        """
         # Invalid prompt name. Prompt name already in use, empty, or only whitespaces.
         if prompt_name in self.saved_prompts or not prompt_name.strip():
             return False
@@ -1129,7 +1182,12 @@ class PromptManager:
 
         return True
 
-    def delete_prompt_profile(self, prompt_name: str):
+    def delete_prompt_profile(self, prompt_name: str) -> None:
+        """Delete a prompt profile by name.
+
+        Args:
+            prompt_name (str): The name of the prompt profile to be deleted.
+        """
         del self.saved_prompts[prompt_name]
 
         # Update the settings file with the updated prompt profiles
@@ -1140,7 +1198,15 @@ class PromptManager:
     def set_prompt_profile_dropdown(self, dropdown: sg.Element):
         self._dropdown = dropdown
 
-    def _update_prompt_profile_dropdown(self, deleted_prompt_profile_name: str = None):
+    def _update_prompt_profile_dropdown(
+        self, deleted_prompt_profile_name: str = None
+    ) -> None:
+        """Update the tracked prompt profile dropdown element if it exists.
+
+        Args:
+            deleted_prompt_profile_name (str, optional): The name of the deleted prompt profile
+                if one was deleted. Defaults to None.
+        """
         if self._dropdown:
             # Get the currently selected profile in the dropdown
             selected_prompt_profile_dropdown = self._dropdown.get()
@@ -1152,7 +1218,7 @@ class PromptManager:
             # Update the prompt profile list in the dropdown
             self._dropdown.update(
                 value=selected_prompt_profile_dropdown,
-                values=self.prompt_profile_names_with_custom,
+                values=self.prompt_profile_names,
             )
 
 
@@ -1232,9 +1298,9 @@ def convert_rows_to_columns_for_elements(
     return columns
 
 
-def save_checkbox_state(window: sg.Window, checkbox_key: str):
-    """Save the checkbox's checked state to the config file. The checkbox must
-    be an Image element whose checked state is True or False and saved in the element's metadata.
+def save_checkbox_state(window: sg.Window, checkbox_key: str) -> None:
+    """Save a checkbox's checked state to the config file. The checkbox must
+    be an Image element whose checked state is saved in the element's metadata as True or False.
 
     Args:
         window (sg.Window): The PySimpleGUI window with the checkbox as an Image element.
@@ -1302,7 +1368,7 @@ class CustomTimer(Timer):
         return self.last
 
 
-def disable_elements(gui_elements: Iterable[sg.Element]):
+def disable_elements(gui_elements: Iterable[sg.Element]) -> None:
     """Disable the PySimpleGUI elements.
 
     Args:
@@ -1311,7 +1377,7 @@ def disable_elements(gui_elements: Iterable[sg.Element]):
     update_elements(gui_elements=gui_elements, disabled=True)
 
 
-def enable_elements(gui_elements: Iterable[sg.Element]):
+def enable_elements(gui_elements: Iterable[sg.Element]) -> None:
     """Enable the PySimpleGUI elements.
 
     Args:
@@ -1320,7 +1386,7 @@ def enable_elements(gui_elements: Iterable[sg.Element]):
     update_elements(gui_elements=gui_elements, disabled=False)
 
 
-def update_elements(gui_elements: Iterable[sg.Element], **kwargs):
+def update_elements(gui_elements: Iterable[sg.Element], **kwargs) -> None:
     """Update the PySimpleGUI elements using keyword arguments.
 
     Calls PySimpleGUI.update() with the keyword arguments provided.
@@ -1943,7 +2009,7 @@ def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[st
 
 def format_multiline_text(
     element: sg.ErrorElement, is_multiline_rstripping_on_update: bool
-):
+) -> None:
     """Update the text in a multiline element.
 
     Replaces \r with \n.
@@ -1987,7 +2053,7 @@ def transcribe_audio_video_files(
     translate_to_english: bool = False,
     use_language_code: bool = False,
     initial_prompt: str = None,
-):
+) -> None:
     """Transcribe a list of audio/video files.
 
     Results are written to files with the same name but with .txt, .vtt, .srt extensions.
@@ -2119,7 +2185,7 @@ def transcribe_audio_video(
     process_done_flag: EventClass,
     translate_to_english: bool = False,
     initial_prompt: str = None,
-):
+) -> None:
     """Transcribe an audio/video file.
 
     Args:
@@ -2192,9 +2258,8 @@ class OutputRedirector(io.StringIO):
         write_conn: Union[Connection, PipeConnection],
         reroute_stdout=True,
         reroute_stderr=True,
-    ):
-        """__init__
-
+    ) -> None:
+        """
         Args:
             write_conn (Union[Connection, PipeConnection]): A writeable connection.
             reroute_stdout (bool, optional): If True, redirects stdout to the connection. Defaults to True.
@@ -2206,29 +2271,29 @@ class OutputRedirector(io.StringIO):
         if reroute_stderr:
             self.reroute_stderr_to_here()
 
-    def reroute_stdout_to_here(self):
+    def reroute_stdout_to_here(self) -> None:
         """Send stdout (prints) to this element."""
         self.previous_stdout = sys.stdout
         sys.stdout = self
 
-    def reroute_stderr_to_here(self):
+    def reroute_stderr_to_here(self) -> None:
         """Send stderr to this element."""
         self.previous_stderr = sys.stderr
         sys.stderr = self
 
-    def restore_stdout(self):
+    def restore_stdout(self) -> None:
         """Restore a previously re-reouted stdout back to the original destination."""
         if self.previous_stdout:
             sys.stdout = self.previous_stdout
-            self.previous_stdout = None  # indicate no longer routed here
+            # self.previous_stdout = None  # indicate no longer routed here
 
-    def restore_stderr(self):
+    def restore_stderr(self) -> None:
         """Restore a previously re-reouted stderr back to the original destination."""
         if self.previous_stderr:
             sys.stderr = self.previous_stderr
-            self.previous_stderr = None  # indicate no longer routed here
+            # self.previous_stderr = None  # indicate no longer routed here
 
-    def write(self, txt: str):
+    def write(self, txt: str) -> int:
         """
         Called by Python when stdout or stderr wants to write.
         Send the text through the pipe's write connection.
@@ -2242,7 +2307,7 @@ class OutputRedirector(io.StringIO):
 
         return len(txt)
 
-    def flush(self):
+    def flush(self) -> None:
         """Handle Flush parameter passed into a print statement.
 
         For now doing nothing.  Not sure what action should be taken to ensure a flush happens regardless.
@@ -2252,7 +2317,7 @@ class OutputRedirector(io.StringIO):
         except:
             pass
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Restore the old stdout, stderr if this object is deleted"""
         # These trys are here because found that if the init fails, then
         # the variables holding the old stdout won't exist and will get an error
@@ -2266,7 +2331,7 @@ class OutputRedirector(io.StringIO):
             pass
 
 
-def close_connections(connections: Iterable[Union[Connection, PipeConnection]]):
+def close_connections(connections: Iterable[Union[Connection, PipeConnection]]) -> None:
     """Close all given connections.
 
     Args:
@@ -2361,7 +2426,7 @@ def write_transcript_to_files(
 # ===================================================#
 
 
-def set_same_width(window: sg.Window, element_keys: Iterable[str]):
+def set_same_width(window: sg.Window, element_keys: Iterable[str]) -> None:
     """Resize the elements in the given window to the max text length among the elements.
 
     Args:
