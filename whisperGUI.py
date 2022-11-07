@@ -4,6 +4,7 @@ from __future__ import annotations
 import decimal
 import io
 import multiprocessing
+from operator import itemgetter
 import os
 import platform
 import re
@@ -1149,19 +1150,19 @@ class PromptManager:
         self._saved_prompts.clear()
 
     @property
-    def prompt_profile_names(self) -> Tuple[str, ...]:
+    def prompt_profile_names(self) -> List[str]:
         """The unsaved prompt profile name and the names of the saved prompt profiles."""
-        return (self._unsaved_prompt_name, *self.saved_prompts.keys())
+        return [self._unsaved_prompt_name, *sorted(self.saved_prompts.keys())]
 
     @property
-    def saved_prompt_profiles(self) -> Tuple[Tuple[str, str], ...]:
+    def saved_prompt_profiles(self) -> List[Tuple[str, str]]:
         """The saved prompt profiles as a tuple of tuples."""
-        return tuple(self.saved_prompts.items())
+        return sorted(self.saved_prompts.items(), key=itemgetter(0))
 
     @property
-    def saved_prompt_profile_names(self) -> Tuple[str, ...]:
+    def saved_prompt_profile_names(self) -> List[str]:
         """The names of the saved prompt profiles."""
-        return tuple(self.saved_prompts.keys())
+        return sorted(self.saved_prompts.keys())
 
     def add_prompt_profile(self, prompt_name: str, prompt: str) -> bool:
         """Add a new prompt profile.
