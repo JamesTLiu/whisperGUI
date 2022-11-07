@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
 import decimal
 import io
 import multiprocessing
@@ -42,8 +43,7 @@ else:
 
 if TYPE_CHECKING:
     import PySimpleGUI
-
-from types import FrameType
+    from types import FrameType
 
 import PySimpleGUI as sg
 import whisper
