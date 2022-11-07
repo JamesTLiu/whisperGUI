@@ -783,9 +783,6 @@ def start_GUI() -> None:
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
-            # Clear selection highlighting
-            window[prompt_profile_dropdown_key].widget.selection_clear()
-
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
@@ -1005,6 +1002,10 @@ def start_GUI() -> None:
             transcription_timer.stop(log_time=False)
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
+
+        # Clear selection highlighting if a dropdown option was selected
+        if window and event and isinstance(window[event], sg.Combo):
+            window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
         if event in TRANSCRIBE_DONE_EVENTS:
