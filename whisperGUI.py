@@ -223,7 +223,7 @@ def start_GUI() -> None:
 
         # Startup prompt profile
         startup_prompt_profile = sg.user_settings_get_entry(
-            prompt_profile_dropdown_key, prompt_manager._unsaved_prompt_name
+            prompt_profile_dropdown_key, prompt_manager._unsaved_prompt_profile_name
         )
 
         # The tab1 option elements as rows
@@ -489,7 +489,7 @@ def start_GUI() -> None:
     main_window = window_tracker.track_window(make_main_window())
 
     # give the prompt manager the prompt profile dropdown element so that it can be updated on changes
-    prompt_manager.set_prompt_profile_dropdown(main_window[prompt_profile_dropdown_key])
+    prompt_manager.set_prompt_profile_dropdown(main_window, prompt_profile_dropdown_key)
 
     def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
@@ -779,7 +779,7 @@ def start_GUI() -> None:
         elif event == initial_prompt_input_key:
             # Select the unsaved prompt profile
             window[prompt_profile_dropdown_key].update(
-                value=prompt_manager._unsaved_prompt_name
+                value=prompt_manager._unsaved_prompt_profile_name
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
@@ -790,7 +790,7 @@ def start_GUI() -> None:
                 new_initial_prompt_input = prompt_manager.saved_prompts[
                     chosen_prompt_profile
                 ]
-            elif chosen_prompt_profile == prompt_manager._unsaved_prompt_name:
+            elif chosen_prompt_profile == prompt_manager._unsaved_prompt_profile_name:
                 new_initial_prompt_input = ""
             else:
                 raise NonExistentPromptProfileName(
@@ -1090,8 +1090,8 @@ class ModalWindowManager:
 
 
 class WindowTracker:
-    """Track possibly open windows.
-    """
+    """Track possibly open windows."""
+
     def __init__(self) -> None:
         self._tracked_windows: Set[sg.Window] = set()
 
@@ -1119,8 +1119,8 @@ class WindowTracker:
 
 
 class PromptManager:
-    # Prompt profile for when the user is not using a saved prompt profile
-    _unsaved_prompt_name = "(None)"
+    # Name of the Prompt profile for when the user is not using a saved prompt profile
+    _unsaved_prompt_profile_name = "(None)"
 
     def __init__(self, saved_prompts_settings_key: str) -> None:
         """
@@ -1131,7 +1131,8 @@ class PromptManager:
         self.saved_prompts = sg.user_settings_get_entry(
             self._saved_prompts_settings_key, {}
         )
-        self._dropdown = None
+        self._dropdown_window = None
+        self._dropdown_key: Optional[str] = None
 
     @property
     def saved_prompts(self) -> Dict[str, str]:
@@ -1152,7 +1153,7 @@ class PromptManager:
     @property
     def prompt_profile_names(self) -> List[str]:
         """The unsaved prompt profile name and the names of the saved prompt profiles."""
-        return [self._unsaved_prompt_name, *sorted(self.saved_prompts.keys())]
+        return [self._unsaved_prompt_profile_name, *sorted(self.saved_prompts.keys())]
 
     @property
     def saved_prompt_profiles(self) -> List[Tuple[str, str]]:
@@ -1200,8 +1201,30 @@ class PromptManager:
 
         self._update_prompt_profile_dropdown(deleted_prompt_profile_name=prompt_name)
 
-    def set_prompt_profile_dropdown(self, dropdown: sg.Element):
-        self._dropdown = dropdown
+    def set_prompt_profile_dropdown(self, window: sg.Window, key: str) -> None:
+        """Set the prompt profile dropdown element that will be updated when the prompt
+        profiles change.
+
+        Args:
+            window (sg.Window): The window containing the dropdown element.
+            key (str): The key for the dropdown element.
+        """
+        self._dropdown_window = window
+        self._dropdown_key = key
+
+    @property
+    def _dropdown(self) -> Optional[sg.Combo]:
+        """The prompt profile dropdown element that will be updated when the prompt
+        profiles change.
+
+        Returns:
+            Optional[sg.Combo]: Returns the dropdown element if known. Else, returns None.
+        """
+        if self._dropdown_window and self._dropdown_key is not None:
+            return self._dropdown_window[self._dropdown_key]
+        else:
+            return None
+
 
     def _update_prompt_profile_dropdown(
         self, deleted_prompt_profile_name: str = None
@@ -1214,17 +1237,23 @@ class PromptManager:
         """
         if self._dropdown:
             # Get the currently selected profile in the dropdown
-            selected_prompt_profile_dropdown = self._dropdown.get()
+            selected_prompt_profile_name = self._dropdown.get()
 
             # Select the unsaved prompt profile if the currently selected profile was just deleted
-            if deleted_prompt_profile_name == selected_prompt_profile_dropdown:
-                selected_prompt_profile_dropdown = self._unsaved_prompt_name
+            if deleted_prompt_profile_name == selected_prompt_profile_name:
+                selected_prompt_profile_name = self._unsaved_prompt_profile_name
 
             # Update the prompt profile list in the dropdown
             self._dropdown.update(
-                value=selected_prompt_profile_dropdown,
+                value=selected_prompt_profile_name,
                 values=self.prompt_profile_names,
             )
+
+            # Send an event selecting the prompt profile in the dropdown
+            if self._dropdown_window and self._dropdown_key is not None:
+                self._dropdown_window.write_event_value(
+                    self._dropdown_key, selected_prompt_profile_name
+                )
 
 
 def fancy_checkbox(
