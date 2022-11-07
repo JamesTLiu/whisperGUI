@@ -783,6 +783,9 @@ def start_GUI() -> None:
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
+            # Clear selection highlighting
+            window[prompt_profile_dropdown_key].widget.selection_clear()
+
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
