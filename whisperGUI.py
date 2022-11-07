@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
+
 import decimal
 import io
 import multiprocessing
-from operator import itemgetter
 import os
 import platform
 import re
@@ -19,6 +19,7 @@ from decimal import Decimal
 from itertools import zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
+from operator import itemgetter
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -94,14 +95,16 @@ def start_GUI() -> None:
 
     # Keys for prompt manager window
     saved_prompts_table_key = "-SAVED-PROMPTS-TABLE-"
-    open_add_prompt_window_key = "-ADD-PROMPT-"
-    edit_prompt_key = "-EDIT-PROMPT-"
+    open_add_prompt_window_key = "-OPEN-ADD-PROMPT-WINDOW-"
+    open_edit_prompt_window_key = "-OPEN-EDIT-PROMPT-WINDOW-"
     delete_prompt_key = "-DELETE-PROMPT-"
 
-    # Keys for add new prompt window
-    new_prompt_name_key = "-NEW-PROMPT-NAME-"
-    new_prompt_key = "-NEW-PROMPT-"
-    add_prompt_profile_key = "-NEW-PROMPT-ADD-"
+    # Keys for add/edit prompt window
+    new_profile_name_key = "-NEW-PROMPT-NAME-"
+    new_profile_prompt_key = "-NEW-PROMPT-"
+
+    add_prompt_profile_key = "-ADD-PROMPT-"
+    edit_prompt_profile_key = "-EDIT-PROMPT-"
 
     # Keys for settings tab
     apply_global_scaling_key = "-SAVE-SETTINGS-"
@@ -280,7 +283,7 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
                 sg.Input(
-                    default_text=prompt_manager.saved_prompts.get(
+                    default_text=prompt_manager.saved_prompt_profiles.get(
                         startup_prompt_profile, ""
                     ),
                     key=initial_prompt_input_key,
@@ -500,7 +503,7 @@ def start_GUI() -> None:
         layout = [
             [
                 sg.Table(
-                    prompt_manager.saved_prompt_profiles,
+                    prompt_manager.saved_prompt_profiles_list,
                     headings=["Profile", "Prompt"],
                     key=saved_prompts_table_key,
                     expand_x=True,
@@ -523,7 +526,9 @@ def start_GUI() -> None:
                         ],
                         [
                             sg.Button(
-                                "Edit selected", key=edit_prompt_key, expand_x=True
+                                "Edit selected",
+                                key=open_edit_prompt_window_key,
+                                expand_x=True,
                             )
                         ],
                         [
@@ -566,22 +571,46 @@ def start_GUI() -> None:
     # keep track of the prompt manager window
     prompt_manager_window = None
 
-    def popup_add_new_prompt() -> sg.Window:
-        """Pop up the add new prompt window.
+    def popup_add_edit_prompt_profile(
+        title: str, submit_event: str, profile_name: str = "", profile_prompt: str = ""
+    ) -> sg.Window:
+        """Pop up either the add or edit prompt profile window.
+
+        Args:
+            title (str): The title for the popup window.
+            submit_event (str): The event that occurs when new profile values are submitted.
+            profile_name (str, optional): The editted profile's name which prefills the profile name field in the window.
+                ONLY FOR PROFILE EDITS. Defaults to "".
+            prompt (str, optional): The editted profile's prompt which prefills the profile prompt field in the window.
+                ONLY FOR PROFILE EDITS. Defaults to "".
 
         Returns:
-            sg.Window: The add new prompt window.
+            sg.Window: The add/edit prompt profile window.
         """
         layout = [
             [
                 [sg.Text("Prompt profile name")],
-                [sg.Input(key=new_prompt_name_key, expand_x=True)],
+                [
+                    sg.Input(
+                        profile_name,
+                        key=new_profile_name_key,
+                        expand_x=True,
+                        metadata=profile_name,
+                    )
+                ],
                 [sg.Text("Prompt")],
-                [sg.Input(key=new_prompt_key, expand_x=True)],
+                [
+                    sg.Input(
+                        profile_prompt,
+                        key=new_profile_prompt_key,
+                        expand_x=True,
+                        metadata=profile_prompt,
+                    )
+                ],
                 [
                     sg.Button(
-                        "Save prompt",
-                        key=add_prompt_profile_key,
+                        "Save",
+                        key=submit_event,
                         focus=True,
                         bind_return_key=True,
                         expand_x=True,
@@ -596,8 +625,8 @@ def start_GUI() -> None:
 
         # Create the window
         win = sg.Window(
-            "Add new prompt profile",
-            layout,
+            title=title,
+            layout=layout,
             finalize=True,
             resizable=True,
             auto_size_buttons=True,
@@ -606,6 +635,44 @@ def start_GUI() -> None:
         )
 
         return win
+
+    def popup_add_prompt_profile(
+        title: str,
+        submit_event: str,
+    ) -> sg.Window:
+        """Pop up the add prompt profile window.
+
+        Args:
+            title (str): The title for the popup window.
+            submit_event (str): The event that occurs when new profile values are submitted.
+
+        Returns:
+            sg.Window: The add prompt profile window.
+        """
+        return popup_add_edit_prompt_profile(title=title, submit_event=submit_event)
+
+    def popup_edit_prompt_profile(
+        title: str, submit_event: str, profile_name: str = "", profile_prompt: str = ""
+    ) -> sg.Window:
+        """Pop up either the edit prompt profile window.
+
+        Args:
+            title (str): The title for the popup window.
+            submit_event (str): The event that occurs when new profile values are submitted.
+            profile_name (str, optional): The editted profile's name which prefills the profile name field in the window.
+                ONLY FOR PROFILE EDITS. Defaults to "".
+            prompt (str, optional): The editted profile's prompt which prefills the profile prompt field in the window.
+                ONLY FOR PROFILE EDITS. Defaults to "".
+
+        Returns:
+            sg.Window: The edit prompt profile window.
+        """
+        return popup_add_edit_prompt_profile(
+            title=title,
+            submit_event=submit_event,
+            profile_name=profile_name,
+            profile_prompt=profile_prompt,
+        )
 
     # keep track of the add new prompt window
     add_new_prompt_window = None
@@ -700,16 +767,63 @@ def start_GUI() -> None:
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
-            add_new_prompt_window = popup_add_new_prompt()
+            add_new_prompt_window = popup_add_prompt_profile(
+                title="Add new prompt profile", submit_event=add_prompt_profile_key
+            )
             modal_window_manager.track_modal_window(add_new_prompt_window)
-        # Handle adding of new saved prompt
-        elif event == add_prompt_profile_key:
-            # Get the name and prompt to be saved
-            new_prompt_name = values[new_prompt_name_key]
-            new_prompt = values[new_prompt_key]
+        # User wants to edit a saved prompt profile
+        elif event == open_edit_prompt_window_key:
+            selected_table_row_indices = values[saved_prompts_table_key]
 
-            # Add a new saved prompt profile
-            if prompt_manager.add_prompt_profile(new_prompt_name, new_prompt):
+            # Ensure user has selected a row in the prompt profile table
+            if selected_table_row_indices:
+                # Look up the profile using the index of the first selected table row
+                selected_profile = prompt_manager.saved_prompt_profiles_list[
+                    selected_table_row_indices[0]
+                ]
+                selected_profile_name, selected_profile_prompt = selected_profile
+
+                # Pop up a window to edit the prompt name and prompt
+                edit_prompt_window = popup_edit_prompt_profile(
+                    title="Edit prompt profile",
+                    submit_event=edit_prompt_profile_key,
+                    profile_name=selected_profile_name,
+                    profile_prompt=selected_profile_prompt,
+                )
+                modal_window_manager.track_modal_window(edit_prompt_window)
+            # User has not selected a row in the prompt profile table
+            else:
+                popup_window = popup_tracked(
+                    f"Please select a profile in the table.",
+                    popup_fn=popup,
+                    window_tracker=window_tracker,
+                    title="Invalid selection",
+                    modal=True,
+                )
+                modal_window_manager.track_modal_window(popup_window)
+        # Handle adding or editing of a prompt profile
+        elif event in (add_prompt_profile_key, edit_prompt_profile_key):
+            # Get the name and prompt to be saved
+            new_profile_name = values[new_profile_name_key]
+            new_profile_prompt = values[new_profile_prompt_key]
+
+            # Get the original profile name of the add/edit profile window before user changes.
+            original_profile_name = window[new_profile_name_key].metadata
+
+            if event == add_prompt_profile_key:
+                (add_edit_success, error_msg,) = prompt_manager.add_prompt_profile(
+                    profile_name=new_profile_name,
+                    profile_prompt=new_profile_prompt,
+                )
+            elif event == edit_prompt_profile_key:
+                (add_edit_success, error_msg,) = prompt_manager.edit_prompt_profile(
+                    profile_name=new_profile_name,
+                    profile_prompt=new_profile_prompt,
+                    original_profile_name=original_profile_name,
+                )
+
+            # Successfully added / edited a saved prompt profile
+            if add_edit_success:
                 # Close the add new prompt window
                 window.close()
                 add_new_prompt_window = None
@@ -724,37 +838,23 @@ def start_GUI() -> None:
             # Failed to add new prompt
             else:
                 popup_window = popup_tracked(
-                    (
-                        f"Invalid prompt name. Empty or whitespace only prompt names are invalid."
-                        "\n\nPlease enter a new prompt name."
-                    ),
+                    error_msg,
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid prompt name",
                     modal=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
-        # User wants to edit a saved prompt
-        elif event == edit_prompt_key:
-            ...
-
-            # Refresh the prompt manager
-            if prompt_manager_window:
-                prompt_manager_window.close()
-                prompt_manager_window = window_tracker.track_window(
-                    popup_prompt_manager()
-                )
-                modal_window_manager.track_modal_window(prompt_manager_window)
-        # User wants to delete a saved prompt
+        # User wants to delete a saved prompt profile
         elif event == delete_prompt_key:
             # Delete the saved prompt profile
-            selected_rows_prompts_table = values[saved_prompts_table_key]
+            selected_table_row_indices = values[saved_prompts_table_key]
 
             # Ensure user has selected a row in the prompt profile table
-            if selected_rows_prompts_table:
+            if selected_table_row_indices:
                 prompt_profile_names = prompt_manager.saved_prompt_profile_names
                 prompt_profile_name_to_delete = prompt_profile_names[
-                    selected_rows_prompts_table[0]
+                    selected_table_row_indices[0]
                 ]
                 prompt_manager.delete_prompt_profile(prompt_profile_name_to_delete)
 
@@ -787,7 +887,7 @@ def start_GUI() -> None:
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
             if chosen_prompt_profile in prompt_manager.saved_prompt_profile_names:
-                new_initial_prompt_input = prompt_manager.saved_prompts[
+                new_initial_prompt_input = prompt_manager.saved_prompt_profiles[
                     chosen_prompt_profile
                 ]
             elif chosen_prompt_profile == prompt_manager.unsaved_prompt_profile_name:
@@ -1133,7 +1233,7 @@ class PromptManager:
             saved_prompts_settings_key (str): Key for the saved prompts in the settings file.
         """
         self._saved_prompts_settings_key = saved_prompts_settings_key
-        self.saved_prompts = sg.user_settings_get_entry(
+        self.saved_prompt_profiles = sg.user_settings_get_entry(
             self._saved_prompts_settings_key, {}
         )
         self._dropdown_window = None
@@ -1145,58 +1245,139 @@ class PromptManager:
         return self._unsaved_prompt_profile_name
 
     @property
-    def saved_prompts(self) -> Dict[str, str]:
+    def saved_prompt_profiles(self) -> Dict[str, str]:
         """A dict with the saved prompt profiles names and their prompt values."""
-        self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(
-            self._saved_prompts_settings_key, self._saved_prompts
+        self._saved_prompt_profiles: Dict[str, str] = sg.user_settings_get_entry(
+            self._saved_prompts_settings_key, self._saved_prompt_profiles
         )
-        return self._saved_prompts
+        return self._saved_prompt_profiles
 
-    @saved_prompts.setter
-    def saved_prompts(self, new_prompt_dict: Dict[str, str]) -> None:
-        self._saved_prompts = new_prompt_dict
+    @saved_prompt_profiles.setter
+    def saved_prompt_profiles(self, new_prompt_dict: Dict[str, str]) -> None:
+        self._saved_prompt_profiles = new_prompt_dict
 
-    @saved_prompts.deleter
-    def saved_prompts(self) -> None:
-        self._saved_prompts.clear()
+    @saved_prompt_profiles.deleter
+    def saved_prompt_profiles(self) -> None:
+        self._saved_prompt_profiles.clear()
 
     @property
     def prompt_profile_names(self) -> List[str]:
-        """The unsaved prompt profile name and the names of the saved prompt profiles."""
-        return [self.unsaved_prompt_profile_name, *sorted(self.saved_prompts.keys())]
+        """The unsaved prompt profile name and the sorted ascending names of the saved prompt profiles."""
+        return [
+            self.unsaved_prompt_profile_name,
+            *sorted(self.saved_prompt_profiles.keys()),
+        ]
 
     @property
-    def saved_prompt_profiles(self) -> List[Tuple[str, str]]:
-        """The saved prompt profiles as a tuple of tuples."""
-        return sorted(self.saved_prompts.items(), key=itemgetter(0))
+    def saved_prompt_profiles_list(self) -> List[Tuple[str, str]]:
+        """The saved prompt profiles as a list of tuples sorted ascending."""
+        return sorted(self.saved_prompt_profiles.items(), key=itemgetter(0))
 
     @property
     def saved_prompt_profile_names(self) -> List[str]:
-        """The names of the saved prompt profiles."""
-        return sorted(self.saved_prompts.keys())
+        """The names of the saved prompt profiles sorted ascending."""
+        return sorted(self.saved_prompt_profiles.keys())
 
-    def add_prompt_profile(self, prompt_name: str, prompt: str) -> bool:
+    def add_prompt_profile(
+        self, profile_name: str, profile_prompt: str
+    ) -> Tuple[bool, str]:
         """Add a new prompt profile.
 
         Args:
-            prompt_name (str): The name for the new prompt profile.
-            prompt (str): The prompt for the new prompt profile.
+            profile_name (str): The name for the new prompt profile.
+            profile_prompt (str): The prompt for the new prompt profile.
 
         Returns:
-            bool: True, if the prompt profile was successfully created. False, otherwise.
+            Tuple[bool, str]: Tuple with the success state and an error message.
+                The success state will be True if the prompt profile was successfully added.
+                False, otherwise. The error message will be an empty string if no error occurred.
         """
-        # Invalid prompt name. Prompt name already in use, empty, or only whitespaces.
-        if prompt_name in self.saved_prompts or not prompt_name.strip():
-            return False
+        error_msg = ""
 
-        self.saved_prompts[prompt_name] = prompt
+        # Invalid prompt name. Prompt name is empty or only has whitespaces.
+        if not profile_name.strip():
+            error_msg = (
+                f"Invalid prompt name: name can't be empty or whitespace only."
+                "\n\nPlease enter a new prompt name."
+            )
+            return False, error_msg
+
+        # Invalid prompt name. Prompt name already in use.
+        if profile_name in self.prompt_profile_names:
+            error_msg = (
+                f"Invalid prompt name: name already in use."
+                "\n\nPlease enter a new prompt name."
+            )
+            return False, error_msg
+
+        self._save_profile(profile_name=profile_name, profile_prompt=profile_prompt)
+
+        return True, error_msg
+
+    def edit_prompt_profile(
+        self,
+        profile_name: str,
+        profile_prompt: str,
+        original_profile_name: str,
+    ) -> Tuple[bool, str]:
+        """Edit a prompt profile.
+
+        Args:
+            profile_name (str): The new name for the prompt profile.
+            profile_prompt (str): The new prompt for the prompt profile.
+            original_profile_name (str): The original name of the prompt profile being edited.
+
+        Returns:
+            Tuple[bool, str]: Tuple with the success state and an error message.
+                The success state will be True if the prompt profile was successfully editted.
+                False, otherwise. The error message will be an empty string if no error occurred.
+        """
+        error_msg = ""
+
+        # Invalid prompt name. Prompt name is empty or only has whitespaces.
+        if not profile_name.strip():
+            error_msg = (
+                f"Invalid prompt name: name can't be empty or whitespace only."
+                "\n\nPlease enter a new prompt name."
+            )
+            return False, error_msg
+
+        profile_name_changed = profile_name != original_profile_name
+
+        # Invalid prompt name. Profile name is already in use and is not the edited profile's original name.
+        if profile_name in self.prompt_profile_names and profile_name_changed:
+            error_msg = (
+                f"Invalid prompt name: name already in use."
+                "\n\nPlease enter a new prompt name."
+            )
+            return False, error_msg
+
+        # User chose to rename the selected prompt. Delete the old prompt profile.
+        if profile_name_changed:
+            with suppress(KeyError):
+                del self.saved_prompt_profiles[original_profile_name]
+
+        self._save_profile(profile_name=profile_name, profile_prompt=profile_prompt)
+
+        return True, error_msg
+
+    def _save_profile(self, profile_name: str, profile_prompt: str) -> None:
+        """Save the prompt profile.
+
+        Overwrites an existing prompt profile if it already exists.
+
+        Args:
+            prompt_name (str): _description_
+            prompt (str): _description_
+        """
+        self.saved_prompt_profiles[profile_name] = profile_prompt
 
         # Update the settings file with the updated prompt profiles
-        sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+        sg.user_settings_set_entry(
+            self._saved_prompts_settings_key, self.saved_prompt_profiles
+        )
 
         self._update_prompt_profile_dropdown()
-
-        return True
 
     def delete_prompt_profile(self, prompt_name: str) -> None:
         """Delete a prompt profile by name.
@@ -1204,23 +1385,14 @@ class PromptManager:
         Args:
             prompt_name (str): The name of the prompt profile to be deleted.
         """
-        del self.saved_prompts[prompt_name]
+        del self.saved_prompt_profiles[prompt_name]
 
         # Update the settings file with the updated prompt profiles
-        sg.user_settings_set_entry(self._saved_prompts_settings_key, self.saved_prompts)
+        sg.user_settings_set_entry(
+            self._saved_prompts_settings_key, self.saved_prompt_profiles
+        )
 
         self._update_prompt_profile_dropdown(deleted_prompt_profile_name=prompt_name)
-
-    def set_prompt_profile_dropdown(self, window: sg.Window, key: str) -> None:
-        """Set the prompt profile dropdown element that will be updated when the prompt
-        profiles change.
-
-        Args:
-            window (sg.Window): The window containing the dropdown element.
-            key (str): The key for the dropdown element.
-        """
-        self._dropdown_window = window
-        self._dropdown_key = key
 
     @property
     def _dropdown(self) -> Optional[sg.Combo]:
@@ -1234,6 +1406,17 @@ class PromptManager:
             return self._dropdown_window[self._dropdown_key]
         else:
             return None
+
+    def set_prompt_profile_dropdown(self, window: sg.Window, key: str) -> None:
+        """Set the prompt profile dropdown element that will be updated when the prompt
+        profiles change.
+
+        Args:
+            window (sg.Window): The window containing the dropdown element.
+            key (str): The key for the dropdown element.
+        """
+        self._dropdown_window = window
+        self._dropdown_key = key
 
     def _update_prompt_profile_dropdown(
         self, deleted_prompt_profile_name: str = None
