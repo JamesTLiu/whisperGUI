@@ -2045,8 +2045,16 @@ def transcribe_audio_video_files(
         )
         process.start()
 
-        def send_to_print_from_connection(conn: Union[Connection, PipeConnection]):
-            window.write_event_value(print_event, str(conn.recv()))
+        def send_piped_output_to_window(
+            win: sg.Window, conn: Union[Connection, PipeConnection]
+        ) -> None:
+            """Send the contents in a connection to a window as a print event.
+
+            Args:
+                win (sg.Window): The window to write the print event to.
+                conn (Union[Connection, PipeConnection]): The connection to read from.
+            """
+            win.write_event_value(print_event, str(conn.recv()))
 
         # Transcribing
         while not process_done_flag.is_set():
@@ -2062,12 +2070,12 @@ def transcribe_audio_video_files(
 
             # Print the stdout stderr output piped from the process
             while read_connection.poll():
-                send_to_print_from_connection(read_connection)
+                send_piped_output_to_window(window, read_connection)
 
             # print('process alive')
 
         while read_connection.poll():
-            send_to_print_from_connection(read_connection)
+            send_piped_output_to_window(window, read_connection)
 
         # Get the result from transcribing the file
         result = mp_queue.get()
