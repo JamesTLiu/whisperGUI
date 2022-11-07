@@ -223,7 +223,7 @@ def start_GUI() -> None:
 
         # Startup prompt profile
         startup_prompt_profile = sg.user_settings_get_entry(
-            prompt_profile_dropdown_key, prompt_manager._unsaved_prompt_profile_name
+            prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_profile_name
         )
 
         # The tab1 option elements as rows
@@ -779,7 +779,7 @@ def start_GUI() -> None:
         elif event == initial_prompt_input_key:
             # Select the unsaved prompt profile
             window[prompt_profile_dropdown_key].update(
-                value=prompt_manager._unsaved_prompt_profile_name
+                value=prompt_manager.unsaved_prompt_profile_name
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
@@ -790,7 +790,7 @@ def start_GUI() -> None:
                 new_initial_prompt_input = prompt_manager.saved_prompts[
                     chosen_prompt_profile
                 ]
-            elif chosen_prompt_profile == prompt_manager._unsaved_prompt_profile_name:
+            elif chosen_prompt_profile == prompt_manager.unsaved_prompt_profile_name:
                 new_initial_prompt_input = ""
             else:
                 raise NonExistentPromptProfileName(
@@ -1136,6 +1136,11 @@ class PromptManager:
         self._dropdown_key: Optional[str] = None
 
     @property
+    def unsaved_prompt_profile_name(self) -> str:
+        """Name of the Prompt profile for when the user is not using a saved prompt profile."""
+        return self._unsaved_prompt_profile_name
+
+    @property
     def saved_prompts(self) -> Dict[str, str]:
         """A dict with the saved prompt profiles names and their prompt values."""
         self._saved_prompts: Dict[str, str] = sg.user_settings_get_entry(
@@ -1154,7 +1159,7 @@ class PromptManager:
     @property
     def prompt_profile_names(self) -> List[str]:
         """The unsaved prompt profile name and the names of the saved prompt profiles."""
-        return [self._unsaved_prompt_profile_name, *sorted(self.saved_prompts.keys())]
+        return [self.unsaved_prompt_profile_name, *sorted(self.saved_prompts.keys())]
 
     @property
     def saved_prompt_profiles(self) -> List[Tuple[str, str]]:
@@ -1226,7 +1231,6 @@ class PromptManager:
         else:
             return None
 
-
     def _update_prompt_profile_dropdown(
         self, deleted_prompt_profile_name: str = None
     ) -> None:
@@ -1242,9 +1246,9 @@ class PromptManager:
 
             # Select the unsaved prompt profile if the currently selected profile was just deleted
             if deleted_prompt_profile_name == selected_prompt_profile_name:
-                selected_prompt_profile_name = self._unsaved_prompt_profile_name
+                selected_prompt_profile_name = self.unsaved_prompt_profile_name
 
-            # Update the prompt profile list in the dropdown
+            # Update the prompt profile list and the selected profile for the dropdown
             self._dropdown.update(
                 value=selected_prompt_profile_name,
                 values=self.prompt_profile_names,
