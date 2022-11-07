@@ -2230,7 +2230,9 @@ class OutputRedirector(io.StringIO):
         """
         # Send text through the write connection and ignore OSError that occurs when the process is killed.
         with suppress(OSError):
-            self.write_conn.send(str(txt))
+            self.write_conn.send(txt)
+
+        return len(txt)
 
     def flush(self):
         """Handle Flush parameter passed into a print statement.
