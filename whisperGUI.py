@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import decimal
+import io
 import multiprocessing
 import os
 import platform
 import re
 import shlex
+import signal
 import subprocess
 import sys
 import threading
@@ -16,7 +18,6 @@ from itertools import zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from pathlib import Path
-from signal import SIGTERM, signal
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -41,6 +42,7 @@ else:
 
 if TYPE_CHECKING:
     import PySimpleGUI
+    from types import FrameType
 
 import PySimpleGUI as sg
 import whisper
@@ -2127,7 +2129,7 @@ def transcribe_audio_video(
     # print("In process...")
 
     # Clean up when this process is told to terminate
-    def handler(sig, frame):
+    def handler(sig: signal._SIGNUM, frame: FrameType = None) -> None:
         queue.close()
         redirector.close()
         write_connection.close()
@@ -2135,7 +2137,7 @@ def transcribe_audio_video(
         sys.exit(0)
 
     # handle sigterm
-    signal(SIGTERM, handler)
+    signal.signal(signal.SIGTERM, handler)
 
     whisper_model = whisper.load_model(model)
 
@@ -2173,7 +2175,7 @@ def transcribe_audio_video(
     process_done_flag.set()
 
 
-class OutputRedirector:
+class OutputRedirector(io.StringIO):
     """Redirector for stdout and/or stderr to a writeable Connection."""
 
     def __init__(
