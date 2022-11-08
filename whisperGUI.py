@@ -48,8 +48,8 @@ if TYPE_CHECKING:
     from types import FrameType
 
 import tkinter as tk
-import tkinter.ttk as ttk
 import tkinter.font as tkfont
+import tkinter.ttk as ttk
 
 import PySimpleGUI as sg
 import whisper
@@ -1385,13 +1385,15 @@ class PromptManager:
     def _save_profile(
         self, profile_name: str, profile_prompt: str, original_profile_name: str = None
     ) -> None:
-        """Save the prompt profile.
+        """Save the prompt profile while overwriting the original profile if it is given.
 
         Overwrites an existing prompt profile if it already exists.
 
         Args:
-            prompt_name (str): _description_
-            prompt (str): _description_
+            prompt_name (str): The name for the prompt profile.
+            prompt (str): The prompt for the prompt profile.
+            original_profile_name (str, None): The original name of the prompt profile being edited
+                if applicable. Defaults to None.
         """
         # Editing a profile. Delete the old prompt profile.
         if original_profile_name is not None:
@@ -1401,10 +1403,7 @@ class PromptManager:
         # Save the new profile
         self.saved_prompt_profiles[profile_name] = profile_prompt
 
-        # Update the settings file with the updated prompt profiles
-        sg.user_settings_set_entry(
-            self._saved_prompts_settings_key, self.saved_prompt_profiles
-        )
+        self._save_profiles_to_settings()
 
         if self._dropdown:
             selected_dropdown_profile_name = self._dropdown.get()
@@ -1427,10 +1426,7 @@ class PromptManager:
         """
         del self.saved_prompt_profiles[profile_name]
 
-        # Update the settings file with the updated prompt profiles
-        sg.user_settings_set_entry(
-            self._saved_prompts_settings_key, self.saved_prompt_profiles
-        )
+        self._save_profiles_to_settings()
 
         # Get the currently selected profile in the dropdown
         if self._dropdown:
@@ -1445,6 +1441,13 @@ class PromptManager:
             # Update the profile dropdown and keep the current profile selection
             else:
                 self._update_prompt_profile_dropdown()
+
+    def _save_profiles_to_settings(self) -> None:
+        """Update the settings file with the current prompt profiles.
+        """
+        sg.user_settings_set_entry(
+            self._saved_prompts_settings_key, self.saved_prompt_profiles
+        )
 
     @property
     def _dropdown(self) -> Optional[sg.Combo]:
@@ -1476,8 +1479,8 @@ class PromptManager:
         """Update the tracked prompt profile dropdown element if it exists.
 
         Args:
-            new_selected_profile (str, optional): The dropdown selection will be changed
-                to this profile if given. Defaults to None.
+            new_selected_profile (str, ellipsis): The dropdown selection will be changed
+                to this profile if given. Defaults to ellipsis.
         """
         if self._dropdown:
             selected_profile = new_selected_profile
