@@ -47,6 +47,10 @@ if TYPE_CHECKING:
     import PySimpleGUI
     from types import FrameType
 
+import tkinter as tk
+import tkinter.ttk as ttk
+import tkinter.font as tkfont
+
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
@@ -485,6 +489,24 @@ def start_GUI() -> None:
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
+
+        def combo_configure(event):
+            combo = event.widget
+            style = ttk.Style()
+
+            long = max(combo.cget("values"), key=len)
+
+            # font = tkfont.nametofont(str(combo.cget('font')))
+            font = tkfont.Font(font=combo.cget("font"))
+            width = max(0, font.measure(long.strip() + "0") - combo.winfo_width())
+
+            style_name = "TCombobox"
+
+            style.configure(style_name, postoffset=(0, 0, width, 0))
+            combo.configure(style=style_name)
+
+        # window[prompt_profile_dropdown_key].widget.bind('<Configure>', combo_configure)
+        # window[prompt_profile_dropdown_key].widget.pack()
 
         return window
 
@@ -1344,7 +1366,7 @@ class PromptManager:
 
         profile_name_changed = profile_name != original_profile_name
 
-        # Invalid prompt name. Profile name is already in use and is not the edited profile's original name.
+        # Invalid prompt name. Profile name is already in use and user isn't editing the selected profile's prompt.
         if profile_name in self.prompt_profile_names and profile_name_changed:
             error_msg = (
                 f"Invalid prompt name: name already in use."
@@ -1352,16 +1374,17 @@ class PromptManager:
             )
             return False, error_msg
 
-        # User chose to rename the selected prompt. Delete the old prompt profile.
-        if profile_name_changed:
-            with suppress(KeyError):
-                del self.saved_prompt_profiles[original_profile_name]
-
-        self._save_profile(profile_name=profile_name, profile_prompt=profile_prompt)
+        self._save_profile(
+            profile_name=profile_name,
+            profile_prompt=profile_prompt,
+            original_profile_name=original_profile_name,
+        )
 
         return True, error_msg
 
-    def _save_profile(self, profile_name: str, profile_prompt: str) -> None:
+    def _save_profile(
+        self, profile_name: str, profile_prompt: str, original_profile_name: str = None
+    ) -> None:
         """Save the prompt profile.
 
         Overwrites an existing prompt profile if it already exists.
@@ -1370,6 +1393,12 @@ class PromptManager:
             prompt_name (str): _description_
             prompt (str): _description_
         """
+        # Editing a profile. Delete the old prompt profile.
+        if original_profile_name is not None:
+            with suppress(KeyError):
+                del self.saved_prompt_profiles[original_profile_name]
+
+        # Save the new profile
         self.saved_prompt_profiles[profile_name] = profile_prompt
 
         # Update the settings file with the updated prompt profiles
@@ -1377,22 +1406,45 @@ class PromptManager:
             self._saved_prompts_settings_key, self.saved_prompt_profiles
         )
 
-        self._update_prompt_profile_dropdown()
+        if self._dropdown:
+            selected_dropdown_profile_name = self._dropdown.get()
 
-    def delete_prompt_profile(self, prompt_name: str) -> None:
+            # Edited the currently selected profile in the dropdown. Select the new profile.
+            if (
+                original_profile_name is not None
+                and original_profile_name == selected_dropdown_profile_name
+            ):
+                self._update_prompt_profile_dropdown(new_selected_profile=profile_name)
+            # Added a profile or did not edit the currently selected profile in the dropdown
+            else:
+                self._update_prompt_profile_dropdown()
+
+    def delete_prompt_profile(self, profile_name: str) -> None:
         """Delete a prompt profile by name.
 
         Args:
             prompt_name (str): The name of the prompt profile to be deleted.
         """
-        del self.saved_prompt_profiles[prompt_name]
+        del self.saved_prompt_profiles[profile_name]
 
         # Update the settings file with the updated prompt profiles
         sg.user_settings_set_entry(
             self._saved_prompts_settings_key, self.saved_prompt_profiles
         )
 
-        self._update_prompt_profile_dropdown(deleted_prompt_profile_name=prompt_name)
+        # Get the currently selected profile in the dropdown
+        if self._dropdown:
+            selected_prompt_profile_name = self._dropdown.get()
+
+            # Update the profile dropdown and select the unsaved prompt profile in the
+            # dropdown since the current profile selection was deleted
+            if profile_name == selected_prompt_profile_name:
+                self._update_prompt_profile_dropdown(
+                    new_selected_profile=self.unsaved_prompt_profile_name
+                )
+            # Update the profile dropdown and keep the current profile selection
+            else:
+                self._update_prompt_profile_dropdown()
 
     @property
     def _dropdown(self) -> Optional[sg.Combo]:
@@ -1419,32 +1471,35 @@ class PromptManager:
         self._dropdown_key = key
 
     def _update_prompt_profile_dropdown(
-        self, deleted_prompt_profile_name: str = None
+        self, new_selected_profile: Union[str, ellipsis] = ...
     ) -> None:
         """Update the tracked prompt profile dropdown element if it exists.
 
         Args:
-            deleted_prompt_profile_name (str, optional): The name of the deleted prompt profile
-                if one was deleted. Defaults to None.
+            new_selected_profile (str, optional): The dropdown selection will be changed
+                to this profile if given. Defaults to None.
         """
         if self._dropdown:
-            # Get the currently selected profile in the dropdown
-            selected_prompt_profile_name = self._dropdown.get()
+            selected_profile = new_selected_profile
 
-            # Select the unsaved prompt profile if the currently selected profile was just deleted
-            if deleted_prompt_profile_name == selected_prompt_profile_name:
-                selected_prompt_profile_name = self.unsaved_prompt_profile_name
+            # Keep the old selection for the dropdown if a new selection is not given
+            if selected_profile is ...:
+                selected_profile = self._dropdown.get()
 
             # Update the prompt profile list and the selected profile for the dropdown
             self._dropdown.update(
-                value=selected_prompt_profile_name,
+                value=selected_profile,
                 values=self.prompt_profile_names,
             )
 
-            # Send an event selecting the prompt profile in the dropdown
-            if self._dropdown_window and self._dropdown_key is not None:
+            # Send an event changing the dropdown selection if a new selected profile is given.
+            if (
+                self._dropdown_window
+                and self._dropdown_key is not None
+                and new_selected_profile is not ...
+            ):
                 self._dropdown_window.write_event_value(
-                    self._dropdown_key, selected_prompt_profile_name
+                    self._dropdown_key, new_selected_profile
                 )
 
 
