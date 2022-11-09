@@ -1104,9 +1104,13 @@ def start_GUI() -> None:
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
-        # Clear selection highlighting if a dropdown option was selected
-        if window and event and isinstance(window[event], sg.Combo):
-            window[event].widget.selection_clear()
+            # Clear selection highlighting if a dropdown option was selected
+            if (
+                window
+                and event in window.key_dict
+                and isinstance(window[event], sg.Combo)
+            ):
+                window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
         if event in TRANSCRIBE_DONE_EVENTS:
