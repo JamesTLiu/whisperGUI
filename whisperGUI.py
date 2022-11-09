@@ -171,7 +171,7 @@ def start_GUI() -> None:
 
     # Options used in the language specifier setting
     LANGUAGE_SPECIFIER_AS_LANG = "Language"
-    LANGUAGE_SPECIFIER_AS_CODE = "Language code"
+    LANGUAGE_SPECIFIER_AS_CODE = "Language Code"
 
     # tracker for possibly active windows
     window_tracker = WindowTracker()
@@ -256,15 +256,15 @@ def start_GUI() -> None:
                 ),
             ],
             fancy_checkbox(
-                text="Translate all results to English",
+                text="Translate to English",
                 text_key=translate_to_english_text_key,
                 checkbox_key=translate_to_english_checkbox_key,
                 is_checked=translate_to_english_last_choice,
             ),
             [
-                sg.Text("Prompt profile"),
+                sg.Text("Prompt Profile"),
                 sg.Text(
-                    "Initial prompt for selected files",
+                    "Initial Prompt",
                     tooltip=(
                         "Use this when a dialect/style of a language or punctuation is desired.\n"
                         "Does NOT guarantee the result will follow the initial prompt.\n"
@@ -299,9 +299,9 @@ def start_GUI() -> None:
 
         # main tab
         tab1_layout = [
-            [sg.Text("Select audio/video file(s)")],
+            [sg.Text("Select Audio/Video File(s)")],
             [sg.Input(disabled=True, expand_x=True), sg.FilesBrowse(key=in_file_key)],
-            [sg.Text("Output folder:")],
+            [sg.Text("Output Folder:")],
             [
                 sg.Input(
                     default_text=sg.user_settings_get_entry(out_dir_key, ""),
@@ -386,11 +386,11 @@ def start_GUI() -> None:
             [sg.HorizontalSeparator()],
             [
                 sg.Text(
-                    "Make the application larger or smaller.", font=(GUI_FONT[0], 22)
+                    "Resize the Application", font=(GUI_FONT[0], 22)
                 )
             ],
             [
-                sg.Text(f"Size multiplier ({MIN_SCALING} to {MAX_SCALING}):"),
+                sg.Text(f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):"),
                 sg.Input(
                     sg.user_settings_get_entry(
                         scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
@@ -401,7 +401,7 @@ def start_GUI() -> None:
                 sg.Button("Apply", key=apply_global_scaling_key),
             ],
             [sg.HorizontalSeparator()],
-            [sg.Text(f"Settings file location:")],
+            [sg.Text(f"Location of the Settings File:")],
             [
                 sg.Input(
                     f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
@@ -409,14 +409,14 @@ def start_GUI() -> None:
             ],
             [sg.HorizontalSeparator()],
             fancy_checkbox(
-                text="Remember output directory",
+                text="Remember Output Folder",
                 text_key=save_output_dir_text_key,
                 checkbox_key=save_output_dir_checkbox_key,
                 is_checked=save_output_dir,
             ),
             [sg.HorizontalSeparator()],
             [
-                sg.Text("Language specifier in output filenames"),
+                sg.Text("Language Specifier in Output File Names"),
                 sg.Combo(
                     values=language_specifier_options,
                     key=language_specifier_setting_key,
@@ -430,7 +430,7 @@ def start_GUI() -> None:
             ],
             [
                 sg.Column(
-                    [[sg.Text("      Language:")], [sg.Text("      Language code:")]],
+                    [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
                     pad=0,
                 ),
                 sg.Column(
@@ -475,7 +475,7 @@ def start_GUI() -> None:
 
         # Create the window
         window = sg.Window(
-            "whisperGUI - transcribe audio/video to text",
+            "WhisperGUI - Convert Audio/Video Files to Text",
             layout,
             finalize=True,
             resizable=True,
