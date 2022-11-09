@@ -2839,6 +2839,26 @@ def get_combo_values(combo: sg.Combo) -> Tuple:
     return combo.widget.cget("values")
 
 
+def set_combo_input_justify(combo: sg.Combo, justify: str) -> None:
+    """Align the text in the combo input field.
+
+    Args:
+        combo (sg.Combo): The Combo element to update.
+        justify (str): Specifies how the text is aligned within the Combo's input field.
+            One of "left", "center", or "right".
+
+    Raises:
+        ValueError: justify parameter must be 'left', 'center', or 'right'
+    """
+    if justify not in ("left", "center", "right"):
+        raise ValueError(
+            f"Invalid justify parameter value: {justify}. "
+            f"justify parameter must be 'left', 'center', or 'right'"
+        )
+
+    combo.widget.configure(justify=justify)
+
+
 if __name__ == "__main__":
     # required for when a program which uses multiprocessing has been frozen to produce a Windows executable.
     # (Has been tested with py2exe, PyInstaller and cx_Freeze.) has no effect when invoked on any operating system other than Windows
