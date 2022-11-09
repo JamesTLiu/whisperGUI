@@ -543,19 +543,19 @@ def start_GUI() -> None:
                     [
                         [
                             sg.Button(
-                                "Add new", key=open_add_prompt_window_key, expand_x=True
+                                "Add Profile", key=open_add_prompt_window_key, expand_x=True
                             )
                         ],
                         [
                             sg.Button(
-                                "Edit selected",
+                                "Edit Profile",
                                 key=open_edit_prompt_window_key,
                                 expand_x=True,
                             )
                         ],
                         [
                             sg.Button(
-                                "Delete selected", key=delete_prompt_key, expand_x=True
+                                "Delete Profile", key=delete_prompt_key, expand_x=True
                             )
                         ],
                         [sg.Text("")],
@@ -611,7 +611,7 @@ def start_GUI() -> None:
         """
         layout = [
             [
-                [sg.Text("Prompt profile name")],
+                [sg.Text("Profile Name")],
                 [
                     sg.Input(
                         profile_name,
