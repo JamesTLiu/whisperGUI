@@ -481,7 +481,6 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
-            modal=True,
         )
 
         # Load the FolderBrowse's selected folder from the settings file
