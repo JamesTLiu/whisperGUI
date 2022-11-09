@@ -2802,7 +2802,7 @@ def del_existing_file(file_path: Union[str, Path]):
         p.unlink()
 
 
-def combo_configure(event):
+def combo_configure(event: tk.Event) -> None:
     """Set the width of the dropdown list to fit all options.
 
     Does not change the entry box width.
@@ -2825,6 +2825,18 @@ def combo_configure(event):
 
     style.configure(style_name, postoffset=(0, 0, width, 0))
     combo.configure(style=style_name)
+
+
+def get_combo_values(combo: sg.Combo) -> Tuple:
+    """Get the values for the Combo element.
+
+    Args:
+        combo (sg.Combo): The Combo element.
+
+    Returns:
+        Tuple: A Tuple with the values for the Combo element.
+    """
+    return combo.widget.cget("values")
 
 
 if __name__ == "__main__":
