@@ -490,11 +490,32 @@ def start_GUI() -> None:
 
         return window
 
-    # make a tracked main window
-    main_window = window_tracker.track_window(make_main_window())
+    def make_tracked_main_window_with_synced_profiles(
+        window_tracker: WindowTracker,
+        prompt_manager: PromptManager,
+        prompt_profile_dropdown_key: str,
+    ) -> sg.Window:
+        """_summary_
 
-    # give the prompt manager the prompt profile dropdown element so that it can be updated on changes
-    prompt_manager.set_prompt_profile_dropdown(main_window, prompt_profile_dropdown_key)
+        Args:
+            window_tracker (WindowTracker): _description_
+            prompt_manager (PromptManager): _description_
+            prompt_profile_dropdown_key (str): _description_
+
+        Returns:
+            sg.Window: _description_
+        """
+        window = window_tracker.track_window(make_main_window())
+
+        # give the prompt manager the prompt profile dropdown so that it's updated on profile changes
+        prompt_manager.set_prompt_profile_dropdown(window, prompt_profile_dropdown_key)
+        return window
+
+    main_window = make_tracked_main_window_with_synced_profiles(
+        window_tracker=window_tracker,
+        prompt_manager=prompt_manager,
+        prompt_profile_dropdown_key=prompt_profile_dropdown_key,
+    )
 
     def popup_prompt_manager() -> sg.Window:
         """Pop up the prompt manager window.
@@ -955,8 +976,12 @@ def start_GUI() -> None:
                 win.close()
             del window_tracker.windows
 
-            # Remake the tracked main window and go back to the settings tab
-            window = main_window = window_tracker.track_window(make_main_window())
+            # Remake the main window and go back to the settings tab
+            window = main_window = make_tracked_main_window_with_synced_profiles(
+                window_tracker=window_tracker,
+                prompt_manager=prompt_manager,
+                prompt_profile_dropdown_key=prompt_profile_dropdown_key,
+            )
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
@@ -1102,13 +1127,9 @@ def start_GUI() -> None:
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
-            # Clear selection highlighting if a dropdown option was selected
-            if (
-                window
-                and event in window.key_dict
-                and isinstance(window[event], sg.Combo)
-            ):
-                window[event].widget.selection_clear()
+        # Clear selection highlighting if a dropdown option was selected
+        if window and event in window.key_dict and isinstance(window[event], sg.Combo):
+            window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
         if event in TRANSCRIBE_DONE_EVENTS:
