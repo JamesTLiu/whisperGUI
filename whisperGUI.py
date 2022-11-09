@@ -1581,7 +1581,7 @@ def fancy_checkbox(
 def convert_rows_to_columns_for_elements(
     rows: Sequence[Sequence[sg.Element]],
 ) -> List[sg.Column]:
-    """Convert a Sequence of rows (Sequence) with PySimpleGUI elements into a list of PySimpleGUI columns.
+    """Convert a series of rows with PySimpleGUI elements into a list of PySimpleGUI columns.
 
     Args:
         rows (Sequence[Sequence[sg.Element]]): A Sequence of rows (Sequence) with PySimpleGUI elements.
