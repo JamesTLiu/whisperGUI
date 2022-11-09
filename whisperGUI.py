@@ -401,13 +401,6 @@ def start_GUI() -> None:
                 sg.Button("Apply", key=apply_global_scaling_key),
             ],
             [sg.HorizontalSeparator()],
-            [sg.Text(f"Location of the Settings File:")],
-            [
-                sg.Input(
-                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
-                )
-            ],
-            [sg.HorizontalSeparator()],
             fancy_checkbox(
                 text="Remember Output Folder",
                 text_key=save_output_dir_text_key,
@@ -436,6 +429,13 @@ def start_GUI() -> None:
                 sg.Column(
                     [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
                 ),
+            ],
+            [sg.HorizontalSeparator()],
+            [sg.Text(f"Location of the Settings File:")],
+            [
+                sg.Input(
+                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
+                )
             ],
         ]
 
