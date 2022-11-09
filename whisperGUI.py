@@ -490,24 +490,6 @@ def start_GUI() -> None:
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
-        def combo_configure(event):
-            combo = event.widget
-            style = ttk.Style()
-
-            long = max(combo.cget("values"), key=len)
-
-            # font = tkfont.nametofont(str(combo.cget('font')))
-            font = tkfont.Font(font=combo.cget("font"))
-            width = max(0, font.measure(long.strip() + "0") - combo.winfo_width())
-
-            style_name = "TCombobox"
-
-            style.configure(style_name, postoffset=(0, 0, width, 0))
-            combo.configure(style=style_name)
-
-        # window[prompt_profile_dropdown_key].widget.bind('<Configure>', combo_configure)
-        # window[prompt_profile_dropdown_key].widget.pack()
-
         return window
 
     # make a tracked main window
@@ -1443,8 +1425,7 @@ class PromptManager:
                 self._update_prompt_profile_dropdown()
 
     def _save_profiles_to_settings(self) -> None:
-        """Update the settings file with the current prompt profiles.
-        """
+        """Update the settings file with the current prompt profiles."""
         sg.user_settings_set_entry(
             self._saved_prompts_settings_key, self.saved_prompt_profiles
         )
@@ -1489,10 +1470,14 @@ class PromptManager:
             if selected_profile is ...:
                 selected_profile = self._dropdown.get()
 
+            # The width of the dropbox that fits all options
+            new_dropdown_width = len(max(self.prompt_profile_names, key=len))
+
             # Update the prompt profile list and the selected profile for the dropdown
             self._dropdown.update(
                 value=selected_profile,
                 values=self.prompt_profile_names,
+                size=(new_dropdown_width, None),
             )
 
             # Send an event changing the dropdown selection if a new selected profile is given.
@@ -2815,6 +2800,31 @@ def del_existing_file(file_path: Union[str, Path]):
         if not p.is_file():
             raise NotAFileError
         p.unlink()
+
+
+def combo_configure(event):
+    """Set the width of the dropdown list to fit all options.
+
+    Does not change the entry box width.
+
+    Usage:
+        window[combo_key].widget.bind(
+            "<ButtonPress>", combo_configure
+        )
+    """
+    combo = event.widget
+    style = ttk.Style()
+
+    long = max(combo.cget("values"), key=len)
+
+    # font = tkfont.nametofont(str(combo.cget('font')))
+    font = tkfont.Font(font=combo.cget("font"))
+    width = max(0, font.measure(long.strip() + "0") - combo.winfo_width())
+
+    style_name = "TCombobox"
+
+    style.configure(style_name, postoffset=(0, 0, width, 0))
+    combo.configure(style=style_name)
 
 
 if __name__ == "__main__":
