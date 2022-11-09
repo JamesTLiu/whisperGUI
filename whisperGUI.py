@@ -47,10 +47,6 @@ if TYPE_CHECKING:
     import PySimpleGUI
     from types import FrameType
 
-import tkinter as tk
-import tkinter.font as tkfont
-import tkinter.ttk as ttk
-
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
@@ -2695,168 +2691,173 @@ def write_transcript_to_files(
 # ===================================================#
 
 
-def set_same_width(window: sg.Window, element_keys: Iterable[str]) -> None:
-    """Resize the elements in the given window to the max text length among the elements.
+# def set_same_width(window: sg.Window, element_keys: Iterable[str]) -> None:
+#     """Resize the elements in the given window to the max text length among the elements.
 
-    Args:
-        window (sg.Window): The window containing the elements.
-        element_keys (Iterable[str]): Iterable with the keys (str) of the elements to resize.
-    """
-    text_lengths = [len(window[key].get()) for key in element_keys]
-    for key in element_keys:
-        window[key].set_size((max(text_lengths), None))
-
-
-def get_abs_resource_path(relative_path: str) -> str:
-    """Get the absolute path to the resource.
-
-    Works when used in a frozen application for Windows made using a tool like Pyinstaller.
-
-    Args:
-        relative_path (str): Relative file path for the resource.
-
-    Returns:
-        str: Absolute file path for the resource.
-    """
-    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+#     Args:
+#         window (sg.Window): The window containing the elements.
+#         element_keys (Iterable[str]): Iterable with the keys (str) of the elements to resize.
+#     """
+#     text_lengths = [len(window[key].get()) for key in element_keys]
+#     for key in element_keys:
+#         window[key].set_size((max(text_lengths), None))
 
 
-def convert_audio_video_to_audio(
-    audio_video_file_path: Union[str, Path],
-    output_dir_path: Union[str, Path],
-    shell_output_window: Optional[sg.Window] = None,
-) -> Tuple[int, str, str]:
-    """Convert an audio/video file into an audio file using ffmpeg.
+# def get_abs_resource_path(relative_path: str) -> str:
+#     """Get the absolute path to the resource.
 
-    Args:
-        audio_video_file_path (Union[str, Path]): The file path for the audio/video file.
-        output_dir_path (Union[str, Path]): The output directory path.
-        shell_output_window (Optional[sg.Window], optional): The window that the shell command writes console output should to.
-            Defaults to None.
+#     Works when used in a frozen application for Windows made using a tool like Pyinstaller.
 
-    Returns:
-        Tuple[int, str, str]: A Tuple with the return value from executing a subprocess, a copy of the console output by the shell command,
-            and the absolute file path for the converted audio file.
-    """
-    video_path = Path(audio_video_file_path)
+#     Args:
+#         relative_path (str): Relative file path for the resource.
 
-    output_directory_path = Path(output_dir_path)
-
-    audio_file_name = f"{video_path.stem}.mp3"
-
-    audio_output_path = output_directory_path / audio_file_name
-
-    cmd = f'ffmpeg -i "{video_path.resolve()}" -y -q:a 0 -map a "{audio_output_path}"'
-
-    retval, shell_output = run_shell_cmd(cmd=cmd, window=shell_output_window)
-    return retval, shell_output, str(audio_output_path.resolve())
+#     Returns:
+#         str: Absolute file path for the resource.
+#     """
+#     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+#     return os.path.join(base_path, relative_path)
 
 
-def run_shell_cmd(
-    cmd: str, timeout: Optional[float] = None, window: Optional[sg.Window] = None
-) -> Tuple[int, str]:
-    """Run shell command.
-    @param cmd: command to execute.
-    @param timeout: timeout for command execution.
-    @param window: the PySimpleGUI window that the output is going to (needed to do refresh on).
-    @return: (return code from command, command output).
-    """
-    p = subprocess.Popen(
-        shlex.split(cmd), shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )
-    shell_output = ""
-    if p.stdout:
-        for line in p.stdout:
-            print(f"sys.version_info= {sys.version_info}")
-            if sys.version_info < (3, 5):
-                errors = "replace"
-            else:
-                errors = "backslashreplace"
-            decoded_line = line.decode(errors=errors).rstrip()
-            shell_output += decoded_line
-            print(decoded_line)
-            if window:
-                window.refresh()
-    retval = p.wait(timeout)
-    return (retval, shell_output)
+# def convert_audio_video_to_audio(
+#     audio_video_file_path: Union[str, Path],
+#     output_dir_path: Union[str, Path],
+#     shell_output_window: Optional[sg.Window] = None,
+# ) -> Tuple[int, str, str]:
+#     """Convert an audio/video file into an audio file using ffmpeg.
+
+#     Args:
+#         audio_video_file_path (Union[str, Path]): The file path for the audio/video file.
+#         output_dir_path (Union[str, Path]): The output directory path.
+#         shell_output_window (Optional[sg.Window], optional): The window that the shell command writes console output should to.
+#             Defaults to None.
+
+#     Returns:
+#         Tuple[int, str, str]: A Tuple with the return value from executing a subprocess, a copy of the console output by the shell command,
+#             and the absolute file path for the converted audio file.
+#     """
+#     video_path = Path(audio_video_file_path)
+
+#     output_directory_path = Path(output_dir_path)
+
+#     audio_file_name = f"{video_path.stem}.mp3"
+
+#     audio_output_path = output_directory_path / audio_file_name
+
+#     cmd = f'ffmpeg -i "{video_path.resolve()}" -y -q:a 0 -map a "{audio_output_path}"'
+
+#     retval, shell_output = run_shell_cmd(cmd=cmd, window=shell_output_window)
+#     return retval, shell_output, str(audio_output_path.resolve())
 
 
-class NotAFileError(Exception):
-    """Operation only works on files."""
+# def run_shell_cmd(
+#     cmd: str, timeout: Optional[float] = None, window: Optional[sg.Window] = None
+# ) -> Tuple[int, str]:
+#     """Run shell command.
+#     @param cmd: command to execute.
+#     @param timeout: timeout for command execution.
+#     @param window: the PySimpleGUI window that the output is going to (needed to do refresh on).
+#     @return: (return code from command, command output).
+#     """
+#     p = subprocess.Popen(
+#         shlex.split(cmd), shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+#     )
+#     shell_output = ""
+#     if p.stdout:
+#         for line in p.stdout:
+#             print(f"sys.version_info= {sys.version_info}")
+#             if sys.version_info < (3, 5):
+#                 errors = "replace"
+#             else:
+#                 errors = "backslashreplace"
+#             decoded_line = line.decode(errors=errors).rstrip()
+#             shell_output += decoded_line
+#             print(decoded_line)
+#             if window:
+#                 window.refresh()
+#     retval = p.wait(timeout)
+#     return (retval, shell_output)
 
 
-def del_existing_file(file_path: Union[str, Path]):
-    """Delete an existing file.
-
-    Args:
-        file_path (Union[str, Path]): The file path for the file to delete.
-
-    Raises:
-        NotAFileError: The path does not lead to a file.
-    """
-    p = Path(file_path)
-    if p.exists():
-        if not p.is_file():
-            raise NotAFileError
-        p.unlink()
+# class NotAFileError(Exception):
+#     """Operation only works on files."""
 
 
-def combo_configure(event: tk.Event) -> None:
-    """Set the width of the dropdown list to fit all options.
+# def del_existing_file(file_path: Union[str, Path]):
+#     """Delete an existing file.
 
-    Does not change the entry box width.
+#     Args:
+#         file_path (Union[str, Path]): The file path for the file to delete.
 
-    Usage:
-        window[combo_key].widget.bind(
-            "<ButtonPress>", combo_configure
-        )
-    """
-    combo = event.widget
-    style = ttk.Style()
+#     Raises:
+#         NotAFileError: The path does not lead to a file.
+#     """
+#     p = Path(file_path)
+#     if p.exists():
+#         if not p.is_file():
+#             raise NotAFileError
+#         p.unlink()
 
-    long = max(combo.cget("values"), key=len)
+# import tkinter as tk
+# import tkinter.font as tkfont
+# import tkinter.ttk as ttk
 
-    # font = tkfont.nametofont(str(combo.cget('font')))
-    font = tkfont.Font(font=combo.cget("font"))
-    width = max(0, font.measure(long.strip() + "0") - combo.winfo_width())
+# def combo_configure(event: tk.Event) -> None:
+#     """Set the width of the dropdown list to fit all options.
 
-    style_name = "TCombobox"
+#     Does not change the entry box width.
 
-    style.configure(style_name, postoffset=(0, 0, width, 0))
-    combo.configure(style=style_name)
-
-
-def get_combo_values(combo: sg.Combo) -> Tuple:
-    """Get the values for the Combo element.
-
-    Args:
-        combo (sg.Combo): The Combo element.
-
-    Returns:
-        Tuple: A Tuple with the values for the Combo element.
-    """
-    return combo.widget.cget("values")
+#     Usage:
+#         window[combo_key].widget.bind(
+#             "<ButtonPress>", combo_configure
+#         )
+#     """
 
 
-def set_combo_input_justify(combo: sg.Combo, justify: str) -> None:
-    """Align the text in the combo input field.
+#     combo = event.widget
+#     style = ttk.Style()
 
-    Args:
-        combo (sg.Combo): The Combo element to update.
-        justify (str): Specifies how the text is aligned within the Combo's input field.
-            One of "left", "center", or "right".
+#     long = max(combo.cget("values"), key=len)
 
-    Raises:
-        ValueError: justify parameter must be 'left', 'center', or 'right'
-    """
-    if justify not in ("left", "center", "right"):
-        raise ValueError(
-            f"Invalid justify parameter value: {justify}. "
-            f"justify parameter must be 'left', 'center', or 'right'"
-        )
+#     # font = tkfont.nametofont(str(combo.cget('font')))
+#     font = tkfont.Font(font=combo.cget("font"))
+#     width = max(0, font.measure(long.strip() + "0") - combo.winfo_width())
 
-    combo.widget.configure(justify=justify)
+#     style_name = "TCombobox"
+
+#     style.configure(style_name, postoffset=(0, 0, width, 0))
+#     combo.configure(style=style_name)
+
+
+# def get_combo_values(combo: sg.Combo) -> Tuple:
+#     """Get the values for the Combo element.
+
+#     Args:
+#         combo (sg.Combo): The Combo element.
+
+#     Returns:
+#         Tuple: A Tuple with the values for the Combo element.
+#     """
+#     return combo.widget.cget("values")
+
+
+# def set_combo_input_justify(combo: sg.Combo, justify: str) -> None:
+#     """Align the text in the combo input field.
+
+#     Args:
+#         combo (sg.Combo): The Combo element to update.
+#         justify (str): Specifies how the text is aligned within the Combo's input field.
+#             One of "left", "center", or "right".
+
+#     Raises:
+#         ValueError: justify parameter must be 'left', 'center', or 'right'
+#     """
+#     if justify not in ("left", "center", "right"):
+#         raise ValueError(
+#             f"Invalid justify parameter value: {justify}. "
+#             f"justify parameter must be 'left', 'center', or 'right'"
+#         )
+
+#     combo.widget.configure(justify=justify)
 
 
 if __name__ == "__main__":
