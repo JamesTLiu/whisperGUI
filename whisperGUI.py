@@ -481,6 +481,7 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
+            modal=True,
         )
 
         # Load the FolderBrowse's selected folder from the settings file
@@ -987,9 +988,6 @@ def start_GUI() -> None:
 
             # Require audio/video file(s) and output folder
             if audio_video_file_paths_str and output_dir_path:
-                # Disable the main window during transcription
-                main_window.disable()
-
                 # Get user selected language and model
                 language_selected = values[language_key]
                 if language_selected not in TO_LANGUAGE_CODE:
@@ -1116,8 +1114,6 @@ def start_GUI() -> None:
         if event in TRANSCRIBE_DONE_EVENTS:
             transcribe_thread = None
             is_transcribing = False
-            main_window.enable()
-            main_window.bring_to_front()
 
         # Transcriptions in progress
         if is_transcribing:
@@ -1144,12 +1140,16 @@ def start_GUI() -> None:
                     orientation="h",
                 )
 
-            # User clicked the Cancel button
-            if not meter_updated:
-                # Close the progress window
-                sg.one_line_progress_meter_cancel(key=progress_key)
-                # Flag the thread to stop
-                stop_flag.set()
+                # Track the meter window in case it was remade to ensure it's modal
+                if meter_updated:
+                    meter_window = sg.QuickMeter.active_meters[progress_key].window
+                    modal_window_manager.track_modal_window(meter_window)
+                # User clicked the Cancel button
+                else:
+                    # Close the progress window
+                    sg.one_line_progress_meter_cancel(key=progress_key)
+                    # Flag the thread to stop
+                    stop_flag.set()
 
         # Set as modal the most recent non-closed tracked modal window
         modal_window_manager.update()
@@ -1171,17 +1171,22 @@ class ModalWindowManager:
         self._modal_window_stack: List[sg.Window] = []
         self._most_recent_modal_window: sg.Window = None
 
-    def track_modal_window(self, window: sg.Window) -> None:
+    def track_modal_window(self, window: sg.Window) -> sg.Window:
         """Add a modal window as the most recent tracked modal window.
 
         Args:
-            window (sg.Window): A modal window.
-                Note: If a non-modal window is added, a later call to update()
-                will set the non-modal window as a modal window if there was a
-                more recent closed modal window.
+            window (sg.Window): A modal window. If a non-modal window is added,
+                it will be changed into a modal window.
+
+        Returns:
+            sg.Window: The tracked modal window.
         """
-        self._modal_window_stack.append(window)
-        self._most_recent_modal_window = window
+        # Ensure the window is not already the most recent tracked modal window before adding it.
+        if not self._modal_window_stack or window is not self._modal_window_stack[-1]:
+            window.make_modal()
+            self._modal_window_stack.append(window)
+            self._most_recent_modal_window = window
+        return window
 
     def update(self) -> None:
         """Set as modal the most recent non-closed tracked modal window."""
