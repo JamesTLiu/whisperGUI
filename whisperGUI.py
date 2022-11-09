@@ -1163,8 +1163,10 @@ def start_GUI() -> None:
 
                 # Track the meter window in case it was remade to ensure it's modal
                 if meter_updated:
-                    meter_window = sg.QuickMeter.active_meters[progress_key].window
-                    modal_window_manager.track_modal_window(meter_window)
+                    # Track the meter window as a modal window if it's still active
+                    if progress_key in sg.QuickMeter.active_meters:
+                        meter_window = sg.QuickMeter.active_meters[progress_key].window
+                        modal_window_manager.track_modal_window(meter_window)
                 # User clicked the Cancel button
                 else:
                     # Close the progress window
