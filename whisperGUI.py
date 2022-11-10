@@ -5,12 +5,9 @@ from __future__ import annotations
 import decimal
 import io
 import multiprocessing
-import os
 import platform
 import re
-import shlex
 import signal
-import subprocess
 import sys
 import threading
 import time
@@ -30,7 +27,6 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Protocol,
     Sequence,
     Set,
     TextIO,
@@ -367,7 +363,6 @@ def start_GUI() -> None:
                     reroute_cprint=True,
                     write_only=True,
                     echo_stdout_stderr=True,
-                    # echo_stdout_stderr=False,
                     disabled=True,
                     rstrip=is_multiline_rstripping_on_update,
                     expand_x=True,
@@ -2419,9 +2414,6 @@ def transcribe_audio_video_files(
     # pipe for stdout and stderr output in a child process
     read_connection, write_connection = multiprocessing.Pipe()
 
-    # window.write_event_value(print_event, "In thread...\n")
-
-    # with os.fdopen(read_connection.fileno(), 'r') as reader:
     for audio_video_path in audio_video_file_paths:
         # pass results from the child process through here
         mp_queue: multiprocessing.Queue = multiprocessing.Queue()
@@ -2472,8 +2464,6 @@ def transcribe_audio_video_files(
             # Print the stdout stderr output piped from the process
             while read_connection.poll():
                 send_piped_output_to_window(window, read_connection)
-
-            # print('process alive')
 
         while read_connection.poll():
             send_piped_output_to_window(window, read_connection)
@@ -2534,8 +2524,6 @@ def transcribe_audio_video(
         initial_prompt (str, optional): User provided text that guides the transcription to a certain dialect/language/style. Defaults to None.
     """
     redirector = OutputRedirector(write_connection)
-
-    # print("In process...")
 
     # Clean up when this process is told to terminate
     def handler(sig: int, frame: Optional[FrameType] = None) -> None:
@@ -2620,13 +2608,13 @@ class OutputRedirector(io.StringIO):
         """Restore a previously re-reouted stdout back to the original destination."""
         if self._previous_stdout:
             sys.stdout = self._previous_stdout
-            # self.previous_stdout = None  # indicate no longer routed here
+            self.previous_stdout = None  # indicate no longer routed here
 
     def restore_stderr(self) -> None:
         """Restore a previously re-reouted stderr back to the original destination."""
         if self._previous_stderr:
             sys.stderr = self._previous_stderr
-            # self.previous_stderr = None  # indicate no longer routed here
+            self.previous_stderr = None  # indicate no longer routed here
 
     def write(self, txt: str) -> int:
         """
@@ -2922,9 +2910,10 @@ def write_transcript_to_files(
 
 
 if __name__ == "__main__":
-    # required for when a program which uses multiprocessing has been frozen to produce a Windows executable.
+    # Required for when a program which uses multiprocessing has been frozen to produce a Windows executable.
     # (Has been tested with py2exe, PyInstaller and cx_Freeze.) has no effect when invoked on any operating system other than Windows
     multiprocessing.freeze_support()
+    
     # The only method that works on both Windows and Linux is "spawn"
     multiprocessing.set_start_method("spawn")
     main()
