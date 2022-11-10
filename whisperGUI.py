@@ -568,6 +568,7 @@ def start_GUI() -> None:
                         [sg.Text("")],
                         [sg.Text("")],
                         [sg.Text("")],
+                        [sg.Text("")],
                         [
                             sg.Button(
                                 "Close",
