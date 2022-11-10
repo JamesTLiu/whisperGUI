@@ -1247,7 +1247,7 @@ class ModalWindowManager:
         """Set as modal the most recent non-closed tracked modal window."""
 
         # Clear closed modal windows from the top of the modal window tracking stack
-        while self._modal_window_stack and self._modal_window_stack[-1].is_closed():
+        while self._modal_window_stack and self._modal_window_stack[-1].was_closed():
             self._modal_window_stack.pop()
 
         # Restore as modal the most recent non-closed tracked modal window
