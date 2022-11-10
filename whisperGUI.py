@@ -544,7 +544,6 @@ def start_GUI() -> None:
                     select_mode=sg.TABLE_SELECT_MODE_BROWSE,
                     enable_events=True,
                 ),
-                # sg.Push(),
                 sg.Column(
                     [
                         [
@@ -2913,7 +2912,7 @@ if __name__ == "__main__":
     # Required for when a program which uses multiprocessing has been frozen to produce a Windows executable.
     # (Has been tested with py2exe, PyInstaller and cx_Freeze.) has no effect when invoked on any operating system other than Windows
     multiprocessing.freeze_support()
-    
+
     # The only method that works on both Windows and Linux is "spawn"
     multiprocessing.set_start_method("spawn")
     main()
