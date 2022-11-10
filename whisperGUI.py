@@ -1601,6 +1601,21 @@ def fancy_checkbox(
     return checkbox_layout
 
 
+def save_checkbox_state(window: sg.Window, checkbox_key: str) -> None:
+    """Save a checkbox's checked state to the config file. The checkbox must
+    be an Image element whose checked state is saved in the element's metadata as True or False.
+
+    Args:
+        window (sg.Window): The PySimpleGUI window with the checkbox as an Image element.
+        checkbox_key (str): The key for the checkbox which is an Image element
+            whose checked state is saved in its metadata.
+    """
+    sg.user_settings_set_entry(
+        checkbox_key,
+        window[checkbox_key].metadata["is_checked"],
+    )
+
+
 def convert_rows_to_columns_for_elements(
     rows: Sequence[Sequence[sg.Element]],
 ) -> List[sg.Column]:
@@ -1626,21 +1641,6 @@ def convert_rows_to_columns_for_elements(
         columns.append(column)
 
     return columns
-
-
-def save_checkbox_state(window: sg.Window, checkbox_key: str) -> None:
-    """Save a checkbox's checked state to the config file. The checkbox must
-    be an Image element whose checked state is saved in the element's metadata as True or False.
-
-    Args:
-        window (sg.Window): The PySimpleGUI window with the checkbox as an Image element.
-        checkbox_key (str): The key for the checkbox which is an Image element
-            whose checked state is saved in its metadata.
-    """
-    sg.user_settings_set_entry(
-        checkbox_key,
-        window[checkbox_key].metadata["is_checked"],
-    )
 
 
 def popup_tracked(
