@@ -2760,6 +2760,8 @@ def write_transcript_to_files(
 # =============== Unused f(x)s below ================#
 # ===================================================#
 
+# import os
+
 # def get_abs_resource_path(relative_path: str) -> str:
 #     """Get the absolute path to the resource.
 
@@ -2805,6 +2807,8 @@ def write_transcript_to_files(
 #     retval, shell_output = run_shell_cmd(cmd=cmd, window=shell_output_window)
 #     return retval, shell_output, str(audio_output_path.resolve())
 
+# import subprocess
+# import shlex
 
 # def run_shell_cmd(
 #     cmd: str, timeout: Optional[float] = None, window: Optional[sg.Window] = None
