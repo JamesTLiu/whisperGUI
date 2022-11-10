@@ -598,6 +598,30 @@ def start_GUI() -> None:
 
         return win
 
+    def reload_prompt_manager_window(
+        prompt_manager_window: sg.Window,
+        modal_window_manager: ModalWindowManager = None,
+        window_tracker: WindowTracker = None,
+    ) -> None:
+        """Reload the prompt manager window and track the new window.
+
+        Args:
+            prompt_manager_window (sg.Window): The prompt manager window to reload.
+            modal_window_manager (ModalWindowManager, optional): The new prompt manager window
+                will be tracked and made modal by a modal window manager if given. Defaults to None.
+            window_tracker (WindowTracker, optional): The new prompt manager window
+                will be tracked by a window tracker if given. Defaults to None.
+        """
+
+        if prompt_manager_window:
+            prompt_manager_window.close()
+            new_prompt_manager_window = popup_prompt_manager()
+            if window_tracker:
+                window_tracker.track_window(new_prompt_manager_window)
+            if modal_window_manager:
+                modal_window_manager.update()
+                modal_window_manager.track_modal_window(prompt_manager_window)
+
     # keep track of the prompt manager window
     prompt_manager_window = None
 
