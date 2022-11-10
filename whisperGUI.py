@@ -602,7 +602,7 @@ def start_GUI() -> None:
         prompt_manager_window: sg.Window,
         modal_window_manager: ModalWindowManager = None,
         window_tracker: WindowTracker = None,
-    ) -> None:
+    ) -> Optional[sg.Window]:
         """Reload the prompt manager window and track the new window.
 
         Args:
@@ -611,6 +611,9 @@ def start_GUI() -> None:
                 will be tracked and made modal by a modal window manager if given. Defaults to None.
             window_tracker (WindowTracker, optional): The new prompt manager window
                 will be tracked by a window tracker if given. Defaults to None.
+
+        Returns:
+            Optional[sg.Window]: The new prompt manager window or None.
         """
 
         if prompt_manager_window:
@@ -621,6 +624,10 @@ def start_GUI() -> None:
             if modal_window_manager:
                 modal_window_manager.update()
                 modal_window_manager.track_modal_window(prompt_manager_window)
+
+            return new_prompt_manager_window
+        else:
+            return None
 
     # keep track of the prompt manager window
     prompt_manager_window = None
@@ -882,13 +889,11 @@ def start_GUI() -> None:
                 window.close()
                 add_new_prompt_window = None
 
-                # Refresh the prompt manager
-                if prompt_manager_window:
-                    prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.track_window(
-                        popup_prompt_manager()
-                    )
-                    modal_window_manager.track_modal_window(prompt_manager_window)
+                prompt_manager_window = reload_prompt_manager_window(
+                    prompt_manager_window=prompt_manager_window,
+                    modal_window_manager=modal_window_manager,
+                    window_tracker=window_tracker,
+                )
             # Failed to add new prompt
             else:
                 popup_window = popup_tracked(
@@ -912,13 +917,11 @@ def start_GUI() -> None:
                 ]
                 prompt_manager.delete_prompt_profile(prompt_profile_name_to_delete)
 
-                # Refresh the prompt manager
-                if prompt_manager_window:
-                    prompt_manager_window.close()
-                    prompt_manager_window = window_tracker.track_window(
-                        popup_prompt_manager()
-                    )
-                    modal_window_manager.track_modal_window(prompt_manager_window)
+                prompt_manager_window = reload_prompt_manager_window(
+                    prompt_manager_window=prompt_manager_window,
+                    modal_window_manager=modal_window_manager,
+                    window_tracker=window_tracker,
+                )
             # User has not selected a row in the prompt profile table
             else:
                 popup_window = popup_tracked(
@@ -1274,12 +1277,10 @@ class ModalWindowManager:
         while self._modal_window_stack and self._modal_window_stack[-1].was_closed():
             self._modal_window_stack.pop()
             stack_changed = True
-            print("popped closed modal window")
 
         # Restore as modal the most recent non-closed tracked modal window
         if stack_changed and self._modal_window_stack:
             self._modal_window_stack[-1].make_modal()
-            print("new modal window")
 
 
 class WindowTracker:
