@@ -44,7 +44,6 @@ else:
     from multiprocessing.connection import Connection as PipeConnection  # type: ignore
 
 if TYPE_CHECKING:
-    import PySimpleGUI
     from types import FrameType
 
 import PySimpleGUI as sg
