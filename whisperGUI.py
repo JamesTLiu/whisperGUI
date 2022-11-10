@@ -532,7 +532,7 @@ def start_GUI() -> None:
             [
                 sg.Table(
                     prompt_manager.saved_prompt_profiles_list,
-                    headings=["Profile", "Prompt"],
+                    headings=[" Profile ", " Prompt   "],
                     key=saved_prompts_table_key,
                     expand_x=True,
                     expand_y=True,
