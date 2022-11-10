@@ -107,11 +107,13 @@ def start_GUI() -> None:
     edit_prompt_profile_key = "-EDIT-PROMPT-"
 
     # Keys for settings tab
-    apply_global_scaling_key = "-SAVE-SETTINGS-"
+    apply_global_scaling_key = "-SAVE-SCALING-"
+    scaling_text_setting_key = "-GLOBAL-SCALING-TEXT-"
     scaling_input_setting_key = "-GLOBAL-SCALING-"
-    save_output_dir_text_key = "-SAVE-OUTPUT-DIR-OPTION-TEXT-"
+    save_output_dir_text_key = "-SAVE-OUTPUT-DIR-TEXT-"
     save_output_dir_checkbox_key = "-CHECKBOX-SAVE-OUTPUT-DIR-"
-    language_specifier_setting_key = "-LANGUAGE-SPECIFIER-OPTION-"
+    language_specifier_text_setting_key = "-LANGUAGE-SPECIFIER-TEXT-"
+    language_specifier_setting_key = "-LANGUAGE-SPECIFIER-"
 
     # Keys for tabs
     main_tab_key = "-MAIN-TAB-"
@@ -384,13 +386,12 @@ def start_GUI() -> None:
         tab2_layout = [
             [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
             [sg.HorizontalSeparator()],
+            [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
             [
                 sg.Text(
-                    "Resize the Application", font=(GUI_FONT[0], 22)
-                )
-            ],
-            [
-                sg.Text(f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):"),
+                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                    key=scaling_text_setting_key,
+                ),
                 sg.Input(
                     sg.user_settings_get_entry(
                         scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
@@ -409,7 +410,10 @@ def start_GUI() -> None:
             ),
             [sg.HorizontalSeparator()],
             [
-                sg.Text("Language Specifier in Output File Names"),
+                sg.Text(
+                    "Language Specifier in Output File Names",
+                    key=language_specifier_text_setting_key,
+                ),
                 sg.Combo(
                     values=language_specifier_options,
                     key=language_specifier_setting_key,
@@ -487,6 +491,14 @@ def start_GUI() -> None:
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
+        set_same_width(
+            [
+                window[scaling_text_setting_key],
+                window[save_output_dir_text_key],
+                window[language_specifier_text_setting_key],
+            ]
+        )
+
         return window
 
     def make_tracked_main_window_with_synced_profiles(
@@ -543,7 +555,9 @@ def start_GUI() -> None:
                     [
                         [
                             sg.Button(
-                                "Add Profile", key=open_add_prompt_window_key, expand_x=True
+                                "Add Profile",
+                                key=open_add_prompt_window_key,
+                                expand_x=True,
                             )
                         ],
                         [
@@ -1178,6 +1192,21 @@ def start_GUI() -> None:
 
     # Finish up by removing from the screen
     main_window.close()
+
+
+def set_same_width(text_elements: Sequence[sg.Text]) -> None:
+    """Set the width of the text elements to the longest text value among the elements.
+
+    Only works properly with monospaced fonts. Non-monospaced fonts cause the textbox to not
+    properly fit the text.
+
+    Args:
+        text_elements (Sequence[sg.Text]): A Sequence with the text elements to set to the same width.
+    """
+    longest_width = max([len(element.get()) for element in text_elements])
+
+    for element in text_elements:
+        element.set_size((longest_width, None))
 
 
 class NonExistentPromptProfileName(Exception):
@@ -2731,19 +2760,6 @@ def write_transcript_to_files(
 # ===================================================#
 # =============== Unused f(x)s below ================#
 # ===================================================#
-
-
-# def set_same_width(window: sg.Window, element_keys: Iterable[str]) -> None:
-#     """Resize the elements in the given window to the max text length among the elements.
-
-#     Args:
-#         window (sg.Window): The window containing the elements.
-#         element_keys (Iterable[str]): Iterable with the keys (str) of the elements to resize.
-#     """
-#     text_lengths = [len(window[key].get()) for key in element_keys]
-#     for key in element_keys:
-#         window[key].set_size((max(text_lengths), None))
-
 
 # def get_abs_resource_path(relative_path: str) -> str:
 #     """Get the absolute path to the resource.
