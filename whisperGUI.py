@@ -530,51 +530,9 @@ def start_GUI() -> None:
         )
 
         element_list = window.element_list()
-        num_elements = len(element_list)
 
         for index, element in enumerate(element_list):
             if "-INFO-" in str(element.key) and isinstance(element, sg.Image):
-
-                def find_closest_text_element(
-                    index: int, element_list: List[sg.Element]
-                ) -> Optional[sg.Text]:
-                    """Find the closest Text element to an target element based the target element's position in a list of elements.
-
-                    Args:
-                        index (int): The index of the target element in the list to start an expanding search from.
-                        element_list (List[sg.Element]): A list of elements.
-
-                    Returns:
-                        Optional[sg.Text]: The closest Text element if found.
-                    """
-                    earlier_element_index = index - 1 if index > 0 else index
-                    later_element_index = (
-                        index + 1 if index < num_elements - 1 else index
-                    )
-                    search_expanded = True
-
-                    while search_expanded:
-                        earlier_element = element_list[earlier_element_index]
-                        if isinstance(earlier_element, sg.Text):
-                            return earlier_element
-
-                        later_element = element_list[later_element_index]
-                        if isinstance(later_element, sg.Text):
-                            return later_element
-
-                        search_expanded = False
-
-                        if earlier_element_index > 0:
-                            earlier_element_index -= 1
-                            search_expanded = True
-
-                        if later_element_index < num_elements - 1:
-                            later_element_index += 1
-                            search_expanded = True
-
-                    # No Text element found in window
-                    return None
-
                 closest_element = find_closest_text_element(
                     index=index, element_list=element_list
                 )
@@ -1341,6 +1299,47 @@ def set_same_width(text_elements: Sequence[sg.Text]) -> None:
     for element in text_elements:
         element.set_size((longest_width, None))
 
+def find_closest_text_element(
+    index: int, element_list: List[sg.Element]
+) -> Optional[sg.Text]:
+    """Find the closest Text element to an target element based the target element's position in a list of elements.
+
+    Args:
+        index (int): The index of the target element in the list to start an expanding search from.
+        element_list (List[sg.Element]): A list of elements.
+
+    Returns:
+        Optional[sg.Text]: The closest Text element if found.
+    """
+    num_elements = len(element_list)
+
+    earlier_element_index = index - 1 if index > 0 else index
+    later_element_index = (
+        index + 1 if index < num_elements - 1 else index
+    )
+    search_expanded = True
+
+    while search_expanded:
+        earlier_element = element_list[earlier_element_index]
+        if isinstance(earlier_element, sg.Text):
+            return earlier_element
+
+        later_element = element_list[later_element_index]
+        if isinstance(later_element, sg.Text):
+            return later_element
+
+        search_expanded = False
+
+        if earlier_element_index > 0:
+            earlier_element_index -= 1
+            search_expanded = True
+
+        if later_element_index < num_elements - 1:
+            later_element_index += 1
+            search_expanded = True
+
+    # No Text element found in window
+    return None
 
 import io
 import PIL.Image
