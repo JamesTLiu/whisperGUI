@@ -528,32 +528,9 @@ def start_GUI() -> None:
             ]
         )
 
-        element_list = window.element_list()
-
-        for index, element in enumerate(element_list):
-            if "-INFO-" in str(element.key) and isinstance(element, sg.Image):
-                closest_element = find_closest_text_element(
-                    index=index, element_list=element_list
-                )
-
-                if closest_element:
-                    width, height = closest_element.get_size()
-                    if height > 0:
-                        element.update(
-                            convert_to_bytes(
-                                file_or_bytes=info_image_data,
-                                resize=(width, height),
-                                fill=False,
-                            )
-                        )
-                    else:
-                        raise ValueError(
-                            f"Unusable height for closest element (key={closest_element.key}). height={height}"
-                        )
-                else:
-                    raise Exception(
-                        f"Unable to find closest Text element to element with key={element.key} in the  main window."
-                    )
+        setup_line_height_images(
+            image_file_or_bytes=info_image_data, image_key_has="-INFO-", window=window
+        )
 
         return window
 
@@ -1291,6 +1268,7 @@ def set_same_width(text_elements: Sequence[sg.Text]) -> None:
     for element in text_elements:
         element.set_size((longest_width, None))
 
+
 def find_closest_text_element(
     index: int, element_list: List[sg.Element]
 ) -> Optional[sg.Text]:
@@ -1306,9 +1284,7 @@ def find_closest_text_element(
     num_elements = len(element_list)
 
     earlier_element_index = index - 1 if index > 0 else index
-    later_element_index = (
-        index + 1 if index < num_elements - 1 else index
-    )
+    later_element_index = index + 1 if index < num_elements - 1 else index
     search_expanded = True
 
     while search_expanded:
@@ -1332,6 +1308,68 @@ def find_closest_text_element(
 
     # No Text element found in window
     return None
+
+
+class InvalidElementSize(Exception):
+    """The width and/or height of the element is not greater than 0."""
+
+
+class ClosestTextElementInWindowNotFound(Warning):
+    """Unable to find closest Text element in the window."""
+
+
+def setup_line_height_images(
+    image_file_or_bytes: Union[str, bytes], window: sg.Window, image_key_has: str = ""
+):
+    """Assign the same image to all Image elements in the window with a height that matches
+    the closest Text element.
+
+    Usage:
+        Put an Image element next to a Text element in a layout. (Optionally) Assign a key that
+        contains a unique string to the Image (Ex. key='-CHECKBOX-10' where '-CHECKBOX-' will be
+        passed to this f(x) when you intend to only update Image's whose key contains '-CHECKBOX-').
+        Call this f(x).
+
+    Args:
+        image_file_or_bytes (Union[str, bytes]): Either a string filename for an image file or a bytes
+            base64 image object.
+        window (sg.Window): The window to update images in.
+        image_key_has (str, optional): Only update Image elements whose key contains this string.
+            Defaults to "".
+
+    Raises:
+        InvalidElementSize: The width and/or height of a closest Text element is not greater than 0.
+        ClosestTextElementInWindowNotFound: Unable to find closest Text element for an Image element in this window.
+    """
+    element_list = window.element_list()
+
+    for index, element in enumerate(element_list):
+        # Image element found with a key that contains a given string
+        if isinstance(element, sg.Image) and image_key_has in str(element.key):
+            closest_text_element = find_closest_text_element(
+                index=index, element_list=element_list
+            )
+
+            # Update the Image element with an image whose size matches the closest Text element.
+            if closest_text_element:
+                width, height = closest_text_element.get_size()
+                if width > 0 and height > 0:
+                    element.update(
+                        convert_to_bytes(
+                            file_or_bytes=image_file_or_bytes,
+                            resize=(width, height),
+                            fill=False,
+                        )
+                    )
+                else:
+                    raise InvalidElementSize(
+                        f"Unusable size for closest element (key={closest_text_element.key}). width={width}, height={height}."
+                    )
+            else:
+                raise ClosestTextElementInWindowNotFound(
+                    f"Unable to find closest Text element to Image element with key={element.key} in the  main window."
+                )
+
 
 import io
 import PIL.Image
