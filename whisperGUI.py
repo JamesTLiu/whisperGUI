@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import decimal
-import functools
 import io
 import multiprocessing
 import platform
@@ -291,7 +290,7 @@ def start_GUI() -> None:
                             #     # font=(GUI_FONT[0], 60),
                             #     pad=0,
                             # ),
-                            make_info_image(
+                            sg.Image(
                                 tooltip=(
                                     "Use this when a dialect/style of a language or punctuation is desired.\n"
                                     "Does NOT guarantee the result will follow the initial prompt.\n"
@@ -1276,13 +1275,6 @@ def start_GUI() -> None:
 
     # Finish up by removing from the screen
     main_window.close()
-
-
-def make_info_image(*args, **kwargs):
-    # image_data = b"iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC4UlEQVRYhb2XzUtUURjGn3sYQkJkGGSQiBiGiJZS0CLC6EsiImgXEdFCYopwGREWSItoEdKihUS0jAJpERSEk39AHyhuQoJMcREhpVBqUr8W5158vTNz7x2/Hrgwc877Pu9zzuW+H4EyAshJOiTphKR9ksqS8pKcpHlJk5JGJY1IGg6CYDErd1rgdqAfmCE7fgAPgJ3rCeyAayHZWrEQit/WKE7QIHhe0lNJJ2Nbi5KG5a/5k/zVO0ltkkqSDkvqDv9bfJR0NgiCqSwnLwLjsZPMAjeAQgb/VqACTMc4poG9ac55YCzmOAS0pyqvL+RhjGsGKDVycMDLmMNtIClILun9hjYXgWXDOQa01DOsxIL3pRD3AHMh+RP8Z5ok4q/hvhs3yIfvOcKLlJOXYqcC6EkRPGBsl4Cy3ewzm3NARwpZN7UYSPFpAb4Y+8FowwFfzUZ/ElHoUwiFWpzO4HfJ2P8CWgUcMIvLwI40opDsIFAF3gFXM/q0AN9NvHMCrpuFkSxE6wHw2MR75CTtN/vVzRYgn0UjdDr5FBrhcxYGoIzP8/apZBQwYX6XcvIlNUIzJTSeTFxGPxsjl9Vp0xA1ExFqU+TGw8b44+Q7mQi7t0CAjTHlJH0wC0e2QMAx83vUSXprFrrS0vB6gK+cZ8xS1Ul6r5XXkJN0ZbMESDovKeotfkt65YIg+Cdp0Bj1AsWNjozvAW6ZpedBEMxHm22xHD1EcjkuU4vEegDcN7ZLwJ64weUY4c0EsiK+CbHP0QT7C6xuSO7VM3LA67iIpJvIgjD4kuEcp15LFhoXqO2I19qUbscPJ/bkM9hOqIFjRx0Rs/iynU90XglcYXWTEwWvacsbDSYFSc8kHY9tLUp6I1+2J+Q/Jcmn17L8YHJKtYPJqPxgMpl2ACvCAb3Utl7NYAG4Q0rrniakCNwFvjUROBpOd6Xx130FDYTkJHXJj+ed8ldekK+oPyVNyV91VU2M5/8BQwxqcYjaAsEAAAAASUVORK5CYII="
-    # info_image = functools.partial(sg.Image, source=image_data, pad=0)
-    # return info_image(*args, **kwargs)
-    return sg.Image(*args, **kwargs)
 
 
 def set_same_width(text_elements: Sequence[sg.Text]) -> None:
