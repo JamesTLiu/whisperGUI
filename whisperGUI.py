@@ -587,7 +587,7 @@ def start_GUI() -> None:
                             convert_to_bytes(
                                 file_or_bytes=info_image_data,
                                 resize=(width, height),
-                                fill=True,
+                                fill=False,
                             )
                         )
                     else:
