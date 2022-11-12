@@ -535,7 +535,15 @@ def start_GUI() -> None:
         )
 
         setup_line_height_images(
-            image_file_or_bytes=info_image_data, image_key_has="-INFO-", window=window
+            image_file_or_bytes=info_image_data,
+            image_key_specifier=info_image_key_prefix,
+            window=window,
+        )
+
+        setup_line_height_images(
+            image_file_or_bytes=info_image_data,
+            image_key_specifier=checkbox_key_prefix,
+            window=window,
         )
 
         return window
