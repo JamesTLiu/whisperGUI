@@ -1363,10 +1363,10 @@ def setup_line_height_images(
     """
     element_list = window.element_list()
 
-    # The Image is the only one to update if it's key is exactly the given key substring
+    # A valid key is exactly the given key substring.
     if exact_key_match:
         valid_key: Callable = operator.eq
-    # An Image is will be updated if it's key contains the given key substring
+    # A valid key contains the given key substring.
     else:
         valid_key = operator.contains
 
