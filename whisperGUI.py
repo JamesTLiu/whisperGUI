@@ -1946,12 +1946,7 @@ def popup_tracked(
         popup_fn (Popup_Callable): The function to call to create a popup.
         window_tracker (WindowTracker): Tracker for possibly active windows which the created popup will be added to.
     """
-    popup_window, popup_event = popup_fn(*args, **kwargs)
-
-    if kwargs.get("non_blocking", None):
-        # Make the window modal if the kwarg is True.
-        if kwargs.get("modal", None):
-            popup_window.make_modal()
+    popup_window, _ = popup_fn(*args, **kwargs)
 
     window_tracker.track_window(popup_window)
 
