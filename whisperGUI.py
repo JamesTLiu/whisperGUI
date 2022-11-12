@@ -5,6 +5,7 @@ from __future__ import annotations
 import decimal
 import io
 import multiprocessing
+import operator
 import platform
 import re
 import signal
@@ -1324,8 +1325,11 @@ class ClosestTextElementInWindowNotFound(Warning):
 
 
 def setup_line_height_images(
-    image_file_or_bytes: Union[str, bytes], window: sg.Window, image_key_has: str = ""
-):
+    image_file_or_bytes: Union[str, bytes],
+    window: sg.Window,
+    image_key_specifier: str = "",
+    exact_key_match: bool = False,
+) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
     the closest Text element.
 
@@ -1339,8 +1343,11 @@ def setup_line_height_images(
         image_file_or_bytes (Union[str, bytes]): Either a string filename for an image file or a bytes
             base64 image object.
         window (sg.Window): The window to update images in.
-        image_key_has (str, optional): Only update Image elements whose key contains this string.
-            Defaults to "".
+        image_key_specifier (str, optional): Only update Image elements whose key matches this string.
+            Matching method depends the 'exact_key_match' argument. Defaults to "".
+        exact_key_match (bool, optional): If True, a single Image whose key exactly matches the
+        'image_key_specifier' argument will be updated. Else, every Image whose key contains the image
+            key specifier will be updated. Defaults to False.
 
     Raises:
         InvalidElementSize: The width and/or height of a closest Text element is not greater than 0.
@@ -1348,9 +1355,18 @@ def setup_line_height_images(
     """
     element_list = window.element_list()
 
+    # The Image is the only one to update if it's key is exactly the given key substring
+    if exact_key_match:
+        valid_key: Callable = operator.eq
+    # An Image is will be updated if it's key contains the given key substring
+    else:
+        valid_key = operator.contains
+
     for index, element in enumerate(element_list):
         # Image element found with a key that contains a given string
-        if isinstance(element, sg.Image) and image_key_has in str(element.key):
+        if isinstance(element, sg.Image) and valid_key(
+            str(element.key), image_key_specifier
+        ):
             closest_text_element = find_closest_text_element(
                 index=index, element_list=element_list
             )
@@ -1374,6 +1390,10 @@ def setup_line_height_images(
                 raise ClosestTextElementInWindowNotFound(
                     f"Unable to find closest Text element to Image element with key={element.key} in the  main window."
                 )
+
+            # Stop after updating only the Image with the given key
+            if exact_key_match:
+                return
 
 
 import io
