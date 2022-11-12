@@ -647,7 +647,6 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
-            modal=True,
         )
 
         return win
@@ -746,7 +745,6 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
-            modal=True,
         )
 
         return win
@@ -913,7 +911,7 @@ def start_GUI() -> None:
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid selection",
-                    modal=True,
+                    non_blocking=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # Handle adding or editing of a prompt profile
@@ -955,7 +953,7 @@ def start_GUI() -> None:
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid prompt name",
-                    modal=True,
+                    non_blocking=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # User wants to delete a saved prompt profile
@@ -983,7 +981,7 @@ def start_GUI() -> None:
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid selection",
-                    modal=True,
+                    non_blocking=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # User modified the initial prompt.
@@ -1030,7 +1028,7 @@ def start_GUI() -> None:
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid scaling factor",
-                    modal=True,
+                    non_blocking=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
 
@@ -1172,7 +1170,7 @@ def start_GUI() -> None:
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Missing selections",
-                    modal=True,
+                    non_blocking=True,
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # 1 transcription completed
@@ -1192,7 +1190,7 @@ def start_GUI() -> None:
                 title="Complete",
                 size=(40, 20),
                 disabled=True,
-                modal=True,
+                non_blocking=True,
             )
             modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
@@ -1206,7 +1204,7 @@ def start_GUI() -> None:
                 popup_fn=popup,
                 window_tracker=window_tracker,
                 title="ERROR",
-                modal=True,
+                non_blocking=True,
             )
             modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
@@ -1285,7 +1283,9 @@ def set_same_width(text_elements: Sequence[sg.Text]) -> None:
 
 
 def find_closest_element(
-    index: int, element_list: List[sg.Element], element_class: Type[sg.Element] = sg.Element
+    index: int,
+    element_list: List[sg.Element],
+    element_class: Type[sg.Element] = sg.Element,
 ) -> Optional[sg.Text]:
     """Find the closest element of a class or its subclass to a target element based the
     target element's position in a list of elements.
