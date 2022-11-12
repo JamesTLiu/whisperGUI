@@ -32,6 +32,7 @@ from typing import (
     Set,
     TextIO,
     Tuple,
+    Type,
     Union,
 )
 
@@ -1283,20 +1284,22 @@ def set_same_width(text_elements: Sequence[sg.Text]) -> None:
         element.set_size((longest_width, None))
 
 
-def find_closest_text_element(
-    index: int, element_list: List[sg.Element]
+def find_closest_element(
+    index: int, element_list: List[sg.Element], element_class: Type[sg.Element] = sg.Element
 ) -> Optional[sg.Text]:
-    """Find the closest Text element to an target element based the target element's position in a list of elements.
+    """Find the closest element of a class or its subclass to a target element based the
+    target element's position in a list of elements.
 
     Args:
         index (int): The index in the list for the target element to start an expanding search from.
         element_list (List[sg.Element]): A list of elements.
+        element_class (Type[sg.Element]): The class requirement for the closest element. Defaults to sg.Element.
 
     Raises:
         IndexError: Invalid index for the given list.
 
     Returns:
-        Optional[sg.Text]: The closest Text element if found.
+        Optional[sg.Text]: The closest element if found.
     """
 
     # Ensure a valid index by accessing it
@@ -1316,16 +1319,15 @@ def find_closest_text_element(
     next_index = index + 1 if index < num_elements - 1 else index
     it_after = islice(element_list, next_index, None)
 
-    search_expanding_left = True
-    search_expanding_right = True
-
     def test_next_element(
-        it: Iterator[sg.Element], type: sg.Element
+        it: Iterator[sg.Element], element_class: Type[sg.Element]
     ) -> Tuple[Optional[sg.Element], bool]:
         """Test if the next element returned by the iterator is a Text element.
 
         Args:
             it (Iterator): The iterator for the elements to test.
+            element_class (Type[sg.Element]): The class requirement for the closest element.
+                Defaults to sg.Element.
 
         Returns:
             Tuple[Optional[sg.Element], bool]: A Tuple with the Text element if found or None
@@ -1336,21 +1338,24 @@ def find_closest_text_element(
         except StopIteration:
             return None, False
         else:
-            if isinstance(next_element, type):
+            if isinstance(next_element, element_class):
                 return next_element, True
             return None, True
+
+    search_expanding_left = True
+    search_expanding_right = True
 
     while search_expanding_left or search_expanding_right:
         if search_expanding_left:
             text_element_before, search_expanding_left = test_next_element(
-                it_before, sg.Text
+                it=it_before, element_class=element_class
             )
             if text_element_before:
                 return text_element_before
 
         if search_expanding_right:
             text_element_after, search_expanding_right = test_next_element(
-                it_after, sg.Text
+                it=it_after, element_class=element_class
             )
             if text_element_after:
                 return text_element_after
@@ -1410,8 +1415,8 @@ def setup_line_height_images(
         if isinstance(element, sg.Image) and valid_key(
             str(element.key), image_key_specifier
         ):
-            closest_text_element = find_closest_text_element(
-                index=index, element_list=element_list
+            closest_text_element = find_closest_element(
+                index=index, element_list=element_list, element_class=sg.Text
             )
 
             # Update the Image element with an image whose size matches the closest Text element.
