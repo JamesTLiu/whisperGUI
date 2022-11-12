@@ -153,6 +153,7 @@ def start_GUI() -> None:
         ),
         font=GUI_FONT,
         tooltip_font=GUI_FONT,
+        force_modal_windows=True,
     )
 
     # number of rows for the table
