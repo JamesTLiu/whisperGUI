@@ -68,6 +68,10 @@ def start_GUI() -> None:
     # Config file
     config_file_path = sg.user_settings_filename(filename="whisperGUI.config")
 
+    checkbox_key_prefix = "-CHECKBOX-"
+
+    info_image_key_prefix = "-INFO-"
+
     # Keys for main tab
     multiline_key = "-CONSOLE-OUTPUT-"
     in_file_key = "-IN-FILE-"
@@ -78,12 +82,12 @@ def start_GUI() -> None:
     model_key = "-MODEL-"
     model_text_key = "-MODEL-TEXT-"
     translate_to_english_text_key = "-TRANSLATE-OPTION-TEXT-"
-    translate_to_english_checkbox_key = "-CHECKBOX-TRANSLATE-"
+    translate_to_english_checkbox_key = checkbox_key_prefix + "TRANSLATE-"
     model_info_toggle_key = "-TOGGLE-MODEL-TABLE-"
     model_info_table_key = "-MODEL-TABLE-"
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
     initial_prompt_input_key = "-INITIAL-PROMPT-"
-    initial_prompt_info_key = "-INFO-INITIAL-PROMPT-"
+    initial_prompt_info_key = info_image_key_prefix + "INITIAL-PROMPT-"
     prompt_profile_dropdown_key = "-PROMPT-PROFILE-"
     start_prompt_manager_key = "-START-PROMPT-MANAGER-"
     start_key = "-START-TRANSCRIPTIONS-"
@@ -107,7 +111,7 @@ def start_GUI() -> None:
     scaling_text_setting_key = "-GLOBAL-SCALING-TEXT-"
     scaling_input_setting_key = "-GLOBAL-SCALING-"
     save_output_dir_text_key = "-SAVE-OUTPUT-DIR-TEXT-"
-    save_output_dir_checkbox_key = "-CHECKBOX-SAVE-OUTPUT-DIR-"
+    save_output_dir_checkbox_key = checkbox_key_prefix + "SAVE-OUTPUT-DIR-"
     language_specifier_text_setting_key = "-LANGUAGE-SPECIFIER-TEXT-"
     language_specifier_setting_key = "-LANGUAGE-SPECIFIER-"
 
