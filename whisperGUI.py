@@ -1521,18 +1521,17 @@ class ModalWindowManager:
             Tuple[sg.Window, bool]: A tuple with the window and True if
                 tracking succeeded, False otherwise.
         """
-        # Ignore closed windows
-        if window.is_closed():
-            return (window, False)
-        else:
-            # Ignore the window if it's already the most recent tracked modal window
-            if self._modal_window_stack and window is self._modal_window_stack[-1]:
-                return (window, True)
 
-            # Add the window as the most recent tracked modal window.
-            window.make_modal()
-            self._modal_window_stack.append(window)
+        # Ignore the window if it's already the most recent tracked modal window
+        if self._modal_window_stack and window is self._modal_window_stack[-1]:
             return (window, True)
+
+        if not window.is_closed():
+            window.make_modal()
+
+        # Add the window as the most recent tracked modal window.
+        self._modal_window_stack.append(window)
+        return (window, True)
 
     def update(self) -> None:
         """Set as modal the most recent non-closed tracked modal window."""
