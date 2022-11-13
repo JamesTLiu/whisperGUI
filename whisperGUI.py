@@ -861,7 +861,7 @@ def start_GUI() -> None:
             # Delete the saved output directory from the settings file when the option is off
             if (
                 event == save_output_dir_checkbox_key
-                and not window[event].is_toggled_on
+                and not window[event].checked
             ):
                 if sg.user_settings_get_entry(out_dir_key):
                     sg.user_settings_delete_entry(out_dir_key)
@@ -1971,7 +1971,7 @@ class ToggleImage(sg.Image):
             metadata=metadata,
         )
 
-    def toggle(self, window: sg.Window = None):
+    def toggle(self, window: sg.Window = None) -> None:
         self.is_toggled_on ^= True
         source = self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
 
@@ -2065,6 +2065,15 @@ class FancyCheckbox(ToggleImage):
             enable_events=enable_events,
             metadata=metadata,
         )
+
+    @property
+    def checked(self) -> bool:
+        """Toggle state of the checkbox. True if the checkbox is checked."""
+        return self.is_toggled_on
+
+    @checked.setter
+    def checked(self, is_checked: bool) -> None:
+        self.is_toggled_on = is_checked
 
 
 def save_checkbox_state(checkbox: FancyCheckbox) -> None:
