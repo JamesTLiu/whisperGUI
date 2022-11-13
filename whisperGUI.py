@@ -1071,7 +1071,7 @@ def start_GUI() -> None:
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
-            is_table_shown = not is_table_shown
+            is_table_shown ^= True
 
             # Update the toggle button's image
             if is_table_shown:
