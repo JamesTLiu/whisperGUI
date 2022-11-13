@@ -1101,7 +1101,7 @@ def start_GUI() -> None:
                 # Get the user's choice of whether to translate the results into english
                 translate_to_english = window[
                     translate_to_english_checkbox_key
-                ].metadata["is_checked"]
+                ].checked
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
                 language_specifier_selection = values[language_specifier_setting_key]
