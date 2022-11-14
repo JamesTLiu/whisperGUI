@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
+from dataclasses import dataclass
 
 import decimal
 import io
@@ -14,7 +15,7 @@ import threading
 import time
 from contextlib import suppress
 from decimal import Decimal
-from itertools import zip_longest, islice
+from itertools import islice, zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from operator import itemgetter
@@ -36,6 +37,8 @@ from typing import (
     Union,
 )
 
+from multipledispatch import dispatch
+
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
@@ -43,6 +46,9 @@ else:
 
 if TYPE_CHECKING:
     from types import FrameType
+
+import tkinter as tk
+from collections import namedtuple
 
 import PySimpleGUI as sg
 import whisper
@@ -52,8 +58,6 @@ from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
 import set_env
-
-import tkinter as tk
 
 
 def main():
@@ -859,10 +863,7 @@ def start_GUI() -> None:
                 save_checkbox_state(window[event])
 
             # Delete the saved output directory from the settings file when the option is off
-            if (
-                event == save_output_dir_checkbox_key
-                and not window[event].checked
-            ):
+            if event == save_output_dir_checkbox_key and not window[event].checked:
                 if sg.user_settings_get_entry(out_dir_key):
                     sg.user_settings_delete_entry(out_dir_key)
         # Popup prompt manager window
@@ -1099,9 +1100,7 @@ def start_GUI() -> None:
                 model_selected = values[model_key]
 
                 # Get the user's choice of whether to translate the results into english
-                translate_to_english = window[
-                    translate_to_english_checkbox_key
-                ].checked
+                translate_to_english = window[translate_to_english_checkbox_key].checked
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
                 language_specifier_selection = values[language_specifier_setting_key]
@@ -1436,9 +1435,10 @@ def setup_line_height_images(
                 return
 
 
-import io
-import PIL.Image
 import base64
+import io
+
+import PIL.Image
 
 
 def convert_to_bytes(file_or_bytes, resize=None, fill=False):
@@ -1834,6 +1834,28 @@ class PromptManager:
                 )
 
 
+@dataclass(frozen=True)
+class ElementWindow:
+    element: Optional[sg.Element] = None
+    window: Optional[sg.Window] = None
+
+    def __bool__(self) -> bool:
+        if self.element and self.window:
+            return True
+        return False
+
+
+def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
+    # Search the active windows for the element with the widget.
+    for window in sg.Window._active_windows:
+        element = window.widget_to_element(widget)
+        if element:
+            print("window found for widget")
+            return ElementWindow(element, window)
+    print("window NOT found for widget")
+    return None
+
+
 def fancy_checkbox(
     text: str = "",
     text_key: str = None,
@@ -1970,6 +1992,15 @@ class ToggleImage(sg.Image):
             enable_events=enable_events,
             metadata=metadata,
         )
+
+        self.widget.bind("<ButtonRelease>", self._toggle_given_event)
+
+    def _toggle_given_event(self, event: tk.Event) -> None:
+        element_window = widget_to_element_with_window(event.widget)
+        if element_window:
+            self.toggle(window=element_window.window)
+        else:
+            self.toggle()
 
     def toggle(self, window: sg.Window = None) -> None:
         self.is_toggled_on ^= True
