@@ -543,7 +543,7 @@ def start_GUI() -> None:
 
         setup_line_height_images(
             image_file_or_bytes=info_image_data,
-            image_key_specifier=info_image_key_prefix,
+            image_subkey=info_image_key_prefix,
             window=window,
         )
 
@@ -1366,8 +1366,9 @@ class ClosestTextElementInWindowNotFound(Warning):
 def setup_line_height_images(
     image_file_or_bytes: Union[str, bytes],
     window: sg.Window,
-    image_key_specifier: str = "",
-    exact_key_match: bool = False,
+    image_subkey: str = "",
+    image_element: sg.Image = None,
+    target_element: sg.Element = None,
 ) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
     the closest Text element.
@@ -1382,57 +1383,74 @@ def setup_line_height_images(
         image_file_or_bytes (Union[str, bytes]): Either a string filename for an image file or a bytes
             base64 image object.
         window (sg.Window): The window to update images in.
-        image_key_specifier (str, optional): Only update Image elements whose key matches this string.
-            Matching method depends the 'exact_key_match' argument. Defaults to "".
-        exact_key_match (bool, optional): If True, a single Image whose key exactly matches the
-        'image_key_specifier' argument will be updated. Else, every Image whose key contains the image
-            key specifier will be updated. Defaults to False.
+        image_subkey (str, optional): Only update Image elements whose key contains this string.
+            Defaults to "".
+        image_element (sg.Image, optional): The Image element to update. image_subkey parameter will be ignored
+            if this parameter is given. Defaults to None.
+        target_element (sg.Element, optional): The element to size match. If not given, the closest element will be used.
+            Defaults to None.
 
     Raises:
         InvalidElementSize: The width and/or height of a closest Text element is not greater than 0.
         ClosestTextElementInWindowNotFound: Unable to find closest Text element for an Image element in this window.
     """
+
     element_list = window.element_list()
 
-    # A valid key is exactly the given key substring.
-    if exact_key_match:
-        valid_key: Callable = operator.eq
-    # A valid key contains the given key substring.
-    else:
-        valid_key = operator.contains
-
     for index, element in enumerate(element_list):
+        # Image element given and found in list.
+        given_image_found = image_element and image_element is element
+
         # Image element found with a key that contains a given string
-        if isinstance(element, sg.Image) and valid_key(
-            str(element.key), image_key_specifier
-        ):
-            closest_text_element = find_closest_element(
-                index=index, element_list=element_list, element_class=sg.Text
-            )
+        valid_image_key = isinstance(element, sg.Image) and image_subkey in str(
+            element.key
+        )
+
+        if given_image_found or valid_image_key:
+            # Size match with the given element
+            if target_element:
+                element_to_size_match = target_element
+            # Size match with the closest element
+            else:
+                element_to_size_match = find_closest_element(
+                    index=index, element_list=element_list, element_class=sg.Text
+                )
 
             # Update the Image element with an image whose size matches the closest Text element.
-            if closest_text_element:
-                width, height = closest_text_element.get_size()
-                if width > 0 and height > 0:
-                    element.update(
-                        convert_to_bytes(
-                            file_or_bytes=image_file_or_bytes,
-                            resize=(width, height),
-                            fill=False,
-                        )
-                    )
-                else:
-                    raise InvalidElementSize(
-                        f"Unusable size for closest element (key={closest_text_element.key}). width={width}, height={height}."
-                    )
+            if element_to_size_match:
+                update_size_matched_image(
+                    image_file_or_bytes=image_file_or_bytes,
+                    image_element=element,
+                    element_to_size_match=element_to_size_match,
+                )
             else:
                 raise ClosestTextElementInWindowNotFound(
                     f"Unable to find closest Text element to Image element with key={element.key} in the  main window."
                 )
 
             # Stop after updating only the Image with the given key
-            if exact_key_match:
+            if image_element:
                 return
+
+
+def update_size_matched_image(
+    image_file_or_bytes: Union[str, bytes],
+    image_element: sg.Image,
+    element_to_size_match: sg.Element,
+):
+    width, height = element_to_size_match.get_size()
+    if width > 0 and height > 0:
+        image_element.update(
+            convert_to_bytes(
+                file_or_bytes=image_file_or_bytes,
+                resize=(width, height),
+                fill=False,
+            )
+        )
+    else:
+        raise InvalidElementSize(
+            f"Unusable size for closest element (key={element_to_size_match.key}). width={width}, height={height}."
+        )
 
 
 import base64
@@ -2010,8 +2028,7 @@ class ToggleImage(sg.Image):
             setup_line_height_images(
                 image_file_or_bytes=source,
                 window=window,
-                image_key_specifier=self.key,
-                exact_key_match=True,
+                image_subkey=self.key,
             )
         else:
             self.update(source=source)
