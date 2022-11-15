@@ -2017,32 +2017,28 @@ class ToggleImage(sg.Image):
     def setup(self) -> None:
         self._setup_binds()
 
-        element_window = widget_to_element_with_window(self.widget)
-        if element_window:
-            self.update_image(element_window.window)
+        # Update the image is size matched after initial creation
+        self.update_image()
 
     def _setup_binds(self) -> None:
-        self.widget.bind("<ButtonRelease>", self._toggle_given_event)
+        self.widget.bind("<ButtonRelease>", lambda e: self.toggle())
+        self.widget.bind("<Map>", lambda e: self.update_image())
 
-    def _toggle_given_event(self, event: tk.Event) -> None:
-        element_window = widget_to_element_with_window(event.widget)
-        if element_window:
-            self.toggle(window=element_window.window)
-        else:
-            self.toggle()
-
-    def toggle(self, window: sg.Window = None) -> None:
+    def toggle(self) -> None:
         self.is_toggled_on ^= True
-        self.update_image(window)
+        self.update_image()
 
-    def update_image(self, window: sg.Window) -> None:
+    def update_image(self) -> None:
         source = self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+
+        window = self.ParentForm
 
         if window:
             setup_line_height_images(
                 image_file_or_bytes=source,
                 window=window,
                 image_subkey=self.key,
+                # image_element=self,
             )
         else:
             self.update(source=source)
