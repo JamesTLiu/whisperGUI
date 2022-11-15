@@ -532,7 +532,7 @@ def start_GUI() -> None:
         # Set up each element's widget with its needed event binds
         for element in window.element_list():
             with suppress(AttributeError):
-                element.setup_binds()
+                element.setup()
 
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
@@ -1376,7 +1376,7 @@ def setup_line_height_images(
     target_element: sg.Element = None,
 ) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
-    the closest Text element.
+    the target element if given or the closest Text element.
 
     Usage:
         Put an Image element next to a Text element in a layout. (Optionally) Assign a key that
@@ -2014,7 +2014,14 @@ class ToggleImage(sg.Image):
             metadata=metadata,
         )
 
-    def setup_binds(self):
+    def setup(self) -> None:
+        self._setup_binds()
+
+        element_window = widget_to_element_with_window(self.widget)
+        if element_window:
+            self.update_image(element_window.window)
+
+    def _setup_binds(self) -> None:
         self.widget.bind("<ButtonRelease>", self._toggle_given_event)
 
     def _toggle_given_event(self, event: tk.Event) -> None:
@@ -2026,6 +2033,9 @@ class ToggleImage(sg.Image):
 
     def toggle(self, window: sg.Window = None) -> None:
         self.is_toggled_on ^= True
+        self.update_image(window)
+
+    def update_image(self, window: sg.Window) -> None:
         source = self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
 
         if window:
