@@ -1915,7 +1915,82 @@ def fancy_checkbox(
     return checkbox_layout
 
 
-class ToggleImage(sg.Image):
+class ExtendedImage(sg.Image):
+    """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
+
+    def __init__(
+        self,
+        source=None,
+        filename=None,
+        data=None,
+        background_color=None,
+        size=(None, None),
+        s=(None, None),
+        pad=None,
+        p=None,
+        key=None,
+        k=None,
+        tooltip=None,
+        subsample=None,
+        right_click_menu=None,
+        expand_x=False,
+        expand_y=False,
+        visible=True,
+        enable_events=False,
+        metadata=None,
+        size_match=False,
+        size_match_element_type=None,
+    ) -> None:
+        self.original_source = source
+        self.size_match = size_match
+        self.size_match_element_type = size_match_element_type
+
+        super().__init__(
+            source=source,
+            filename=filename,
+            data=data,
+            background_color=background_color,
+            size=size,
+            s=s,
+            pad=pad,
+            p=p,
+            key=key,
+            k=k,
+            tooltip=tooltip,
+            subsample=subsample,
+            right_click_menu=right_click_menu,
+            expand_x=expand_x,
+            expand_y=expand_y,
+            visible=visible,
+            enable_events=enable_events,
+            metadata=metadata,
+        )
+
+    def setup(self) -> None:
+        self._setup_binds()
+
+        # Update the image so it's size matched after initial creation
+        self.update_image()
+
+    def _setup_binds(self) -> None:
+        self.widget.bind("<Map>", lambda e: self.update_image())
+
+    def update_image(self, source: Union[str, bytes, None] = None) -> None:
+        window = self.ParentForm
+
+        new_source = source if source else self.original_source
+
+        if window:
+            setup_line_height_images(
+                image_file_or_bytes=new_source,
+                window=window,
+                image_element=self,
+            )
+        else:
+            self.update(source=new_source)
+
+
+class ToggleImage(ExtendedImage):
     """ToggleImage element - show an image that can be toggled in the window.
     Toggle On and Off images should be a GIF or a PNG only.
     """
@@ -2015,25 +2090,30 @@ class ToggleImage(sg.Image):
 
     def _setup_binds(self) -> None:
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
-        self.widget.bind("<Map>", lambda e: self.update_image())
+        self.widget.bind("<Map>", lambda e: self.update_toggle_images())
 
     def toggle(self) -> None:
         self.is_toggled_on ^= True
-        self.update_image()
+        self.update_toggle_images()
 
-    def update_image(self) -> None:
-        source = self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+    def update_toggle_images(
+        self,
+        toggle_on_source: Union[str, bytes, None] = None,
+        toggle_off_source: Union[str, bytes, None] = None,
+    ):
+        if toggle_on_source:
+            self.toggle_on_source = toggle_on_source
 
-        window = self.ParentForm
+        if toggle_off_source:
+            self.toggle_off_source = toggle_off_source
 
-        if window:
-            setup_line_height_images(
-                image_file_or_bytes=source,
-                window=window,
-                image_element=self,
-            )
-        else:
-            self.update(source=source)
+        new_source = (
+            self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+        )
+
+        self.update_image(new_source)
+
+
 
 
 class FancyCheckbox(ToggleImage):
