@@ -1986,10 +1986,7 @@ class ToggleImage(sg.Image):
         self.toggle_on_source = toggle_on_source
         self.toggle_off_source = toggle_off_source
 
-        if start_toggled_on:
-            source = toggle_on_source
-        else:
-            source = toggle_off_source
+        source = toggle_on_source if start_toggled_on else toggle_off_source
 
         super().__init__(
             source=source,
