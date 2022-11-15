@@ -546,11 +546,11 @@ def start_GUI() -> None:
             ]
         )
 
-        setup_line_height_images(
-            image_file_or_bytes=info_image_data,
-            image_subkey=info_image_key_prefix,
-            window=window,
-        )
+        # setup_line_height_images(
+        #     image_file_or_bytes=info_image_data,
+        #     image_subkey=info_image_key_prefix,
+        #     window=window,
+        # )
 
         return window
 
@@ -1368,6 +1368,7 @@ def setup_line_height_images(
     image_subkey: str = "",
     image_element: sg.Image = None,
     target_element: sg.Element = None,
+    closest_element_type: Type[sg.Element] = sg.Element,
 ) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
     the target element if given or the closest Text element.
@@ -1388,6 +1389,7 @@ def setup_line_height_images(
             if this parameter is given. Defaults to None.
         target_element (sg.Element, optional): The element to size match. If not given, the closest element will be used.
             Defaults to None.
+        closest_element_type (Type[sg.Element]): The type of the closest Element to size match. Defaults to sg.Element.
 
     Raises:
         InvalidElementSize: The width and/or height of a closest Text element is not greater than 0.
@@ -1414,7 +1416,9 @@ def setup_line_height_images(
             # Size match with the closest element
             else:
                 element_to_size_match = find_closest_element(
-                    index=index, element_list=element_list, element_class=sg.Text
+                    index=index,
+                    element_list=element_list,
+                    element_class=closest_element_type,
                 )
 
             # Update the Image element with an image whose size matches the closest Text element.
@@ -1939,7 +1943,7 @@ class Image(sg.Image):
         enable_events=False,
         metadata=None,
         size_match=False,
-        size_match_element_type=None,
+        size_match_element_type=sg.Element,
     ) -> None:
         self.original_source = source
         self.size_match = size_match
@@ -1980,11 +1984,12 @@ class Image(sg.Image):
 
         new_source = source if source else self.original_source
 
-        if window:
+        if window and self.size_match:
             setup_line_height_images(
                 image_file_or_bytes=new_source,
                 window=window,
                 image_element=self,
+                closest_element_type=self.size_match_element_type,
             )
         else:
             self.update(source=new_source)
@@ -2112,8 +2117,6 @@ class ToggleImage(Image):
         )
 
         self.update_image(new_source)
-
-
 
 
 class FancyCheckbox(ToggleImage):
