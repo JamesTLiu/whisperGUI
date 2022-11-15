@@ -552,12 +552,6 @@ def start_GUI() -> None:
             window=window,
         )
 
-        # setup_line_height_images(
-        #     image_file_or_bytes=info_image_data,
-        #     image_key_specifier=checkbox_key_prefix,
-        #     window=window,
-        # )
-
         return window
 
     def make_tracked_main_window_with_synced_profiles(
@@ -1406,9 +1400,11 @@ def setup_line_height_images(
         # Image element given and found in list.
         given_image_found = image_element and image_element is element
 
-        # Image element found with a key that contains a given string
-        valid_image_key = isinstance(element, sg.Image) and image_subkey in str(
-            element.key
+        # Image element not given. Image element found with a key that contains the required subkey.
+        valid_image_key = (
+            image_element is None
+            and isinstance(element, sg.Image)
+            and image_subkey in str(element.key)
         )
 
         if given_image_found or valid_image_key:
@@ -2017,11 +2013,11 @@ class ToggleImage(sg.Image):
     def setup(self) -> None:
         self._setup_binds()
 
-        # Update the image is size matched after initial creation
+        # Update the image so it's size matched after initial creation
         self.update_image()
 
     def _setup_binds(self) -> None:
-        self.widget.bind("<ButtonRelease>", lambda e: self.toggle())
+        self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
         self.widget.bind("<Map>", lambda e: self.update_image())
 
     def toggle(self) -> None:
@@ -2037,8 +2033,7 @@ class ToggleImage(sg.Image):
             setup_line_height_images(
                 image_file_or_bytes=source,
                 window=window,
-                image_subkey=self.key,
-                # image_element=self,
+                image_element=self,
             )
         else:
             self.update(source=source)
