@@ -529,6 +529,11 @@ def start_GUI() -> None:
 
         window.refresh()
 
+        # Set up each element's widget with its needed event binds
+        for element in window.element_list():
+            with suppress(AttributeError):
+                element.setup_binds()
+
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
@@ -1868,9 +1873,7 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
     for window in sg.Window._active_windows:
         element = window.widget_to_element(widget)
         if element:
-            print("window found for widget")
             return ElementWindow(element, window)
-    print("window NOT found for widget")
     return None
 
 
@@ -2011,6 +2014,7 @@ class ToggleImage(sg.Image):
             metadata=metadata,
         )
 
+    def setup_binds(self):
         self.widget.bind("<ButtonRelease>", self._toggle_given_event)
 
     def _toggle_given_event(self, event: tk.Event) -> None:
