@@ -1915,7 +1915,7 @@ def fancy_checkbox(
     return checkbox_layout
 
 
-class ExtendedImage(sg.Image):
+class Image(sg.Image):
     """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
 
     def __init__(
@@ -1990,7 +1990,7 @@ class ExtendedImage(sg.Image):
             self.update(source=new_source)
 
 
-class ToggleImage(ExtendedImage):
+class ToggleImage(Image):
     """ToggleImage element - show an image that can be toggled in the window.
     Toggle On and Off images should be a GIF or a PNG only.
     """
