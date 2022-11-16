@@ -2204,10 +2204,16 @@ class FancyCheckbox(ToggleImage):
         :param metadata:          User metadata that can be set to ANYTHING
         :type metadata:           (Any)
         """
+
+        on_source = toggle_on_source if toggle_on_source else self.checked_box_image
+        off_source = (
+            toggle_off_source if toggle_off_source else self.unchecked_box_image
+        )
+
         super().__init__(
             start_toggled_on=start_toggled_on,
-            toggle_on_source=toggle_on_source if toggle_on_source else self.checked_box_image,
-            toggle_off_source=toggle_off_source if toggle_off_source else self.unchecked_box_image,
+            toggle_on_source=on_source,
+            toggle_off_source=off_source,
             background_color=background_color,
             size=size,
             s=s,
