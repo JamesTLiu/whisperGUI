@@ -526,10 +526,6 @@ def start_GUI() -> None:
             with suppress(AttributeError):
                 element.setup()
 
-        window.refresh()
-
-        window.set_alpha(1)
-
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
@@ -541,6 +537,8 @@ def start_GUI() -> None:
                 window[language_specifier_text_setting_key],
             ]
         )
+
+        window.set_alpha(1)
 
         return window
 
