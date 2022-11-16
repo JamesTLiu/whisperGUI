@@ -521,10 +521,12 @@ def start_GUI() -> None:
 
         window.refresh()
 
-        # Set up each element's widget with its needed event binds
+        # Run needed setup for each element
         for element in window.element_list():
             with suppress(AttributeError):
                 element.setup()
+
+        window.refresh()
 
         window.set_alpha(1)
 
