@@ -839,7 +839,11 @@ def start_GUI() -> None:
             # Save the choice to the config file
             sg.user_settings_set_entry(model_key, values[model_key])
         # User clicked a checkbox
-        elif window and isinstance(window[event], FancyCheckbox):
+        elif (
+            window
+            and event in window.key_dict
+            and isinstance(window[event], FancyCheckbox)
+        ):
             # Save the checkbox state to the config file for save-on-click checkboxes
             save_on_click_checkboxes = (
                 translate_to_english_checkbox_key,
