@@ -1363,11 +1363,11 @@ class ClosestTextElementInWindowNotFound(Warning):
 
 
 def setup_line_height_images(
-    image_file_or_bytes: Union[str, bytes],
+    image_file_or_bytes: Union[str, bytes, None],
     window: sg.Window,
     image_subkey: str = "",
     image_element: sg.Image = None,
-    target_element: sg.Element = None,
+    size_match_element: sg.Element = None,
     closest_element_type: Type[sg.Element] = sg.Element,
 ) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
@@ -1411,8 +1411,8 @@ def setup_line_height_images(
 
         if given_image_found or valid_image_key:
             # Size match with the given element
-            if target_element:
-                element_to_size_match = target_element
+            if size_match_element:
+                element_to_size_match = size_match_element
             # Size match with the closest element
             else:
                 element_to_size_match = find_closest_element(
@@ -1439,7 +1439,7 @@ def setup_line_height_images(
 
 
 def update_size_matched_image(
-    image_file_or_bytes: Union[str, bytes],
+    image_file_or_bytes: Union[str, bytes, None],
     image_element: sg.Image,
     element_to_size_match: sg.Element,
 ):
@@ -1908,6 +1908,9 @@ def fancy_checkbox(
         start_toggled_on=is_checked,
         key=checkbox_key,
         enable_events=True,
+        size_match=True,
+        size_match_element=text_element,
+        size_match_element_type=sg.Text,
     )
 
     checkbox_layout = [text_element, image_element]
@@ -1945,7 +1948,8 @@ class Image(sg.Image):
         size_match=False,
         size_match_element_type=sg.Element,
     ) -> None:
-        self.original_source = source
+
+        self._original_source = source
         self.size_match = size_match
         self.size_match_element_type = size_match_element_type
 
@@ -1982,7 +1986,7 @@ class Image(sg.Image):
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
         window = self.ParentForm
 
-        new_source = source if source else self.original_source
+        new_source = source if source else self._original_source
 
         if window and self.size_match:
             setup_line_height_images(
@@ -1995,16 +1999,16 @@ class Image(sg.Image):
             self.update(source=new_source)
 
 
-class ToggleImage(Image):
+class ToggleImage(sg.Image):
     """ToggleImage element - show an image that can be toggled in the window.
     Toggle On and Off images should be a GIF or a PNG only.
     """
 
     def __init__(
         self,
-        start_toggled_on,
-        toggle_on_source=None,
-        toggle_off_source=None,
+        start_toggled_on: bool,
+        toggle_on_source: Union[str, bytes, None]=None,
+        toggle_off_source: Union[str, bytes, None]=None,
         background_color=None,
         size=(None, None),
         s=(None, None),
@@ -2020,47 +2024,60 @@ class ToggleImage(Image):
         visible=True,
         enable_events=False,
         metadata=None,
+        size_match=False,
+        size_match_element: sg.Element=None,
+        size_match_element_type: Type[sg.Element]=sg.Element,
     ):
         """
-        :param start_toggled_on:  Set to True if you want this element to start toggled on.
-        :type start_toggled_on:   bool
-        :param toggle_on_source:  A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type.
-        :type toggle_on_source:   str | bytes | None
-        :param toggle_off_source: A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type.
-        :type toggle_off_source:  str | bytes | None
-        :param source:            A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
-        :type source:             str | bytes | None
-        :param background_color:  color of background
+        :param start_toggled_on:               Set to True if you want this element to start toggled on.
+        :type start_toggled_on:                bool
+        :param toggle_on_source:               A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type.
+        :type toggle_on_source:                str | bytes | None
+        :param toggle_off_source:              A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type.
+        :type toggle_off_source:               str | bytes | None
+        :param source:                         A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
+        :type source:                          str | bytes | None
+        :param background_color:               color of background
         :type background_color:
-        :param size:              (width, height) size of image in pixels
-        :type size:               (int, int)
-        :param s:                 Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
-        :type s:                  (int, int)  | (None, None) | int
-        :param pad:               Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
-        :type pad:                (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
-        :param p:                 Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
-        :type p:                  (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
-        :param key:               Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
-        :type key:                str | int | tuple | object
-        :param k:                 Same as the Key. You can use either k or key. Which ever is set will be used.
-        :type k:                  str | int | tuple | object
-        :param tooltip:           text, that will appear when mouse hovers over the element
-        :type tooltip:            (str)
-        :param subsample:         amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
-        :type subsample:          (int)
-        :param right_click_menu:  A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
-        :type right_click_menu:   List[List[ List[str] | str ]]
-        :param expand_x:          If True the element will automatically expand in the X direction to fill available space
-        :type expand_x:           (bool)
-        :param expand_y:          If True the element will automatically expand in the Y direction to fill available space
-        :type expand_y:           (bool)
-        :param visible:           set visibility state of the element
-        :type visible:            (bool)
-        :param enable_events:     Turns on the element specific events. For an Image element, the event is "image clicked"
-        :type enable_events:      (bool)
-        :param metadata:          User metadata that can be set to ANYTHING
-        :type metadata:           (Any)
+        :param size:                           (width, height) size of image in pixels
+        :type size:                            (int, int)
+        :param s:                              Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+        :type s:                               (int, int)  | (None, None) | int
+        :param pad:                            Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+        :type pad:                             (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param p:                              Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+        :type p:                               (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param key:                            Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
+        :type key:                             str | int | tuple | object
+        :param k:                              Same as the Key. You can use either k or key. Which ever is set will be used.
+        :type k:                               str | int | tuple | object
+        :param tooltip:                        text, that will appear when mouse hovers over the element
+        :type tooltip:                         (str)
+        :param subsample:                      amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
+        :type subsample:                       (int)
+        :param right_click_menu:               A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
+        :type right_click_menu:                List[List[ List[str] | str ]]
+        :param expand_x:                       If True the element will automatically expand in the X direction to fill available space
+        :type expand_x:                        (bool)
+        :param expand_y:                       If True the element will automatically expand in the Y direction to fill available space
+        :type expand_y:                        (bool)
+        :param visible:                        set visibility state of the element
+        :type visible:                         (bool)
+        :param enable_events:                  Turns on the element specific events. For an Image element, the event is "image clicked"
+        :type enable_events:                   (bool)
+        :param metadata:                       User metadata that can be set to ANYTHING
+        :type metadata:                        (Any)
+        :param size_match:                     If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
+        :type size_match:                      (bool)
+        :param size_match_element:             The element to size match the image to.
+        :type size_match_element:              (sg.Element)
+        :param size_match_element_type:        The type of the closest Element to size match will be this type.
+        :type size_match_element_type:         (Type[sg.Element])
         """
+
+        self.size_match = size_match
+        self.size_match_element = size_match_element
+        self.size_match_element_type = size_match_element_type
 
         self.is_toggled_on = start_toggled_on
         self.toggle_on_source = toggle_on_source
@@ -2091,7 +2108,7 @@ class ToggleImage(Image):
         self._setup_binds()
 
         # Update the image so it's size matched after initial creation
-        self.update_image()
+        self._update_image()
 
     def _setup_binds(self) -> None:
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
@@ -2112,15 +2129,29 @@ class ToggleImage(Image):
         if toggle_off_source:
             self.toggle_off_source = toggle_off_source
 
+        self._update_image()
+
+    def _update_image(self) -> None:
+        window = self.ParentForm
+
         new_source = (
             self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
         )
 
-        self.update_image(new_source)
+        if window and self.size_match:
+            setup_line_height_images(
+                image_file_or_bytes=new_source,
+                window=window,
+                image_element=self,
+                size_match_element=self.size_match_element,
+                closest_element_type=self.size_match_element_type,
+            )
+        else:
+            self.update(source=new_source)
 
 
 class FancyCheckbox(ToggleImage):
-    """Fancy Checkbox Element. Displays a checkbox with fancy checked/unchecked images."""
+    """Fancy Checkbox Element. Displays a checkbox with fancy checked/unchecked default images."""
 
     checked_box_image = b"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"
     unchecked_box_image = b"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"
@@ -2128,6 +2159,8 @@ class FancyCheckbox(ToggleImage):
     def __init__(
         self,
         start_toggled_on,
+        toggle_on_source=None,
+        toggle_off_source=None,
         background_color=None,
         size=(None, None),
         s=(None, None),
@@ -2143,6 +2176,9 @@ class FancyCheckbox(ToggleImage):
         visible=True,
         enable_events=False,
         metadata=None,
+        size_match=False,
+        size_match_element: sg.Element=None,
+        size_match_element_type=sg.Element,
     ):
         """
         :param start_toggled_on:  Set to True if you want this element to start toggled on.
@@ -2180,8 +2216,8 @@ class FancyCheckbox(ToggleImage):
         """
         super().__init__(
             start_toggled_on=start_toggled_on,
-            toggle_on_source=self.checked_box_image,
-            toggle_off_source=self.unchecked_box_image,
+            toggle_on_source=toggle_on_source if toggle_on_source else self.checked_box_image,
+            toggle_off_source=toggle_off_source if toggle_off_source else self.unchecked_box_image,
             background_color=background_color,
             size=size,
             s=s,
@@ -2197,6 +2233,9 @@ class FancyCheckbox(ToggleImage):
             visible=visible,
             enable_events=enable_events,
             metadata=metadata,
+            size_match=size_match,
+            size_match_element=size_match_element,
+            size_match_element_type=size_match_element_type,
         )
 
     @property
