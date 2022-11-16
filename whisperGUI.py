@@ -1934,11 +1934,13 @@ class Image(sg.Image):
         enable_events=False,
         metadata=None,
         size_match=False,
+        size_match_element: sg.Element = None,
         size_match_element_type=sg.Element,
     ) -> None:
 
         self._original_source = source
         self.size_match = size_match
+        self.size_match_element = size_match_element
         self.size_match_element_type = size_match_element_type
 
         super().__init__(
@@ -1981,6 +1983,7 @@ class Image(sg.Image):
                 image_file_or_bytes=new_source,
                 window=window,
                 image_element=self,
+                size_match_element=self.size_match_element,
                 closest_element_type=self.size_match_element_type,
             )
         else:
