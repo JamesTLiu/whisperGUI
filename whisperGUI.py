@@ -516,6 +516,7 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
+            alpha_channel=0,
         )
 
         window.refresh()
@@ -524,6 +525,8 @@ def start_GUI() -> None:
         for element in window.element_list():
             with suppress(AttributeError):
                 element.setup()
+
+        window.set_alpha(1)
 
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
@@ -1939,7 +1942,7 @@ class Image(sg.Image):
         self.size_match_element_type = size_match_element_type
 
         super().__init__(
-            source=source,
+            source=None,
             filename=filename,
             data=data,
             background_color=background_color,
@@ -1967,6 +1970,7 @@ class Image(sg.Image):
 
     def _setup_binds(self) -> None:
         self.widget.bind("<Map>", lambda e: self.update_image())
+        # self.widget.bind("<Create>", lambda e: self.update_image())
 
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
         window = self.ParentForm
@@ -2068,10 +2072,10 @@ class ToggleImage(sg.Image):
         self.toggle_on_source = toggle_on_source
         self.toggle_off_source = toggle_off_source
 
-        source = toggle_on_source if start_toggled_on else toggle_off_source
+        # source = toggle_on_source if start_toggled_on else toggle_off_source
 
         super().__init__(
-            source=source,
+            source=None,
             background_color=background_color,
             size=size,
             s=s,
@@ -2098,6 +2102,7 @@ class ToggleImage(sg.Image):
     def _setup_binds(self) -> None:
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
+        # self.widget.bind("<Create>", lambda e: self.update_toggle_images())
 
     def toggle(self) -> None:
         self.is_toggled_on ^= True
