@@ -1996,8 +1996,8 @@ class ToggleImage(sg.Image):
     def __init__(
         self,
         start_toggled_on: bool,
-        toggle_on_source: Union[str, bytes, None]=None,
-        toggle_off_source: Union[str, bytes, None]=None,
+        toggle_on_source: Union[str, bytes, None] = None,
+        toggle_off_source: Union[str, bytes, None] = None,
         background_color=None,
         size=(None, None),
         s=(None, None),
@@ -2014,8 +2014,8 @@ class ToggleImage(sg.Image):
         enable_events=False,
         metadata=None,
         size_match=False,
-        size_match_element: sg.Element=None,
-        size_match_element_type: Type[sg.Element]=sg.Element,
+        size_match_element: sg.Element = None,
+        size_match_element_type: Type[sg.Element] = sg.Element,
     ):
         """
         :param start_toggled_on:               Set to True if you want this element to start toggled on.
@@ -2072,8 +2072,6 @@ class ToggleImage(sg.Image):
         self.toggle_on_source = toggle_on_source
         self.toggle_off_source = toggle_off_source
 
-        # source = toggle_on_source if start_toggled_on else toggle_off_source
-
         super().__init__(
             source=None,
             background_color=background_color,
@@ -2101,8 +2099,6 @@ class ToggleImage(sg.Image):
 
     def _setup_binds(self) -> None:
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
-        self.widget.bind("<Map>", lambda e: self.update_toggle_images())
-        # self.widget.bind("<Create>", lambda e: self.update_toggle_images())
 
     def toggle(self) -> None:
         self.is_toggled_on ^= True
@@ -2167,7 +2163,7 @@ class FancyCheckbox(ToggleImage):
         enable_events=False,
         metadata=None,
         size_match=False,
-        size_match_element: sg.Element=None,
+        size_match_element: sg.Element = None,
         size_match_element_type=sg.Element,
     ):
         """
