@@ -290,20 +290,7 @@ def start_GUI() -> None:
                                 ),
                                 key=initial_prompt_text_key,
                             ),
-                            # sg.Text(
-                            #     "🛈",
-                            #     tooltip=(
-                            #         "Use this when a dialect/style of a language or punctuation is desired.\n"
-                            #         "Does NOT guarantee the result will follow the initial prompt.\n"
-                            #         "Initial prompt will NOT be included in the result.\n"
-                            #         "Try a larger model if the result does not follow the initial prompt.\n\n"
-                            #         "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                            #     ),
-                            #     relief=sg.RELIEF_RAISED,
-                            #     # font=(GUI_FONT[0], 60),
-                            #     pad=0,
-                            # ),
-                            sg.Image(
+                            Image(
                                 tooltip=(
                                     "Use this when a dialect/style of a language or punctuation is desired.\n"
                                     "Does NOT guarantee the result will follow the initial prompt.\n"
@@ -545,12 +532,6 @@ def start_GUI() -> None:
                 window[language_specifier_text_setting_key],
             ]
         )
-
-        # setup_line_height_images(
-        #     image_file_or_bytes=info_image_data,
-        #     image_subkey=info_image_key_prefix,
-        #     window=window,
-        # )
 
         return window
 
