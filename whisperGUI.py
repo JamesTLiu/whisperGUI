@@ -1969,8 +1969,7 @@ class Image(sg.Image):
         self.update_image()
 
     def _setup_binds(self) -> None:
-        self.widget.bind("<Map>", lambda e: self.update_image())
-        # self.widget.bind("<Create>", lambda e: self.update_image())
+        ...
 
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
         window = self.ParentForm
