@@ -292,4 +292,6 @@ whisper (either through cmd line or whisper python package) uses CPU when a CUDA
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
 
 ## Credits
+This GUI would not be possible without openai whisper. Read more about it at https://openai.com/blog/whisper/.
+
 Icon - <a href="https://www.flaticon.com/free-icons/text-to-speech" title="text to speech icons">Text to speech icons created by Freepik - Flaticon</a>
