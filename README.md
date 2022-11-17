@@ -290,3 +290,6 @@ PermissionError: [Errno 13] Permission denied: 'ffmpeg'
 
 whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and no option to use CPU is given.
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
+
+## Credits
+Icon - <a href="https://www.flaticon.com/free-icons/text-to-speech" title="text to speech icons">Text to speech icons created by Freepik - Flaticon</a>
