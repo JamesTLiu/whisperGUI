@@ -515,6 +515,11 @@ def start_GUI() -> None:
             alpha_channel=0,
         )
 
+        # Set the window size relative to the screen
+        resize_window_relative_to_screen(
+            window=window, width_factor=0.6, height_factor=0.85
+        )
+
         window.refresh()
 
         # Run needed setup for each element
@@ -1235,6 +1240,23 @@ def start_GUI() -> None:
 
     # Finish up by removing from the screen
     main_window.close()
+
+
+def resize_window_relative_to_screen(
+    window: sg.Window,
+    width_factor: Union[float, int],
+    height_factor: Union[float, int],
+):
+    screen_width, screen_height = sg.Window.get_screen_size()
+
+    window_width = int(screen_width * width_factor)
+    window_height = int(screen_height * height_factor)
+
+    window.size = (window_width, window_height)
+
+    window.refresh()
+
+    window.move_to_center()
 
 
 def set_same_width(text_elements: Sequence[sg.Text]) -> None:
