@@ -167,9 +167,6 @@ def start_GUI() -> None:
     # number of rows for the table
     num_table_rows = 5
 
-    # height of the multiline element showing console output when the table is not shown
-    multiline_height = 15
-
     # whether multiline element strips whitespaces from the end of the new text to append
     is_multiline_rstripping_on_update = False
 
@@ -390,7 +387,6 @@ def start_GUI() -> None:
             [
                 sg.Multiline(
                     key=multiline_key,
-                    size=(70, multiline_height),
                     background_color="black",
                     text_color="white",
                     auto_refresh=True,
@@ -1067,14 +1063,6 @@ def start_GUI() -> None:
 
             # Show/hide the table
             window[model_info_table_key].update(visible=is_table_shown)
-
-            # Update multine element's height based on whether the table is showing
-            new_multiline_height = multiline_height
-
-            if is_table_shown:
-                new_multiline_height -= num_table_rows
-
-            window[multiline_key].set_size((None, new_multiline_height))
         # User wants to start transcription
         elif event == start_key:
             # Get user provided paths for the video file and output directory
