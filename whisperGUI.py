@@ -1929,7 +1929,15 @@ def fancy_checkbox(
     return checkbox_layout
 
 
-class Image(sg.Image):
+class ExtendedImageBase(sg.Image):
+    """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
+
+    def _unbind_all(self) -> None:
+        for event in self.widget.bind():
+            self.unbind(event)
+
+
+class Image(ExtendedImageBase):
     """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
 
     def __init__(
@@ -1993,10 +2001,6 @@ class Image(sg.Image):
         # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_image())
 
-    def _unbind_all(self) -> None:
-        for event in self.widget.bind():
-            self.unbind(event)
-
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
         window = self.ParentForm
 
@@ -2014,7 +2018,7 @@ class Image(sg.Image):
             self.update(source=new_source)
 
 
-class ToggleImage(sg.Image):
+class ToggleImage(ExtendedImageBase):
     """ToggleImage element - show an image that can be toggled in the window.
     Toggle On and Off images should be a GIF or a PNG only.
     """
@@ -2136,10 +2140,6 @@ class ToggleImage(sg.Image):
 
         # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
-
-    def _unbind_all(self) -> None:
-        for event in self.widget.bind():
-            self.unbind(event)
 
     def toggle(self) -> None:
         self.is_toggled_on ^= True
