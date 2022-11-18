@@ -371,6 +371,7 @@ def start_GUI() -> None:
                     key=model_info_toggle_key,
                     size_match=True,
                     size_match_element_type=sg.Text,
+                    enable_events=True,
                 ),
             ],
             [
@@ -393,7 +394,6 @@ def start_GUI() -> None:
                         visible=show_model_info_at_start,
                     ),
                     expand_x=True,
-                    expand_y=True,
                 )
             ],
             [
@@ -1990,6 +1990,7 @@ class Image(sg.Image):
         self.update_image()
 
     def _setup_binds(self) -> None:
+        # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_image())
 
     def _unbind_all(self) -> None:
@@ -2126,10 +2127,14 @@ class ToggleImage(sg.Image):
         # Remove existing event bindings
         self._unbind_all()
 
-        # Toggle the element on left click release and send out PySimpleGUI event
-        self.bind("<ButtonRelease-1>", "")
+        # Set up PySimpleGUI events on left click release if they're enabled for this element
+        if self.EnableEvents:
+            self.bind("<ButtonRelease-1>", "")
+
+        # Toggle the element on left click release
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle(), add="+")
 
+        # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
 
     def _unbind_all(self) -> None:
