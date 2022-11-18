@@ -1068,20 +1068,11 @@ def start_GUI() -> None:
             window[settings_tab_key].select()
         # User pressed toggle button for the table
         elif event == model_info_toggle_key:
-            # is_table_shown ^= True
-
-            # # Update the toggle button's image
-            # if is_table_shown:
-            #     toggle_image = toggle_btn_on
-            # else:
-            #     toggle_image = toggle_btn_off
-
             # window[model_info_toggle_key].update(image_data=toggle_image)
-            model_info_toggle: ToggleImage = window[model_info_toggle_key]
-            model_info_toggle.toggle()
+            model_info_toggled_on = window[model_info_toggle_key].is_toggled_on
 
             # Show/hide the table
-            window[model_info_table_key].update(visible=model_info_toggle.is_toggled_on)
+            window[model_info_table_key].update(visible=model_info_toggled_on)
         # User wants to start transcription
         elif event == start_key:
             # Get user provided paths for the video file and output directory
