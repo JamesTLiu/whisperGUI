@@ -1992,6 +1992,10 @@ class Image(sg.Image):
     def _setup_binds(self) -> None:
         self.widget.bind("<Map>", lambda e: self.update_image())
 
+    def _unbind_all(self) -> None:
+        for event in self.widget.bind():
+            self.unbind(event)
+
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
         window = self.ParentForm
 
@@ -2119,8 +2123,18 @@ class ToggleImage(sg.Image):
         self._update_image()
 
     def _setup_binds(self) -> None:
-        self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle())
+        # Remove existing event bindings
+        self._unbind_all()
+
+        # Toggle the element on left click release and send out PySimpleGUI event
+        self.bind("<ButtonRelease-1>", "")
+        self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle(), add="+")
+
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
+
+    def _unbind_all(self) -> None:
+        for event in self.widget.bind():
+            self.unbind(event)
 
     def toggle(self) -> None:
         self.is_toggled_on ^= True
