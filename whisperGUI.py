@@ -2011,9 +2011,53 @@ class SizeMatchingImage(ExtendedImage):
         enable_events=False,
         metadata=None,
         size_match=False,
-        size_match_element: sg.Element = None,
+        size_match_element=None,
         size_match_element_type=sg.Element,
     ) -> None:
+        """
+        :param source:                  A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
+        :type source:                   str | bytes | None
+        :param filename:                image filename if there is a button image. GIFs and PNGs only.
+        :type filename:                 str | None
+        :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
+        :type data:                     bytes | str | None
+        :param background_color:        color of background
+        :type background_color:
+        :param size:                    (width, height) size of image in pixels
+        :type size:                     (int, int)
+        :param s:                       Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+        :type s:                        (int, int)  | (None, None) | int
+        :param pad:                     Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+        :type pad:                      (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param p:                       Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+        :type p:                        (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param key:                     Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
+        :type key:                      str | int | tuple | object
+        :param k:                       Same as the Key. You can use either k or key. Which ever is set will be used.
+        :type k:                        str | int | tuple | object
+        :param tooltip:                 text, that will appear when mouse hovers over the element
+        :type tooltip:                  (str)
+        :param subsample:               amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
+        :type subsample:                (int)
+        :param right_click_menu:        A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
+        :type right_click_menu:         List[List[ List[str] | str ]]
+        :param expand_x:                If True the element will automatically expand in the X direction to fill available space
+        :type expand_x:                 (bool)
+        :param expand_y:                If True the element will automatically expand in the Y direction to fill available space
+        :type expand_y:                 (bool)
+        :param visible:                 set visibility state of the element
+        :type visible:                  (bool)
+        :param enable_events:           Turns on the element specific events. For an Image element, the event is "image clicked"
+        :type enable_events:            (bool)
+        :param metadata:                User metadata that can be set to ANYTHING
+        :type metadata:                 (Any)
+        :param size_match:              If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
+        :type size_match:               (bool)
+        :param size_match_element:      The element to size match the image to.
+        :type size_match_element:       (sg.Element)
+        :param size_match_element_type: The type of the closest Element to size match will be this type.
+        :type size_match_element_type:  (Type[sg.Element])
+        """
 
         self._original_source = source
         self.size_match = size_match
@@ -2042,16 +2086,30 @@ class SizeMatchingImage(ExtendedImage):
         )
 
     def setup(self) -> None:
+        """Set up internal tkinter event binds and update the image. Only call this after the
+        widget is created via calling window.refresh() or window.read() on the window with
+        this element.
+        """
+
         self._setup_binds()
 
         # Update the image so it's size matched after initial creation
         self.update_image()
 
     def _setup_binds(self) -> None:
+        # Set up tkinter bind events
+        
         # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_image())
 
     def update_image(self, source: Union[str, bytes, None] = None) -> None:
+        """Update the image with the given source. If size matching is on, a size-matched version of
+        the source will be used.
+
+        Args:
+            source (Union[str, bytes, None], optional): A filename or a base64 bytes. Defaults to None.
+        """
+
         window = self.ParentForm
 
         new_source = source if source else self._original_source
@@ -2172,12 +2230,19 @@ class SizeMatchingToggleImage(ExtendedImage):
         )
 
     def setup(self) -> None:
+        """Set up internal tkinter event binds and update the image. Only call this after the
+        widget is created via calling window.refresh() or window.read() on the window with
+        this element.
+        """
+
         self._setup_binds()
 
         # Update the image so it's size matched after initial creation
         self._update_image()
 
     def _setup_binds(self) -> None:
+        # Set up tkinter bind events
+
         # Remove existing event bindings
         self._unbind_all()
 
@@ -2199,7 +2264,16 @@ class SizeMatchingToggleImage(ExtendedImage):
         self,
         toggle_on_source: Union[str, bytes, None] = None,
         toggle_off_source: Union[str, bytes, None] = None,
-    ):
+    ) -> None:
+        """Update the sources for the toggle images and the image with the new source based on the
+        current toggle state. If size matching is on, a size-matched version of the new source will
+        be used.
+
+        Args:
+            toggle_on_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type. Defaults to None.
+            toggle_off_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type. Defaults to None.
+        """
+
         if toggle_on_source:
             self.toggle_on_source = toggle_on_source
 
@@ -2209,6 +2283,8 @@ class SizeMatchingToggleImage(ExtendedImage):
         self._update_image()
 
     def _update_image(self) -> None:
+        # Update the image. If size matching is on, a size-matched version of the source will be used.
+
         window = self.ParentForm
 
         new_source = (
