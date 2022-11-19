@@ -860,7 +860,7 @@ def start_GUI() -> None:
             )
 
             if event in save_on_click_checkboxes:
-                save_checkbox_state(window[event])
+                save_toggle_state(window[event])
 
             # Delete the saved output directory from the settings file when the option is off
             if event == save_output_dir_checkbox_key and not window[event].checked:
@@ -2500,18 +2500,15 @@ class FancyToggle(SizeMatchingToggleImage):
         )
 
 
-def save_checkbox_state(checkbox: FancyCheckbox) -> None:
-    """Save a checkbox's checked state to the config file. The checkbox must
-    be an Image element whose checked state is saved in the element's metadata as True or False.
+def save_toggle_state(toggle_element: ToggleImage) -> None:
+    """Save the toggle element's toggle state to the config file.
 
     Args:
-        window (sg.Window): The PySimpleGUI window with the checkbox as an Image element.
-        checkbox_key (str): The key for the checkbox which is an Image element
-            whose checked state is saved in its metadata.
+        toggle_element (ToggleImage): The toggle element whose toggle state is to be saved.
     """
     sg.user_settings_set_entry(
-        checkbox.key,
-        checkbox.is_toggled_on,
+        toggle_element.key,
+        toggle_element.is_toggled_on,
     )
 
 
