@@ -510,7 +510,7 @@ def start_GUI() -> None:
         ]
 
         # Create the window
-        window = sg.Window(
+        window = Window(
             "WhisperGUI - Convert Audio/Video Files to Text",
             layout,
             finalize=True,
@@ -524,13 +524,6 @@ def start_GUI() -> None:
         resize_window_relative_to_screen(
             window=window, width_factor=0.6, height_factor=0.85
         )
-
-        window.refresh()
-
-        # Run needed setup for each element
-        for element in window.element_list():
-            with suppress(AttributeError):
-                element.setup()
 
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
@@ -642,7 +635,7 @@ def start_GUI() -> None:
         ]
 
         # Create the window
-        win = sg.Window(
+        win = Window(
             "Prompt Manager",
             layout,
             finalize=True,
@@ -740,7 +733,7 @@ def start_GUI() -> None:
         ]
 
         # Create the window
-        win = sg.Window(
+        win = Window(
             title=title,
             layout=layout,
             finalize=True,
@@ -1241,6 +1234,148 @@ def start_GUI() -> None:
 
     # Finish up by removing from the screen
     main_window.close()
+
+
+class Window(sg.Window):
+    """Represents a single Window."""
+
+    def __init__(
+        self,
+        title,
+        layout=None,
+        default_element_size=None,
+        default_button_element_size=(None, None),
+        auto_size_text=None,
+        auto_size_buttons=None,
+        location=(None, None),
+        relative_location=(None, None),
+        size=(None, None),
+        element_padding=None,
+        margins=(None, None),
+        button_color=None,
+        font=None,
+        progress_bar_color=(None, None),
+        background_color=None,
+        border_depth=None,
+        auto_close=False,
+        auto_close_duration=sg.DEFAULT_AUTOCLOSE_TIME,
+        icon=None,
+        force_toplevel=False,
+        alpha_channel=None,
+        return_keyboard_events=False,
+        use_default_focus=True,
+        text_justification=None,
+        no_titlebar=False,
+        grab_anywhere=False,
+        grab_anywhere_using_control=True,
+        keep_on_top=None,
+        resizable=False,
+        disable_close=False,
+        disable_minimize=False,
+        right_click_menu=None,
+        transparent_color=None,
+        debugger_enabled=True,
+        right_click_menu_background_color=None,
+        right_click_menu_text_color=None,
+        right_click_menu_disabled_text_color=None,
+        right_click_menu_selected_colors=(None, None),
+        right_click_menu_font=None,
+        right_click_menu_tearoff=False,
+        finalize=False,
+        element_justification="left",
+        ttk_theme=None,
+        use_ttk_buttons=None,
+        modal=False,
+        enable_close_attempted_event=False,
+        titlebar_background_color=None,
+        titlebar_text_color=None,
+        titlebar_font=None,
+        titlebar_icon=None,
+        use_custom_titlebar=None,
+        scaling=None,
+        sbar_trough_color=None,
+        sbar_background_color=None,
+        sbar_arrow_color=None,
+        sbar_width=None,
+        sbar_arrow_width=None,
+        sbar_frame_color=None,
+        sbar_relief=None,
+        metadata=None,
+    ):
+        super().__init__(
+            title=title,
+            layout=layout,
+            default_element_size=default_element_size,
+            default_button_element_size=default_button_element_size,
+            auto_size_text=auto_size_text,
+            auto_size_buttons=auto_size_buttons,
+            location=location,
+            relative_location=relative_location,
+            size=size,
+            element_padding=element_padding,
+            margins=margins,
+            button_color=button_color,
+            font=font,
+            progress_bar_color=progress_bar_color,
+            background_color=background_color,
+            border_depth=border_depth,
+            auto_close=auto_close,
+            auto_close_duration=auto_close_duration,
+            icon=icon,
+            force_toplevel=force_toplevel,
+            alpha_channel=alpha_channel,
+            return_keyboard_events=return_keyboard_events,
+            use_default_focus=use_default_focus,
+            text_justification=text_justification,
+            no_titlebar=no_titlebar,
+            grab_anywhere=grab_anywhere,
+            grab_anywhere_using_control=grab_anywhere_using_control,
+            keep_on_top=keep_on_top,
+            resizable=resizable,
+            disable_close=disable_close,
+            disable_minimize=disable_minimize,
+            right_click_menu=right_click_menu,
+            transparent_color=transparent_color,
+            debugger_enabled=debugger_enabled,
+            right_click_menu_background_color=right_click_menu_background_color,
+            right_click_menu_text_color=right_click_menu_text_color,
+            right_click_menu_disabled_text_color=right_click_menu_disabled_text_color,
+            right_click_menu_selected_colors=right_click_menu_selected_colors,
+            right_click_menu_font=right_click_menu_font,
+            right_click_menu_tearoff=right_click_menu_tearoff,
+            finalize=finalize,
+            element_justification=element_justification,
+            ttk_theme=ttk_theme,
+            use_ttk_buttons=use_ttk_buttons,
+            modal=modal,
+            enable_close_attempted_event=enable_close_attempted_event,
+            titlebar_background_color=titlebar_background_color,
+            titlebar_text_color=titlebar_text_color,
+            titlebar_font=titlebar_font,
+            titlebar_icon=titlebar_icon,
+            use_custom_titlebar=use_custom_titlebar,
+            scaling=scaling,
+            sbar_trough_color=sbar_trough_color,
+            sbar_background_color=sbar_background_color,
+            sbar_arrow_color=sbar_arrow_color,
+            sbar_width=sbar_width,
+            sbar_arrow_width=sbar_arrow_width,
+            sbar_frame_color=sbar_frame_color,
+            sbar_relief=sbar_relief,
+            metadata=metadata,
+        )
+
+        self._setup()
+
+    def _setup(self):
+        self.refresh()
+
+        # Run the setup for each element if it exists
+        for element in self.element_list():
+            with suppress(AttributeError):
+                element._setup()
+
+        self.refresh()
 
 
 def resize_window_relative_to_screen(
@@ -2085,7 +2220,7 @@ class Image(ImageBase):
             metadata=metadata,
         )
 
-    def setup(self) -> None:
+    def _setup(self) -> None:
         """Set up internal tkinter event binds and update the image. Only call this after the
         widget is created via calling window.refresh() or window.read() on the window with
         this element.
@@ -2098,7 +2233,7 @@ class Image(ImageBase):
 
     def _setup_binds(self) -> None:
         # Set up tkinter bind events
-        
+
         # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_image())
 
@@ -2229,7 +2364,7 @@ class ToggleImage(ImageBase):
             metadata=metadata,
         )
 
-    def setup(self) -> None:
+    def _setup(self) -> None:
         """Set up internal tkinter event binds and update the image. Only call this after the
         widget is created via calling window.refresh() or window.read() on the window with
         this element.
@@ -2257,6 +2392,7 @@ class ToggleImage(ImageBase):
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
 
     def toggle(self) -> None:
+        """Toggle the image."""
         self.is_toggled_on ^= True
         self.update_toggle_images()
 
@@ -2265,7 +2401,7 @@ class ToggleImage(ImageBase):
         toggle_on_source: Union[str, bytes, None] = None,
         toggle_off_source: Union[str, bytes, None] = None,
     ) -> None:
-        """Update the sources for the toggle images and the image with the new source based on the
+        """Update the sources for the toggle images and the image with a new source based on the
         current toggle state. If size matching is on, a size-matched version of the new source will
         be used.
 
@@ -2303,7 +2439,7 @@ class ToggleImage(ImageBase):
             self.update(source=new_source)
 
 
-class FancyCheckbox(SizeMatchingToggleImage):
+class FancyCheckbox(ToggleImage):
     """Fancy Checkbox Element. Displays a checkbox with fancy checked/unchecked default images."""
 
     checked_box_image = b"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"
@@ -2649,7 +2785,7 @@ def popup(
     "print" statement.  It's also great for "pausing" your program's flow until the user can read some error messages.
 
     If this popup doesn't have the features you want, then you can easily make your own. Popups can be accomplished in 1 line of code:
-    choice, _ = sg.Window('Continue?', [[sg.T('Do you want to continue?')], [sg.Yes(s=10), sg.No(s=10)]], disable_close=True).read(close=True)
+    choice, _ = Window('Continue?', [[sg.T('Do you want to continue?')], [sg.Yes(s=10), sg.No(s=10)]], disable_close=True).read(close=True)
 
 
     :param *args:               Variable number of your arguments.  Load up the call with stuff to see!
@@ -2868,7 +3004,7 @@ def popup(
             ]
         ]
 
-    window = sg.Window(
+    window = Window(
         _title,
         layout,
         auto_size_text=True,
@@ -3049,7 +3185,7 @@ def popup_scrolled(
     if no_titlebar and no_sizegrip is not True:
         layout += [[sg.Sizegrip()]]
 
-    window = sg.Window(
+    window = Window(
         title or args[0],
         layout,
         auto_size_text=True,
