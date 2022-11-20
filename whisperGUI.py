@@ -536,7 +536,7 @@ def start_GUI() -> None:
                 window[language_specifier_text_setting_key],
             ]
         )
-        
+
         window.reappear()
 
         return window
@@ -2369,11 +2369,21 @@ class ToggleImage(ImageBase):
         """
 
         self.is_toggled_on = start_toggled_on
-        self.toggle_on_source = toggle_on_source if toggle_on_source is not ... else self._toggle_on_source_default
-        self.toggle_off_source = toggle_off_source if toggle_off_source is not ... else self._toggle_off_source_default
+        self.toggle_on_source = (
+            toggle_on_source
+            if toggle_on_source is not ...
+            else self._toggle_on_source_default
+        )
+        self.toggle_off_source = (
+            toggle_off_source
+            if toggle_off_source is not ...
+            else self._toggle_off_source_default
+        )
 
         super().__init__(
-            source=self.toggle_on_source if self.is_toggled_on else self.toggle_off_source,
+            source=self.toggle_on_source
+            if self.is_toggled_on
+            else self.toggle_off_source,
             background_color=background_color,
             size=size,
             s=s,
@@ -2429,7 +2439,7 @@ class ToggleImage(ImageBase):
         toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
         toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
     ) -> None:
-        """Update the sources for the toggle images and the image with a new source based on the
+        """Update the sources for the toggle images and update the image with a new source based on the
         current toggle state. If size matching is on, a size-matched version of the new source will
         be used.
 
@@ -2449,7 +2459,7 @@ class ToggleImage(ImageBase):
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
     ) -> Union[str, bytes, None]:
-        # Return the source for the current toggle state.
+        # Return the appropriate source for the current toggle state.
         return self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
 
 
@@ -2538,7 +2548,17 @@ class CustomTimer(Timer):
     """codetiming.Timer with a stop() that optionally prints the elapsed time."""
 
     def stop(self, log_time: bool = True) -> float:
-        """Stop the timer, and optionally report the elapsed time."""
+        """Stop the timer, and optionally report the elapsed time.
+
+        Args:
+            log_time (bool, optional): If True, prints the elapsed time. Defaults to True.
+
+        Raises:
+            TimerError: Timer is not running.
+
+        Returns:
+            float: The elapsed time in seconds.
+        """
         if self._start_time is None:
             raise TimerError("Timer is not running. Use .start() to start it")
 
