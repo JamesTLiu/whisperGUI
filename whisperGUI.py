@@ -2440,8 +2440,8 @@ class InfoImage(Image):
 
 class EmptyImage(Image):
     """EmptyImage element with size-matching functionality. Displays an empty (transparent)
-    image as the default image. An empty image is useful for taking up space that size matches
-    a target element or closest element of a specified type. Image should be a GIF or a PNG only.
+    image as the default image. An empty image can be used to horizontally align rows in
+    multiple columns that don't have the same number of rows. Image should be a GIF or a PNG only.
     """
 
     _source_default: Union[
