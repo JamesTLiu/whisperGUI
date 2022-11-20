@@ -2444,8 +2444,8 @@ class ToggleImage(ImageBase):
         be used.
 
         Args:
-            toggle_on_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type. Defaults to None.
-            toggle_off_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type. Defaults to None.
+            toggle_on_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type. Defaults to ... .
+            toggle_off_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type. Defaults to ... .
         """
 
         if toggle_on_source is not ...:
@@ -2989,7 +2989,7 @@ def popup_scrolled(
         width_used = min(longest_line_len, width)
         max_line_total = max(max_line_total, width_used)
         max_line_width = width
-        lines_needed = _GetNumLinesNeeded(message, width_used)
+        lines_needed = GetNumLinesNeeded(message, width_used)
         height_computed += lines_needed + 1
         complete_output += message + "\n"
         total_lines += lines_needed
@@ -3072,10 +3072,10 @@ def popup_scrolled(
 
 
 # Taken from Pysimplegui._GetNumLinesNeeded(). Needed by popup_scrolled().
-# ==============================_GetNumLinesNeeded ==#
+# ============================== GetNumLinesNeeded ==#
 # Helper function for determining how to wrap text   #
 # ===================================================#
-def _GetNumLinesNeeded(text: str, max_line_width: int) -> int:
+def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     """Get the number of lines needed to wrap the text.
 
     Args:
@@ -3098,7 +3098,7 @@ def _GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     return total_lines_needed
 
 
-# Taken from Pysimplegui.DummyButton(). Added extra arguments to pass to called Button().
+# Taken from Pysimplegui.DummyButton() and modified.
 # -------------------------  Dummy BUTTON Element lazy function  ------------------------- #
 def DummyButton(
     button_text,
