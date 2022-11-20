@@ -234,6 +234,8 @@ def start_GUI() -> None:
             prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_profile_name
         )
 
+        show_model_info_at_start = False
+
         # The tab1 option elements as rows
         tab1_options_rows = [
             [
@@ -316,12 +318,27 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
+            [
+                sg.Button("Prompt Manager", key=start_prompt_manager_key),
+                EmptyImage(
+                    size_match=True,
+                    size_match_element_type=sg.Button,
+                ),
+            ],
+            [
+                sg.Text("Model Information"),
+                FancyToggle(
+                    start_toggled_on=show_model_info_at_start,
+                    key=model_info_toggle_key,
+                    size_match=True,
+                    size_match_element_type=sg.Text,
+                    enable_events=True,
+                ),
+            ],
         ]
 
         # Put the options in columns to align their components
         tab1_options_layout = convert_rows_to_columns_for_elements(tab1_options_rows)
-
-        show_model_info_at_start = False
 
         # main tab
         tab1_layout = [
@@ -343,27 +360,6 @@ def start_GUI() -> None:
                 ),
             ],
             tab1_options_layout,
-            [sg.Button("Prompt Manager", key=start_prompt_manager_key)],
-            [
-                sg.Text("Model Information"),
-                # sg.Button(
-                #     "",
-                #     image_data=toggle_btn_off,
-                #     key=model_info_toggle_key,
-                #     button_color=(
-                #         sg.theme_background_color(),
-                #         sg.theme_background_color(),
-                #     ),
-                #     border_width=0,
-                # ),
-                FancyToggle(
-                    start_toggled_on=show_model_info_at_start,
-                    key=model_info_toggle_key,
-                    size_match=True,
-                    size_match_element_type=sg.Text,
-                    enable_events=True,
-                ),
-            ],
             [
                 sg.pin(
                     sg.Table(
