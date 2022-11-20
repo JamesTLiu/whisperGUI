@@ -2300,8 +2300,8 @@ class ToggleImage(ImageBase):
     def __init__(
         self,
         start_toggled_on: bool,
-        toggle_on_source: Union[str, bytes, None] = _toggle_on_source_default,
-        toggle_off_source: Union[str, bytes, None] = _toggle_off_source_default,
+        toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
+        toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
         background_color=None,
         size=(None, None),
         s=(None, None),
@@ -2369,11 +2369,11 @@ class ToggleImage(ImageBase):
         """
 
         self.is_toggled_on = start_toggled_on
-        self.toggle_on_source = toggle_on_source
-        self.toggle_off_source = toggle_off_source
+        self.toggle_on_source = toggle_on_source if toggle_on_source is not ... else self._toggle_on_source_default
+        self.toggle_off_source = toggle_off_source if toggle_off_source is not ... else self._toggle_off_source_default
 
         super().__init__(
-            source=toggle_on_source if start_toggled_on else toggle_off_source,
+            source=self.toggle_on_source if self.is_toggled_on else self.toggle_off_source,
             background_color=background_color,
             size=size,
             s=s,
