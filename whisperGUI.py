@@ -191,8 +191,6 @@ def start_GUI() -> None:
         AUTODETECT_OPTION = "autodetect"
         LANGUAGES = (AUTODETECT_OPTION, *sorted(TO_LANGUAGE_CODE.keys()))
 
-        info_image_data = b"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"
-
         # Information for the table comparing models
         model_data_table = [
             [
@@ -284,7 +282,7 @@ def start_GUI() -> None:
                                 ),
                                 key=initial_prompt_text_key,
                             ),
-                            Image(
+                            InfoImage(
                                 tooltip=(
                                     "Use this when a dialect/style of a language or punctuation is desired.\n"
                                     "Does NOT guarantee the result will follow the initial prompt.\n"
@@ -292,7 +290,6 @@ def start_GUI() -> None:
                                     "Try a larger model if the result does not follow the initial prompt.\n\n"
                                     "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
                                 ),
-                                source=info_image_data,
                                 key=initial_prompt_info_key,
                                 size_match=True,
                                 size_match_element_type=sg.Text,
@@ -2313,6 +2310,110 @@ class ImageBase(sg.Image):
 class Image(ImageBase):
     """Image element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only."""
 
+    _source_default: Union[str, bytes, None] = None
+
+    def __init__(
+        self,
+        source=...,
+        filename=...,
+        data=...,
+        background_color=None,
+        size=(None, None),
+        s=(None, None),
+        pad=None,
+        p=None,
+        key=None,
+        k=None,
+        tooltip=None,
+        subsample=None,
+        right_click_menu=None,
+        expand_x=False,
+        expand_y=False,
+        visible=True,
+        enable_events=False,
+        metadata=None,
+        size_match=False,
+        size_match_element=None,
+        size_match_element_type=sg.Element,
+    ) -> None:
+        """
+        :param source:                  A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
+        :type source:                   str | bytes | None
+        :param filename:                image filename if there is a button image. GIFs and PNGs only.
+        :type filename:                 str | None
+        :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
+        :type data:                     bytes | str | None
+        :param background_color:        color of background
+        :type background_color:
+        :param size:                    (width, height) size of image in pixels
+        :type size:                     (int, int)
+        :param s:                       Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+        :type s:                        (int, int)  | (None, None) | int
+        :param pad:                     Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+        :type pad:                      (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param p:                       Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+        :type p:                        (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param key:                     Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
+        :type key:                      str | int | tuple | object
+        :param k:                       Same as the Key. You can use either k or key. Which ever is set will be used.
+        :type k:                        str | int | tuple | object
+        :param tooltip:                 text, that will appear when mouse hovers over the element
+        :type tooltip:                  (str)
+        :param subsample:               amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
+        :type subsample:                (int)
+        :param right_click_menu:        A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
+        :type right_click_menu:         List[List[ List[str] | str ]]
+        :param expand_x:                If True the element will automatically expand in the X direction to fill available space
+        :type expand_x:                 (bool)
+        :param expand_y:                If True the element will automatically expand in the Y direction to fill available space
+        :type expand_y:                 (bool)
+        :param visible:                 set visibility state of the element
+        :type visible:                  (bool)
+        :param enable_events:           Turns on the element specific events. For an Image element, the event is "image clicked"
+        :type enable_events:            (bool)
+        :param metadata:                User metadata that can be set to ANYTHING
+        :type metadata:                 (Any)
+        :param size_match:              If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
+        :type size_match:               (bool)
+        :param size_match_element:      The element to size match the image to.
+        :type size_match_element:       (sg.Element)
+        :param size_match_element_type: The type of the closest Element to size match will be this type.
+        :type size_match_element_type:  (Type[sg.Element])
+        """
+        no_source_given = all(arg is ... for arg in (source, filename, data))
+
+        if no_source_given:
+            _source = self._source_default
+            _filename = _data = None
+        else:
+            _source = source if source is not ... else None
+            _filename = filename if filename is not ... else None
+            _data = data if data is not ... else None
+
+        super().__init__(
+            source=_source,
+            filename=_filename,
+            data=_data,
+            background_color=background_color,
+            size=size,
+            s=s,
+            pad=pad,
+            p=p,
+            key=key,
+            k=k,
+            tooltip=tooltip,
+            subsample=subsample,
+            right_click_menu=right_click_menu,
+            expand_x=expand_x,
+            expand_y=expand_y,
+            visible=visible,
+            enable_events=enable_events,
+            metadata=metadata,
+            size_match=size_match,
+            size_match_element=size_match_element,
+            size_match_element_type=size_match_element_type,
+        )
+
     def _post_init(self):
         self._original_source = self.Source
 
@@ -2329,6 +2430,27 @@ class Image(ImageBase):
     ) -> Union[str, bytes, None]:
         # Return the given source if not None or else the current source.
         return source if source is not ... else self._original_source
+
+
+class InfoImage(Image):
+    """InfoImage element with size-matching functionality. Displays an image with
+    an info icon as the default image. Image should be a GIF or a PNG only.
+    """
+
+    _source_default: Union[
+        str, bytes, None
+    ] = b"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"
+
+
+class EmptyImage(Image):
+    """EmptyImage element with size-matching functionality. Displays an empty (transparent)
+    image as the default image. An empty image is useful for taking up space that size matches
+    a target element or closest element of a specified type. Image should be a GIF or a PNG only.
+    """
+
+    _source_default: Union[
+        str, bytes, None
+    ] = b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC"
 
 
 class ToggleImage(ImageBase):
