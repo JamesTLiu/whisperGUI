@@ -536,8 +536,8 @@ def start_GUI() -> None:
                 window[language_specifier_text_setting_key],
             ]
         )
-
-        window.set_alpha(1)
+        
+        window.reappear()
 
         return window
 
