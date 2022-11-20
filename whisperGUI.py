@@ -2113,6 +2113,52 @@ def fancy_checkbox(
     return checkbox_layout
 
 
+class Multiline(sg.Multiline):
+    """Multiline Element with extra capabilities - Display and/or read multiple lines of text.
+    This is both an input and output element.
+    """
+
+    def write(self, txt: str) -> None:
+        """
+        Called by Python (not tkinter?) when stdout or stderr wants to write
+
+        :param txt: text of output
+        :type txt:  (str)
+        """
+        _txt = self._format_text(txt)
+        try:
+            self.update(_txt, append=True)
+            if self.echo_stdout_stderr:
+                self.previous_stdout.write(_txt)
+        except:
+            pass
+
+    def _format_text(self, text: str) -> str:
+        """Return formatted text meant for console output.
+
+        Replaces \r with \n.
+        Replaces progress characters between '|'s in progress bars with proper '█'s.
+
+        Args:
+            text (str): The text to format.
+        """
+        # remove the auto appended '\n' by every Multiline.get() call when rstrip is False
+        _text = text if self.rstrip else text[:-1]
+
+        # Replace all \r with \n
+        processed_text = re.sub(r"\r", "\n", _text)
+
+        def replace_with_progress_bars(m: re.Match) -> str:
+            # Replace all characters in the match with a block character.
+            return "█" * len(m.group())
+
+        processed_text = re.sub(
+            r"(?<=\|)\S+(?=\s*\|)", replace_with_progress_bars, processed_text
+        )
+
+        return processed_text
+
+
 class ImageBase(sg.Image):
     """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
 
@@ -3218,52 +3264,6 @@ def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[st
     """
     audio_video_paths_list = re.split(delimiter, file_paths_string)
     return tuple(str(Path(file_path).resolve()) for file_path in audio_video_paths_list)
-
-
-class Multiline(sg.Multiline):
-    """Multiline Element with extra capabilities - Display and/or read multiple lines of text.
-    This is both an input and output element.
-    """
-
-    def write(self, txt: str) -> None:
-        """
-        Called by Python (not tkinter?) when stdout or stderr wants to write
-
-        :param txt: text of output
-        :type txt:  (str)
-        """
-        _txt = self._format_text(txt)
-        try:
-            self.update(_txt, append=True)
-            if self.echo_stdout_stderr:
-                self.previous_stdout.write(_txt)
-        except:
-            pass
-
-    def _format_text(self, text: str) -> str:
-        """Return formatted text meant for console output.
-
-        Replaces \r with \n.
-        Replaces progress characters between '|'s in progress bars with proper '█'s.
-
-        Args:
-            text (str): The text to format.
-        """
-        # remove the auto appended '\n' by every Multiline.get() call when rstrip is False
-        _text = text if self.rstrip else text[:-1]
-
-        # Replace all \r with \n
-        processed_text = re.sub(r"\r", "\n", _text)
-
-        def replace_with_progress_bars(m: re.Match) -> str:
-            # Replace all characters in the match with a block character.
-            return "█" * len(m.group())
-
-        processed_text = re.sub(
-            r"(?<=\|)\S+(?=\s*\|)", replace_with_progress_bars, processed_text
-        )
-
-        return processed_text
 
 
 def transcribe_audio_video_files(
