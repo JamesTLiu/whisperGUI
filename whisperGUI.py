@@ -390,7 +390,7 @@ def start_GUI() -> None:
                 )
             ],
             [
-                sg.Multiline(
+                Multiline(
                     key=multiline_key,
                     background_color="black",
                     text_color="white",
@@ -1193,10 +1193,6 @@ def start_GUI() -> None:
 
         # Transcriptions in progress
         if is_transcribing:
-            format_multiline_text(
-                main_window[multiline_key], is_multiline_rstripping_on_update
-            )
-
             # Update the progress meter unless the user has clicked the cancel button already
             if not stop_flag.is_set():
                 # Get the current file being worked on
@@ -3002,7 +2998,7 @@ def popup_scrolled(
         height_computed = height
     layout += [
         [
-            sg.Multiline(
+            Multiline(
                 complete_output,
                 size=(max_line_width, height_computed),
                 background_color=background_color,
@@ -3224,35 +3220,50 @@ def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[st
     return tuple(str(Path(file_path).resolve()) for file_path in audio_video_paths_list)
 
 
-def format_multiline_text(
-    element: sg.ErrorElement, is_multiline_rstripping_on_update: bool
-) -> None:
-    """Update the text in a multiline element.
-
-    Replaces \r with \n.
-    Replaces progress characters between |s in progress bars with proper █s.
-
-    Args:
-        element (sg.ErrorElement): A Multiline element.
-        is_multiline_rstripping_on_update (bool): If True, the Multiline is stripping whitespace
-            from the end of each string that is appended to its text.
+class Multiline(sg.Multiline):
+    """Multiline Element with extra capabilities - Display and/or read multiple lines of text.
+    This is both an input and output element.
     """
-    # Get the text in the Multiline element
-    text = element.get()
 
-    # remove the auto appended '\n' by every Multiline.get() call when rstrip=False option is set for Multiline
-    if not is_multiline_rstripping_on_update:
-        text = text[:-1]
+    def write(self, txt: str) -> None:
+        """
+        Called by Python (not tkinter?) when stdout or stderr wants to write
 
-    # Replace all \r with \n
-    processed_text = re.sub(r"\r", "\n", text)
+        :param txt: text of output
+        :type txt:  (str)
+        """
+        _txt = self._format_text(txt)
+        try:
+            self.update(_txt, append=True)
+            if self.echo_stdout_stderr:
+                self.previous_stdout.write(_txt)
+        except:
+            pass
 
-    def repl_progress_bars(m: re.Match):
-        return "█" * len(m.group())
+    def _format_text(self, text: str) -> str:
+        """Return formatted text meant for console output.
 
-    processed_text = re.sub(r"(?<=\|)\S+(?=\s*\|)", repl_progress_bars, processed_text)
+        Replaces \r with \n.
+        Replaces progress characters between '|'s in progress bars with proper '█'s.
 
-    element.update(processed_text)
+        Args:
+            text (str): The text to format.
+        """
+        # remove the auto appended '\n' by every Multiline.get() call when rstrip is False
+        _text = text if self.rstrip else text[:-1]
+
+        # Replace all \r with \n
+        processed_text = re.sub(r"\r", "\n", _text)
+
+        def replace_with_progress_bars(m: re.Match) -> str:
+            # Replace all characters in the match with a block character.
+            return "█" * len(m.group())
+
+        processed_text = re.sub(
+            r"(?<=\|)\S+(?=\s*\|)", replace_with_progress_bars, processed_text
+        )
+
+        return processed_text
 
 
 def transcribe_audio_video_files(
@@ -3794,6 +3805,37 @@ def write_transcript_to_files(
 #         )
 
 #     combo.widget.configure(justify=justify)
+
+
+# def format_multiline_text(
+#     element: sg.Multiline, is_multiline_rstripping_on_update: bool
+# ) -> None:
+#     """Update the text in a multiline element.
+
+#     Replaces \r with \n.
+#     Replaces progress characters between |s in progress bars with proper █s.
+
+#     Args:
+#         element (sg.ErrorElement): A Multiline element.
+#         is_multiline_rstripping_on_update (bool): If True, the Multiline is stripping whitespace
+#             from the end of each string that is appended to its text.
+#     """
+#     # Get the text in the Multiline element
+#     text = element.get()
+
+#     # remove the auto appended '\n' by every Multiline.get() call when rstrip=False option is set for Multiline
+#     if not is_multiline_rstripping_on_update:
+#         text = text[:-1]
+
+#     # Replace all \r with \n
+#     processed_text = re.sub(r"\r", "\n", text)
+
+#     def repl_progress_bars(m: re.Match):
+#         return "█" * len(m.group())
+
+#     processed_text = re.sub(r"(?<=\|)\S+(?=\s*\|)", repl_progress_bars, processed_text)
+
+#     element.update(processed_text)
 
 
 if __name__ == "__main__":
