@@ -2426,8 +2426,8 @@ class ToggleImage(ImageBase):
 
     def update_toggle_images(
         self,
-        toggle_on_source: Union[str, bytes, None] = None,
-        toggle_off_source: Union[str, bytes, None] = None,
+        toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
+        toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
     ) -> None:
         """Update the sources for the toggle images and the image with a new source based on the
         current toggle state. If size matching is on, a size-matched version of the new source will
@@ -2438,10 +2438,10 @@ class ToggleImage(ImageBase):
             toggle_off_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type. Defaults to None.
         """
 
-        if toggle_on_source:
+        if toggle_on_source is not ...:
             self.toggle_on_source = toggle_on_source
 
-        if toggle_off_source:
+        if toggle_off_source is not ...:
             self.toggle_off_source = toggle_off_source
 
         self._update_image()
