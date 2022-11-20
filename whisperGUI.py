@@ -2544,10 +2544,12 @@ class ToggleImage(ImageBase):
             else self._toggle_off_source_default
         )
 
+        current_source = (
+            self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+        )
+
         super().__init__(
-            source=self.toggle_on_source
-            if self.is_toggled_on
-            else self.toggle_off_source,
+            source=current_source,
             background_color=background_color,
             size=size,
             s=s,
