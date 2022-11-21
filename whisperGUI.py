@@ -2071,10 +2071,10 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
 def fancy_checkbox(
     text: str = "",
     text_key: str = None,
+    text_tooltip: str = None,
     checkbox_key: str = None,
     is_checked: bool = False,
     is_checkbox_before_text: bool = False,
-    text_tooltip: str = None,
 ) -> List[sg.Element]:
     """Return the PySimpleGUI elements for a fancy checkbox with text.
 
