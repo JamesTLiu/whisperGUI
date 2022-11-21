@@ -423,38 +423,81 @@ def start_GUI() -> None:
         )
 
         # settings tab
+        # tab2_layout = [
+        #     [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
+        #     [sg.HorizontalSeparator()],
+        #     [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
+        #     [
+        #         sg.Text(
+        #             f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+        #             key=scaling_text_setting_key,
+        #         ),
+        #         sg.Input(
+        #             sg.user_settings_get_entry(
+        #                 scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
+        #             ),
+        #             size=(5),
+        #             key=scaling_input_setting_key,
+        #         ),
+        #         sg.Button("Apply", key=apply_global_scaling_key),
+        #     ],
+        #     [sg.HorizontalSeparator()],
+        #     size_matched_image_element(
+        #         size_match_element=sg.Text(
+        #             text="Remember Output Folder",
+        #             key=save_output_dir_text_key,
+        #         ),
+        #         image_element=FancyCheckbox(
+        #             start_toggled_on=save_output_dir,
+        #             key=save_output_dir_checkbox_key,
+        #             enable_events=True,
+        #             size_match=True,
+        #         ),
+        #     ),
+        #     [sg.HorizontalSeparator()],
+        #     [
+        #         sg.Text(
+        #             "Language Specifier in Output File Names",
+        #             key=language_specifier_text_setting_key,
+        #         ),
+        #         sg.Combo(
+        #             values=language_specifier_options,
+        #             key=language_specifier_setting_key,
+        #             default_value=sg.user_settings_get_entry(
+        #                 language_specifier_setting_key, language_specifier_options[0]
+        #             ),
+        #             auto_size_text=True,
+        #             readonly=True,
+        #             enable_events=True,
+        #         ),
+        #     ],
+        #     [
+        #         sg.Column(
+        #             [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
+        #             pad=0,
+        #         ),
+        #         sg.Column(
+        #             [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
+        #         ),
+        #     ],
+        #     [sg.HorizontalSeparator()],
+        #     [sg.Text(f"Location of the Settings File:")],
+        #     [
+        #         sg.Input(
+        #             f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
+        #         )
+        #     ],
+        # ]
+
         tab2_layout = [
-            [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
-            [sg.HorizontalSeparator()],
-            [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
             [
                 sg.Text(
                     f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
                     key=scaling_text_setting_key,
                 ),
-                sg.Input(
-                    sg.user_settings_get_entry(
-                        scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
-                    ),
-                    size=(5),
-                    key=scaling_input_setting_key,
-                ),
                 sg.Button("Apply", key=apply_global_scaling_key),
             ],
-            [sg.HorizontalSeparator()],
-            size_matched_image_element(
-                size_match_element=sg.Text(
-                    text="Remember Output Folder",
-                    key=save_output_dir_text_key,
-                ),
-                image_element=FancyCheckbox(
-                    start_toggled_on=save_output_dir,
-                    key=save_output_dir_checkbox_key,
-                    enable_events=True,
-                    size_match=True,
-                ),
-            ),
-            [sg.HorizontalSeparator()],
+            [sg.Text("foo"), sg.Text("bar")],
             [
                 sg.Text(
                     "Language Specifier in Output File Names",
@@ -471,23 +514,9 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            [
-                sg.Column(
-                    [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
-                    pad=0,
-                ),
-                sg.Column(
-                    [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
-                ),
-            ],
-            [sg.HorizontalSeparator()],
-            [sg.Text(f"Location of the Settings File:")],
-            [
-                sg.Input(
-                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
-                )
-            ],
         ]
+
+        tab2_columns = convert_rows_to_columns_for_elements(tab2_layout, sg.Button)
 
         # Define the window's contents
         layout = [
@@ -502,7 +531,8 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                tab2_layout,
+                                # tab2_layout,
+                                [tab2_columns],
                                 key=settings_tab_key,
                             ),
                         ]
@@ -543,17 +573,46 @@ def start_GUI() -> None:
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
-        set_same_width(
-            [
-                window[scaling_text_setting_key],
-                window[save_output_dir_text_key],
-                window[language_specifier_text_setting_key],
-            ]
-        )
+        # set_same_width(
+        #     [
+        #         window[scaling_text_setting_key],
+        #         window[save_output_dir_text_key],
+        #         window[language_specifier_text_setting_key],
+        #     ]
+        # )
 
         window.reappear()
 
+        # ----------------- Test -------------------#
+        window[settings_tab_key].select()
+
+        window.refresh()
+
+        set_row_size_of_element(window[apply_global_scaling_key], 100)
+        # ----------------- EndTest ----------------#
+
         return window
+
+    def set_row_size_of_element(
+        element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
+    ):
+        """Forcefully set the size of the row that the element is in. The row will no longer
+        fit to its children.
+
+        Args:
+            element (sg.Element): The element whose row is to be resized.
+            width (Optional[int], optional): New width of the row. Defaults to None.
+            height (Optional[int], optional): New height of the row. Defaults to None.
+        """
+        current_width, current_height = element.get_size()
+
+        row_frame: tk.Frame = element.ParentRowFrame
+
+        new_width = width if width is not None else current_width
+        new_height = height if height is not None else current_height
+
+        row_frame.config(bg="skyblue3", height=new_width, width=new_height)
+        row_frame.pack_propagate(flag=False)
 
     def make_tracked_main_window_with_synced_profiles(
         window_tracker: WindowTracker,
