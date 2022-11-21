@@ -319,13 +319,15 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            [
-                sg.Button("Prompt Manager", key=start_prompt_manager_key),
-                EmptyImage(
-                    size_match=True,
-                    size_match_element_type=sg.Button,
+            size_matched_image_element(
+                size_match_element=sg.Button(
+                    "Prompt Manager",
+                    key=start_prompt_manager_key,
                 ),
-            ],
+                image_element=EmptyImage(
+                    size_match=True,
+                ),
+            ),
             [
                 sg.Text("Model Information"),
                 FancyToggle(
@@ -2111,6 +2113,22 @@ def fancy_checkbox(
         checkbox_layout.reverse()
 
     return checkbox_layout
+
+
+def size_matched_image_element(
+    size_match_element: sg.Element, image_element: ImageBase
+) -> List[sg.Element]:
+    """Return the element and the image element that's set to size match it.
+
+    Args:
+        size_match_element (sg.Element): The element that the image element will size match.
+        image_element (ImageBase): The image element that will be set to size match the given element.
+
+    Returns:
+        List[sg.Element]: A list with the element and the image element set to size match it.
+    """
+    image_element.size_match_element = size_match_element
+    return [size_match_element, image_element]
 
 
 class Multiline(sg.Multiline):
