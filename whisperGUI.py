@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import decimal
+from functools import partial, partialmethod
 import io
 import multiprocessing
 import operator
@@ -337,8 +338,14 @@ def start_GUI() -> None:
             ],
         ]
 
+        class SizeMatchingEmptyImage(EmptyImage):
+            __init__ = partialmethod(EmptyImage.__init__, size_match=True)  # type: ignore
+
         # Put the options in columns to align their components
-        tab1_options_layout = convert_rows_to_columns_for_elements(tab1_options_rows)
+        tab1_options_layout = convert_rows_to_columns_for_elements(
+            rows=tab1_options_rows,
+            fill_element_type=SizeMatchingEmptyImage,
+        )
 
         # main tab
         tab1_layout = [
@@ -2667,12 +2674,14 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
 
 
 def convert_rows_to_columns_for_elements(
-    rows: Sequence[Sequence[sg.Element]],
+    rows: Sequence[Sequence[sg.Element]], fill_element_type: Type[sg.Element]
 ) -> List[sg.Column]:
     """Convert a series of rows with PySimpleGUI elements into a list of PySimpleGUI columns.
 
     Args:
         rows (Sequence[Sequence[sg.Element]]): A Sequence of rows (Sequence) with PySimpleGUI elements.
+        fill_element_type (Type[sg.Element]): The type of element that's used to filling in column rows
+            when the given rows are of unequal length.
 
     Returns:
         List[sg.Column]: A list of PySimpleGUI columns.
@@ -2683,9 +2692,10 @@ def convert_rows_to_columns_for_elements(
     # Make a list of PySimpleGUI Column elements from the column grouped elements
     columns = []
     for column_elements in column_grouped_elements_list:
-        # Replace None values with PySimpleGUI Text elements
+        # Replace None values with elements of the specified type
         column_layout = [
-            [element if element else sg.Text()] for element in column_elements
+            [element if element is not None else fill_element_type()]
+            for element in column_elements
         ]
         column = sg.Column(column_layout, pad=(0, 0))
         columns.append(column)
