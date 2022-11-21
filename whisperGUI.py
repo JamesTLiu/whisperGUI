@@ -2127,6 +2127,7 @@ def size_matched_image_element(
     Returns:
         List[sg.Element]: A list with the element and the image element set to size match it.
     """
+    image_element.size_match = True
     image_element.size_match_element = size_match_element
     return [size_match_element, image_element]
 
