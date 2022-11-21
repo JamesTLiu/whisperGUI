@@ -263,11 +263,17 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            fancy_checkbox(
-                text="Translate to English",
-                text_key=translate_to_english_text_key,
-                checkbox_key=translate_to_english_checkbox_key,
-                is_checked=translate_to_english_last_choice,
+            size_matched_image_element(
+                size_match_element=sg.Text(
+                    text="Translate to English",
+                    key=translate_to_english_text_key,
+                ),
+                image_element=FancyCheckbox(
+                    start_toggled_on=translate_to_english_last_choice,
+                    key=translate_to_english_checkbox_key,
+                    enable_events=True,
+                    size_match=True,
+                ),
             ),
             [
                 sg.Text("Prompt Profile"),
@@ -436,11 +442,17 @@ def start_GUI() -> None:
                 sg.Button("Apply", key=apply_global_scaling_key),
             ],
             [sg.HorizontalSeparator()],
-            fancy_checkbox(
-                text="Remember Output Folder",
-                text_key=save_output_dir_text_key,
-                checkbox_key=save_output_dir_checkbox_key,
-                is_checked=save_output_dir,
+            size_matched_image_element(
+                size_match_element=sg.Text(
+                    text="Remember Output Folder",
+                    key=save_output_dir_text_key,
+                ),
+                image_element=FancyCheckbox(
+                    start_toggled_on=save_output_dir,
+                    key=save_output_dir_checkbox_key,
+                    enable_events=True,
+                    size_match=True,
+                ),
             ),
             [sg.HorizontalSeparator()],
             [
@@ -2068,51 +2080,6 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
         if element:
             return ElementWindow(element, window)
     return None
-
-
-def fancy_checkbox(
-    text: str = "",
-    text_key: str = None,
-    text_tooltip: str = None,
-    checkbox_key: str = None,
-    is_checked: bool = False,
-    is_checkbox_before_text: bool = False,
-) -> List[sg.Element]:
-    """Return the PySimpleGUI elements for a fancy checkbox with text.
-
-    Args:
-        text (str): Text for the PySimpleGUI Text element that goes with the checkbox.
-        text_key (str, optional): The key to assign the PySimpleGUI Text element that goes with the checkbox. Defaults to None.
-        checkbox_key (str, optional): The key to assign the PySimpleGUI Image element which represents the checkbox. Defaults to None.
-        is_checked (bool, optional): If True, starts the checkbox checked. Defaults to False.
-        is_checkbox_before_text (bool, optional): Put the checkbox before (to the left) of the text. Defaults to False.
-        text_tooltip (str, optional): Tooltip for the Text element that goes with the checkbox.
-    Returns:
-        List[sg.Element]: A list with the PySimpleGUI elements that make up a fancy checkbox.
-    """
-
-    text_element = sg.Text(
-        text,
-        key=text_key,
-        tooltip=text_tooltip,
-    )
-
-    image_element = FancyCheckbox(
-        start_toggled_on=is_checked,
-        key=checkbox_key,
-        enable_events=True,
-        size_match=True,
-        size_match_element=text_element,
-        size_match_element_type=sg.Text,
-    )
-
-    checkbox_layout = [text_element, image_element]
-
-    # Flip the element order to put the checkbox before (to the left) of the text
-    if is_checkbox_before_text:
-        checkbox_layout.reverse()
-
-    return checkbox_layout
 
 
 def size_matched_image_element(
