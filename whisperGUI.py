@@ -2673,8 +2673,13 @@ class ToggleImage(ImageBase):
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
     ) -> Union[str, bytes, None]:
-        # Return the appropriate source for the current toggle state.
-        return self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+        if source is not ...:
+            return source
+        else:
+            # Return the appropriate source for the current toggle state.
+            return (
+                self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+            )
 
 
 class FancyCheckbox(ToggleImage):
