@@ -2204,7 +2204,36 @@ class Multiline(sg.Multiline):
         return processed_text
 
 
-class ImageBase(sg.Image):
+class SuperElement(sg.Element):
+    """The base class for all Elements but with extra capabilities."""
+
+    def _setup(self) -> None:
+        """Set up internal tkinter event binds and update internal components. Only call
+        this after the widget is created via calling window.refresh() or window.read()
+        on the window with this element.
+        """
+
+        self._setup_binds()
+
+        # Update internal components now that a widget exists
+        if self._widget_was_created():
+            self._update_internals()
+
+    def _setup_binds(self) -> None:
+        """Set up tkinter bind events."""
+        ...
+
+    def _update_internals(self) -> None:
+        """Update internal components."""
+        ...
+
+    def _unbind_all(self) -> None:
+        """Remove all event bindings for this element's widget."""
+        for event in self.widget.bind():
+            self.unbind(event)
+
+
+class ImageBase(sg.Image, SuperElement):
     """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
 
     def __init__(
@@ -2301,39 +2330,16 @@ class ImageBase(sg.Image):
             metadata=metadata,
         )
 
-        self._post_init()
-
-    def _post_init(self):
-        ...
-
-    def _setup(self) -> None:
-        """Set up internal tkinter event binds and update the image. Only call this after the
-        widget is created via calling window.refresh() or window.read() on the window with
-        this element.
-        """
-
-        self._setup_binds()
-
-        # Update the image so it's size matched after initial creation
+    def _update_internals(self) -> None:
         self._update_image()
-
-    def _setup_binds(self) -> None:
-        # Set up tkinter bind events
-        ...
-
-    def _unbind_all(self) -> None:
-        # Remove all event bindings for this element's widget
-        for event in self.widget.bind():
-            self.unbind(event)
 
     def _update_image(self, source: Union[str, bytes, None, ellipsis] = ...) -> None:
         """Update the image with the given source. If size matching is on, a size-matched version of
         the source will be used.
 
         Args:
-            source (Union[str, bytes, None], optional): A filename or a base64 bytes. Defaults to ....
+            source (Union[str, bytes, None], optional): A filename or a base64 bytes. Defaults to ... .
         """
-
         window = self.ParentForm
 
         new_source = self._determine_new_source(source)
@@ -2352,6 +2358,14 @@ class ImageBase(sg.Image):
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
     ) -> Union[str, bytes, None]:
+        """Return the new source based on the argument and any default(s).
+
+        Args:
+            source (Union[str, bytes, None, ellipsis]): A filename, a base64 bytes, None, or ... (no given source).
+
+        Returns:
+            Union[str, bytes, None]:  The new source.
+        """
         return source if source is not ... else self.Source
 
 
@@ -2462,12 +2476,12 @@ class Image(ImageBase):
             size_match_element_type=size_match_element_type,
         )
 
+        self._post_init()
+
     def _post_init(self):
         self._original_source = self.Source
 
     def _setup_binds(self) -> None:
-        # Set up tkinter bind events
-
         # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self._update_image(), add="+")
 
@@ -2476,7 +2490,6 @@ class Image(ImageBase):
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
     ) -> Union[str, bytes, None]:
-        # Return the given source if not None or else the current source.
         return source if source is not ... else self._original_source
 
 
@@ -2619,8 +2632,6 @@ class ToggleImage(ImageBase):
         )
 
     def _setup_binds(self) -> None:
-        # Set up tkinter bind events
-
         # Remove existing event bindings
         self._unbind_all()
 
