@@ -593,27 +593,6 @@ def start_GUI() -> None:
 
         return window
 
-    def set_row_size_of_element(
-        element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
-    ):
-        """Forcefully set the size of the row that the element is in. The row will no longer
-        fit to its children.
-
-        Args:
-            element (sg.Element): The element whose row is to be resized.
-            width (Optional[int], optional): New width of the row. Defaults to None.
-            height (Optional[int], optional): New height of the row. Defaults to None.
-        """
-        current_width, current_height = element.get_size()
-
-        row_frame: tk.Frame = element.ParentRowFrame
-
-        new_width = width if width is not None else current_width
-        new_height = height if height is not None else current_height
-
-        row_frame.config(bg="skyblue3", height=new_width, width=new_height)
-        row_frame.pack_propagate(flag=False)
-
     def make_tracked_main_window_with_synced_profiles(
         window_tracker: WindowTracker,
         prompt_manager: PromptManager,
@@ -2337,6 +2316,35 @@ class Grid(sg.Column, SuperElement):
                 raise ValueError(
                     f"Invalid items in list. Expected a list of sg.Column objects. \nOffending list: {columns}"
                 )
+
+
+def set_row_size_of_element(
+    element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
+):
+    """Forcefully set the size of the row that the element is in. The row will no longer
+    fit to its children.
+
+    Args:
+        element (sg.Element): The element whose row is to be resized.
+        width (Optional[int], optional): New width of the row. Defaults to None.
+        height (Optional[int], optional): New height of the row. Defaults to None.
+    """
+    row_frame: tk.Frame = element.ParentRowFrame
+
+    current_width, current_height = get_widget_size(row_frame)
+    if current_width is None:
+        current_width = 1
+
+    if current_height is None:
+        current_height = 1
+
+    new_width = width if width is not None else current_width
+    new_height = height if height is not None else current_height
+
+    row_frame.config(bg="skyblue3", width=new_width, height=new_height)
+    row_frame.pack_propagate(flag=False)
+
+
 def get_widget_size(widget: tk.Widget) -> Union[Tuple[int, int], Tuple[None, None]]:
     """
     Return the size of a widget in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this get_size method.
