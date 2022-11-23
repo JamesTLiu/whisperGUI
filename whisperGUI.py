@@ -2234,7 +2234,7 @@ class SuperElement(sg.Element):
 
 
 class ImageBase(sg.Image, SuperElement):
-    """Image element with extra capabilities - show an image in the window. Should be a GIF or a PNG only."""
+    """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only."""
 
     def __init__(
         self,
@@ -2370,7 +2370,7 @@ class ImageBase(sg.Image, SuperElement):
 
 
 class Image(ImageBase):
-    """Image element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only."""
+    """Image Element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only."""
 
     _source_default: Union[str, bytes, None] = None
 
@@ -2494,7 +2494,7 @@ class Image(ImageBase):
 
 
 class InfoImage(Image):
-    """InfoImage element with size-matching functionality. Displays an image with
+    """InfoImage Element with size-matching functionality. Displays an image with
     an info icon as the default image. Image should be a GIF or a PNG only.
     """
 
@@ -2504,7 +2504,7 @@ class InfoImage(Image):
 
 
 class EmptyImage(Image):
-    """EmptyImage element with size-matching functionality. Displays an empty (transparent)
+    """EmptyImage Element with size-matching functionality. Displays an empty (transparent)
     image as the default image. An empty image can be used to horizontally align rows in
     multiple columns that don't have the same number of rows. Image should be a GIF or a PNG only.
     """
@@ -2515,7 +2515,7 @@ class EmptyImage(Image):
 
 
 class ToggleImage(ImageBase):
-    """Toggleable Image element with size-matching functionality - show an image that can be toggled in the window.
+    """ToggleImage Element with size-matching functionality - show an image that can be toggled in the window.
     Toggle On and Off images should be a GIF or a PNG only.
     """
 
