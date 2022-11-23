@@ -35,6 +35,7 @@ from typing import (
     TextIO,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -516,7 +517,7 @@ def start_GUI() -> None:
             ],
         ]
 
-        tab2_columns = convert_rows_to_columns_for_elements(tab2_layout, sg.Button)
+        # tab2_columns = convert_rows_to_columns_for_elements(tab2_layout, sg.Button)
 
         # Define the window's contents
         layout = [
@@ -532,7 +533,8 @@ def start_GUI() -> None:
                             sg.Tab(
                                 "Settings",
                                 # tab2_layout,
-                                [tab2_columns],
+                                # [tab2_columns],
+                                [[Grid(layout=tab2_layout)]],
                                 key=settings_tab_key,
                             ),
                         ]
@@ -588,7 +590,7 @@ def start_GUI() -> None:
 
         window.refresh()
 
-        set_row_size_of_element(window[apply_global_scaling_key], 100)
+        # set_row_size_of_element(element=window[apply_global_scaling_key], height=100)
         # ----------------- EndTest ----------------#
 
         return window
@@ -2247,7 +2249,10 @@ class Grid(sg.Column, SuperElement):
         sbar_arrow_width=None,
         sbar_frame_color=None,
         sbar_relief=None,
+        equal_block_sizes=False,
     ):
+        self.equal_block_sizes = equal_block_sizes
+
         columns_layout = [
             convert_rows_to_columns_for_elements(rows=layout, fill_element_type=sg.Text)
         ]
@@ -2290,28 +2295,46 @@ class Grid(sg.Column, SuperElement):
     def _update_internals(self) -> None:
         self._update_layout()
 
-    def _update_layout(self):
-        return
-        if self.Rows:
-            columns: List[sg.Column] = self.Rows[0]
+    def _update_layout(self) -> None:
+        # # Horizontally align the rows between the columns
 
-            # Horizontally align the rows between the columns
+        if self.Rows:
+            columns: Iterable[sg.Column] = self.Rows[0]
+
+            # Ensure that we have an Iterable of columns
             if all(isinstance(col, sg.Column) for col in columns):
                 # Group the nth rows from each column
                 grouped_nth_rows_from_columns = zip(col.Rows for col in columns)
 
+                # A list to track the max height for each row among the columns
+                max_row_heights: List[int] = []
+
+                # Get the max height for each group of rows
                 for rows_to_align in grouped_nth_rows_from_columns:
+                    max_row_height = 1
+                    # Get the max height of each row and update the max row height if it's greater
                     for row in rows_to_align:
-                        row_height = 1
                         if row:
                             element: sg.Element = row[0]
                             row_frame = element.ParentRowFrame
+                            _, row_height = get_widget_size(row_frame)
+                            if row_height is not None and row_height > max_row_height:
+                                max_row_height = row_height
+                    # Save the max height for this group of rows
+                    max_row_heights.append(max_row_height)
 
-                            row_height = element.get_size()[1]
-                            if row_height is None:
-                                row_height = 1
+                # Set all rows to the max row height among the columns
+                equal_block_sizes_height = max(max_row_heights)
 
-                    max((row[0].get_size()[1] for row in rows_to_align))
+                for aligned_row_height, rows_to_align in zip(max_row_heights, grouped_nth_rows_from_columns):
+                    for row in rows_to_align:
+                        if row:
+                            elmt: sg.Element = row[0]
+                            if self.equal_block_sizes:
+                                new_height = equal_block_sizes_height
+                            else:
+                                new_height = aligned_row_height
+                            set_row_size_of_element(element=elmt, height=new_height)
             else:
                 raise ValueError(
                     f"Invalid items in list. Expected a list of sg.Column objects. \nOffending list: {columns}"
