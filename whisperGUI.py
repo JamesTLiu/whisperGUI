@@ -2233,6 +2233,22 @@ class SuperElement(sg.Element):
             self.unbind(event)
 
 
+def get_widget_size(widget: tk.Widget) -> Union[Tuple[int, int], Tuple[None, None]]:
+    """
+    Return the size of a widget in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this get_size method.
+    :return: width and height of the element
+    :rtype:  (int, int)
+    """
+
+    try:
+        w = widget.winfo_width()
+        h = widget.winfo_height()
+    except Exception:
+        print(f"Warning, error getting size of widget: {widget}")
+        return None, None
+    return w, h
+
+
 class ImageBase(sg.Image, SuperElement):
     """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only."""
 
