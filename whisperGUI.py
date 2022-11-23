@@ -7,7 +7,6 @@ import decimal
 from functools import partial, partialmethod
 import io
 import multiprocessing
-import operator
 import platform
 import re
 import signal
@@ -2298,13 +2297,16 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self) -> None:
         # # Horizontally align the rows between the columns
 
-        if self.Rows:
+        if self.widget.winfo_ismapped() and self.Rows:
+            # Refresh the window for this element so its rows are rendered
+            self.ParentForm.refresh()
+
             columns: Iterable[sg.Column] = self.Rows[0]
 
             # Ensure that we have an Iterable of columns
             if all(isinstance(col, sg.Column) for col in columns):
                 # Group the nth rows from each column
-                grouped_nth_rows_from_columns = zip(col.Rows for col in columns)
+                grouped_nth_rows_from_columns = tuple(zip(*[col.Rows for col in columns]))
 
                 # A list to track the max height for each row among the columns
                 max_row_heights: List[int] = []
@@ -2316,7 +2318,7 @@ class Grid(sg.Column, SuperElement):
                     for row in rows_to_align:
                         if row:
                             element: sg.Element = row[0]
-                            row_frame = element.ParentRowFrame
+                            row_frame: tk.Frame = element.ParentRowFrame
                             _, row_height = get_widget_size(row_frame)
                             if row_height is not None and row_height > max_row_height:
                                 max_row_height = row_height
@@ -2364,7 +2366,8 @@ def set_row_size_of_element(
     new_width = width if width is not None else current_width
     new_height = height if height is not None else current_height
 
-    row_frame.config(bg="skyblue3", width=new_width, height=new_height)
+    # row_frame.config(bg="skyblue3") # set a background color to see the row size
+    row_frame.config(width=new_width, height=new_height)
     row_frame.pack_propagate(flag=False)
 
 
