@@ -8,6 +8,7 @@ from functools import partial, partialmethod
 import io
 import multiprocessing
 import platform
+import random
 import re
 import signal
 import sys
@@ -305,7 +306,6 @@ def start_GUI() -> None:
                             ),
                         ]
                     ],
-                    pad=0,
                 ),
             ],
             [
@@ -346,15 +346,6 @@ def start_GUI() -> None:
             ],
         ]
 
-        class SizeMatchingEmptyImage(EmptyImage):
-            __init__ = partialmethod(EmptyImage.__init__, size_match=True)  # type: ignore
-
-        # Put the options in columns to align their components
-        tab1_options_layout = convert_rows_to_columns_for_elements(
-            rows=tab1_options_rows,
-            fill_element_type=SizeMatchingEmptyImage,
-        )[0]
-
         # main tab
         tab1_layout = [
             [sg.Text("Select Audio/Video File(s)")],
@@ -374,7 +365,7 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            tab1_options_layout,
+            [Grid(layout=tab1_options_rows)],
             [
                 sg.pin(
                     sg.Table(
@@ -516,8 +507,6 @@ def start_GUI() -> None:
             ],
         ]
 
-        # tab2_columns = convert_rows_to_columns_for_elements(tab2_layout, sg.Button)
-
         # Define the window's contents
         layout = [
             [
@@ -531,8 +520,6 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                # tab2_layout,
-                                # [tab2_columns],
                                 [[Grid(layout=tab2_layout)]],
                                 key=settings_tab_key,
                             ),
@@ -573,14 +560,6 @@ def start_GUI() -> None:
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
-
-        # set_same_width(
-        #     [
-        #         window[scaling_text_setting_key],
-        #         window[save_output_dir_text_key],
-        #         window[language_specifier_text_setting_key],
-        #     ]
-        # )
 
         window.reappear()
 
@@ -2940,7 +2919,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
             "The offensive layout = ",
             layout,
             keep_on_top=True,
-            image=sg._random_error_emoji(),
+            image=_random_error_emoji(),
         )
         return
 
@@ -2956,7 +2935,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                 row,
                 "This item will be stripped from your layout",
                 keep_on_top=True,
-                image=sg._random_error_emoji(),
+                image=_random_error_emoji(),
             )
             continue
         for element in row:
@@ -2969,7 +2948,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                     element,
                     "This list will be stripped from your layout",
                     keep_on_top=True,
-                    image=sg._random_error_emoji(),
+                    image=_random_error_emoji(),
                 )
                 continue
             elif callable(element) and not isinstance(element, sg.Element):
@@ -2981,7 +2960,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                     element,
                     "This item will be stripped from your layout",
                     keep_on_top=True,
-                    image=sg._random_error_emoji(),
+                    image=_random_error_emoji(),
                 )
                 continue
             if element.ParentContainer is not None:
@@ -3000,9 +2979,14 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                     "This item will be stripped from your layout",
                     'Hint - try printing your layout and matching the IDs "print(layout)"',
                     keep_on_top=True,
-                    image=sg._random_error_emoji(),
+                    image=_random_error_emoji(),
                 )
                 continue
+
+
+def _random_error_emoji():
+    c = random.choice(sg.EMOJI_BASE64_SAD_LIST)
+    return c
 
 
 def popup_tracked(
