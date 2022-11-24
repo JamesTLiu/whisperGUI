@@ -353,7 +353,7 @@ def start_GUI() -> None:
         tab1_options_layout = convert_rows_to_columns_for_elements(
             rows=tab1_options_rows,
             fill_element_type=SizeMatchingEmptyImage,
-        )
+        )[0]
 
         # main tab
         tab1_layout = [
@@ -2252,9 +2252,9 @@ class Grid(sg.Column, SuperElement):
     ):
         self.equal_block_sizes = equal_block_sizes
 
-        columns_layout = [
-            convert_rows_to_columns_for_elements(rows=layout, fill_element_type=sg.Text)
-        ]
+        columns_layout = convert_rows_to_columns_for_elements(
+            rows=layout, fill_element_type=sg.Text
+        )
 
         super().__init__(
             layout=columns_layout,
@@ -2890,7 +2890,7 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
 
 def convert_rows_to_columns_for_elements(
     rows: Sequence[Sequence[sg.Element]], fill_element_type: Type[sg.Element]
-) -> List[sg.Column]:
+) -> List[List[sg.Column]]:
     """Convert a series of rows with PySimpleGUI elements into a list of PySimpleGUI columns.
 
     Args:
@@ -2915,7 +2915,7 @@ def convert_rows_to_columns_for_elements(
         column = sg.Column(column_layout, pad=(0, 0))
         columns.append(column)
 
-    return columns
+    return [columns]
 
 
 def popup_tracked(
