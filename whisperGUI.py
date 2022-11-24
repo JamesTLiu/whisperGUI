@@ -238,8 +238,7 @@ def start_GUI() -> None:
 
         show_model_info_at_start = False
 
-        # The tab1 option elements as rows
-        tab1_options_rows = [
+        tab1_options_layout = [
             [
                 sg.Text("Language:", key=language_text_key),
                 sg.Combo(
@@ -365,7 +364,7 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_rows)],
+            [Grid(layout=tab1_options_layout)],
             [
                 sg.pin(
                     sg.Table(
@@ -562,14 +561,6 @@ def start_GUI() -> None:
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
         window.reappear()
-
-        # ----------------- Test -------------------#
-        window[settings_tab_key].select()
-
-        window.refresh()
-
-        # set_row_size_of_element(element=window[apply_global_scaling_key], height=100)
-        # ----------------- EndTest ----------------#
 
         return window
 
