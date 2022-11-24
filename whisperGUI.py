@@ -2254,18 +2254,16 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self) -> None:
         # Horizontally align the rows between the columns
 
-        if self.widget.winfo_ismapped() and self.Rows:
+        if self.widget.winfo_ismapped():
             # Refresh the window for this element so its rows are rendered
             self.ParentForm.refresh()
 
-            columns: Iterable[sg.Column] = self.Rows[0]
+            columns = self._get_columns_from_layout()
 
-            # Ensure that we have an Iterable of columns
-            if all(isinstance(col, sg.Column) for col in columns):
+            if columns:
                 # Group the nth rows from each column
-                grouped_nth_rows_from_columns = tuple(
-                    zip(*[col.Rows for col in columns])
-                )
+                layouts_for_columns = [col.Rows for col in columns]
+                grouped_nth_rows_from_columns = tuple(zip(*layouts_for_columns))
 
                 # A list to track the max height for each row among the columns
                 max_row_heights: List[int] = []
@@ -2299,10 +2297,36 @@ class Grid(sg.Column, SuperElement):
                             else:
                                 new_height = aligned_row_height
                             set_row_size_of_element(element=elmt, height=new_height)
-            else:
-                raise ValueError(
-                    f"Invalid items in list. Expected a list of sg.Column objects. \nOffending list: {columns}"
-                )
+
+    def _get_columns_from_layout(self) -> Optional[Tuple[sg.Column, ...]]:
+        """Extract the iterable of Column elements from this element's layout.
+
+        Returns:
+            Optional[Iterable[sg.Column]]: Iterable of Columns or None.
+        """
+        # Ensure layout exists
+        if self.Rows:
+            columns = tuple(self.Rows[0])
+
+            # Ensure each element is a column
+            for col in columns:
+                if not isinstance(col, sg.Column):
+                    sg.PopupError(
+                        "Error in layout",
+                        "Your layout is not an Iterable[Iterable[sg.Column]]",
+                        "Instead of a sg.Column, the type found was {}".format(
+                            type(col)
+                        ),
+                        "The offensive layout = ",
+                        self.Rows,
+                        keep_on_top=True,
+                        image=_random_error_emoji(),
+                    )
+                    return None
+
+            return columns
+
+        return None
 
 
 def set_row_size_of_element(
