@@ -560,6 +560,12 @@ def start_GUI() -> None:
         # (Needed until an arg for FolderBrowse adds this functionality)
         window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
 
+        # Switch to the settings tab to load it and then switch back to the main tab
+        window[settings_tab_key].select()
+        window.refresh()
+        window[main_tab_key].select()
+
+        # Show the window
         window.reappear()
 
         return window
