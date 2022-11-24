@@ -2252,6 +2252,8 @@ class Grid(sg.Column, SuperElement):
     ):
         self.equal_block_sizes = equal_block_sizes
 
+        ensure_valid_layout(layout)
+
         columns_layout = convert_rows_to_columns_for_elements(
             rows=layout, fill_element_type=sg.Text
         )
@@ -2306,7 +2308,9 @@ class Grid(sg.Column, SuperElement):
             # Ensure that we have an Iterable of columns
             if all(isinstance(col, sg.Column) for col in columns):
                 # Group the nth rows from each column
-                grouped_nth_rows_from_columns = tuple(zip(*[col.Rows for col in columns]))
+                grouped_nth_rows_from_columns = tuple(
+                    zip(*[col.Rows for col in columns])
+                )
 
                 # A list to track the max height for each row among the columns
                 max_row_heights: List[int] = []
@@ -2328,7 +2332,9 @@ class Grid(sg.Column, SuperElement):
                 # Set all rows to the max row height among the columns
                 equal_block_sizes_height = max(max_row_heights)
 
-                for aligned_row_height, rows_to_align in zip(max_row_heights, grouped_nth_rows_from_columns):
+                for aligned_row_height, rows_to_align in zip(
+                    max_row_heights, grouped_nth_rows_from_columns
+                ):
                     for row in rows_to_align:
                         if row:
                             elmt: sg.Element = row[0]
@@ -2366,7 +2372,7 @@ def set_row_size_of_element(
     new_width = width if width is not None else current_width
     new_height = height if height is not None else current_height
 
-    # row_frame.config(bg="skyblue3") # set a background color to see the row size
+    row_frame.config(bg="skyblue3")  # set a background color to see the row size
     row_frame.config(width=new_width, height=new_height)
     row_frame.pack_propagate(flag=False)
 
@@ -2916,6 +2922,87 @@ def convert_rows_to_columns_for_elements(
         columns.append(column)
 
     return [columns]
+
+
+def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
+    """Ensure that the layout is valid (an Iterable[Iterable[Element]]).
+
+    Args:
+        layout (Sequence[Sequence[sg.Element]]): The layout to check.
+    """
+    try:
+        iter(layout)
+    except TypeError:
+        sg.PopupError(
+            "Error in layout",
+            "Your layout is not an iterable (e.g. a list)",
+            "Instead of a list, the type found was {}".format(type(layout)),
+            "The offensive layout = ",
+            layout,
+            keep_on_top=True,
+            image=sg._random_error_emoji(),
+        )
+        return
+
+    for row in layout:
+        try:
+            iter(row)
+        except TypeError:
+            sg.PopupError(
+                "Error in layout",
+                "Your row is not an iterable (e.g. a list)",
+                "Instead of a list, the type found was {}".format(type(row)),
+                "The offensive row = ",
+                row,
+                "This item will be stripped from your layout",
+                keep_on_top=True,
+                image=sg._random_error_emoji(),
+            )
+            continue
+        for element in row:
+            if type(element) == list:
+                sg.PopupError(
+                    "Error in layout",
+                    "Layout has a LIST instead of an ELEMENT",
+                    "This means you have a badly placed ]",
+                    "The offensive list is:",
+                    element,
+                    "This list will be stripped from your layout",
+                    keep_on_top=True,
+                    image=sg._random_error_emoji(),
+                )
+                continue
+            elif callable(element) and not isinstance(element, sg.Element):
+                sg.PopupError(
+                    "Error in layout",
+                    "Layout has a FUNCTION instead of an ELEMENT",
+                    "This likely means you are missing () from your layout",
+                    "The offensive list is:",
+                    element,
+                    "This item will be stripped from your layout",
+                    keep_on_top=True,
+                    image=sg._random_error_emoji(),
+                )
+                continue
+            if element.ParentContainer is not None:
+                sg.warnings.warn(
+                    "*** AN ELEMENT IN YOUR LAYOUT IS ALREADY IN USE! Once placed in a layout, an element cannot be used in another layout. ***",
+                    UserWarning,
+                )
+                sg.PopupError(
+                    "Error in layout",
+                    "The layout specified has already been used",
+                    'You MUST start with a "clean", unused layout every time you create a window',
+                    "The offensive Element = ",
+                    element,
+                    "and has a key = ",
+                    element.Key,
+                    "This item will be stripped from your layout",
+                    'Hint - try printing your layout and matching the IDs "print(layout)"',
+                    keep_on_top=True,
+                    image=sg._random_error_emoji(),
+                )
+                continue
 
 
 def popup_tracked(
