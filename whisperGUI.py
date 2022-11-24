@@ -2267,7 +2267,7 @@ class Grid(sg.Column, SuperElement):
         self._update_layout()
 
     def _update_layout(self) -> None:
-        # # Horizontally align the rows between the columns
+        # Horizontally align the rows between the columns
 
         if self.widget.winfo_ismapped() and self.Rows:
             # Refresh the window for this element so its rows are rendered
@@ -2299,9 +2299,10 @@ class Grid(sg.Column, SuperElement):
                     # Save the max height for this group of rows
                     max_row_heights.append(max_row_height)
 
-                # Set all rows to the max row height among the columns
+                # The max row height among the columns
                 equal_block_sizes_height = max(max_row_heights)
 
+                # Horizontally align the rows between the columns
                 for aligned_row_height, rows_to_align in zip(
                     max_row_heights, grouped_nth_rows_from_columns
                 ):
