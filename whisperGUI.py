@@ -2385,6 +2385,27 @@ def get_widget_size(widget: tk.Widget) -> Union[Tuple[int, int], Tuple[None, Non
     return w, h
 
 
+def change_row_autosizing(
+    row: tk.Frame = None, element: sg.Element = None, auto_size: bool = False
+) -> None:
+    """Set whether the row or the row of an element fits its contents. If both are given,
+    the row will be used.
+
+    Args:
+        row (tk.Frame): The tkinter Frame that represents the row. Defaults to None.
+        element (sg.Element): The element whose row's setting is to be changed. Defaults to None.
+        auto_size (bool): If True, the row will fit its contents. Defaults to False.
+    """
+    if row:
+        row_frame = row
+    elif element:
+        row_frame = element.ParentRowFrame
+    else:
+        return
+
+    row_frame.pack_propagate(flag=auto_size)
+
+
 class ImageBase(sg.Image, SuperElement):
     """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only."""
 
