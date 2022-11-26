@@ -2148,11 +2148,23 @@ class SuperElement(sg.Element):
         on the window with this element.
         """
 
-        self._setup_binds()
-
         # Update internal components now that a widget exists
         if self._widget_was_created():
+            self._setup_binds()
             self._update_internals()
+        else:
+            sg.PopupError(
+                "Error during element setup.",
+                "The widget for this element does not exist.",
+                "You MUST only call this method after the widget is created via calling window.refresh() or window.read()",
+                "The offensive Element = ",
+                self,
+                "and has a key = ",
+                self.Key,
+                "The setup for this element will be aborted.",
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
 
     def _setup_binds(self) -> None:
         """Set up tkinter bind events."""
