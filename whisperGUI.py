@@ -415,41 +415,55 @@ def start_GUI() -> None:
         # settings tab
         tab2_layout = [
             [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
-            [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
             [
-                sg.Text(
-                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                    key=scaling_text_setting_key,
-                ),
-                sg.Column(
+                sg.Frame(
+                    title="Resize the Application",
                     layout=[
                         [
-                            sg.Input(
-                                sg.user_settings_get_entry(
-                                    scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
-                                ),
-                                size=(5),
-                                key=scaling_input_setting_key,
+                            sg.Text(
+                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                                key=scaling_text_setting_key,
                             ),
-                            sg.Button("Apply", key=apply_global_scaling_key),
+                            sg.Column(
+                                layout=[
+                                    [
+                                        sg.Input(
+                                            sg.user_settings_get_entry(
+                                                scaling_input_setting_key,
+                                                DEFAULT_GLOBAL_SCALING,
+                                            ),
+                                            size=(5),
+                                            key=scaling_input_setting_key,
+                                        ),
+                                        sg.Button(
+                                            "Apply", key=apply_global_scaling_key
+                                        ),
+                                    ]
+                                ]
+                            ),
                         ]
-                    ]
-                ),
+                    ],
+                )
             ],
-            [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            size_matched_image_element(
-                size_match_element=sg.Text(
-                    text="Remember Output Folder",
-                    key=save_output_dir_text_key,
-                ),
-                image_element=FancyCheckbox(
-                    start_toggled_on=save_output_dir,
-                    key=save_output_dir_checkbox_key,
-                    enable_events=True,
-                    size_match=True,
-                ),
-            ),
+            [
+                sg.Frame(
+                    title="Output Folder",
+                    layout=[
+                        size_matched_image_element(
+                            size_match_element=sg.Text(
+                                text="Remember Output Folder",
+                                key=save_output_dir_text_key,
+                            ),
+                            image_element=FancyCheckbox(
+                                start_toggled_on=save_output_dir,
+                                key=save_output_dir_checkbox_key,
+                                enable_events=True,
+                                size_match=True,
+                            ),
+                        )
+                    ],
+                )
+            ],
             [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
             [
                 sg.Text(
@@ -476,11 +490,18 @@ def start_GUI() -> None:
                     [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
                 ),
             ],
-            [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            [sg.Text(f"Location of the Settings File:")],
             [
-                sg.Input(
-                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
+                sg.Frame(
+                    title="Settings File Path",
+                    layout=[
+                        [
+                            sg.Input(
+                                f"{config_file_path}",
+                                size=len(config_file_path) - 6,
+                                disabled=True,
+                            )
+                        ]
+                    ],
                 )
             ],
         ]
@@ -498,7 +519,8 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                [[Grid(layout=tab2_layout)]],
+                                # [[Grid(layout=tab2_layout)]],
+                                tab2_layout,
                                 key=settings_tab_key,
                             ),
                         ]
