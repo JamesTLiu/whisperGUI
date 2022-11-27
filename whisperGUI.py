@@ -1240,6 +1240,41 @@ def start_GUI() -> None:
     main_window.close()
 
 
+def function_details(func: Callable) -> Callable:
+
+    # Getting the argument names of the
+    # called function
+    argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
+
+    # Getting the Function name of the
+    # called function
+    fname = func.__name__
+
+    def inner_func(*args, **kwargs):
+
+        print(fname, "(", end="")
+
+        # printing the function arguments
+        print(
+            ", ".join(
+                "% s = % r" % entry for entry in zip(argnames, args[: len(argnames)])
+            ),
+            end=", ",
+        )
+
+        # Printing the variable length Arguments
+        print("args =", list(args[len(argnames) :]), end=", ")
+
+        # Printing the variable length keyword
+        # arguments
+        print("kwargs =", kwargs, end="")
+        print(")")
+
+        func(*args, **kwargs)
+
+    return inner_func
+
+
 class Window(sg.Window):
     """Represents a single Window."""
 
@@ -2365,6 +2400,50 @@ class Grid(sg.Column, SuperElement):
             return columns
 
         return None
+
+
+def detect_all_widget_events(widget: tk.Widget, ignored_events: Iterable[str] = tuple()):
+    """Add event detail printing bindings to the widget for every possible tkinter event.
+
+    Args:
+        widget (tk.Widget): The widget to detect events for.
+        ignored_events (Iterable[str], optional): An Iterable of names for ignored tkinter events.
+            Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
+    """
+    @function_details
+    def event_handler(event: tk.Event):
+        widget: tk.Widget = event.widget
+        lookup = widget_to_element_with_window(widget)
+        if not lookup or not lookup.element or not lookup.window:
+            print("element/window not found for widget in event", end="\n\n")
+            return
+        element = lookup.element
+        print(f"event_handler called for element with key: {element.key}", end="\n\n")
+
+    undocumented_events = (
+        "Keymap",
+        "GraphicsExpose",
+        "NoExpose",
+        "CirculateRequest",
+        "SelectionClear",
+        "SelectionRequest",
+        "Selection",
+        "ClientMessage",
+        "Mapping",
+        "VirtualEvent",
+    )
+
+    for event in tk.EventType:
+        # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
+        if (
+            event.name not in undocumented_events
+            and event.name not in ignored_events
+        ):
+            widget.bind(
+                f"<{event.name}>",
+                event_handler,
+                add="+",
+            )
 
 
 def set_row_size_of_element(
