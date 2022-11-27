@@ -1382,6 +1382,32 @@ class Window(sg.Window):
         self.refresh()
 
 
+def refresh_idletasks(window: sg.Window) -> sg.Window:
+    """Refreshes the window by calling tkroot.update_idletasks().
+    Call this when you want all tkinter idle callbacks to be processed. This
+    will update the display of windows before it next idles but not process
+    events caused by the user.
+
+    Some tasks in updating the display, such as resizing and redrawing widgets,
+    are called idle tasks because they are usually deferred until the application
+    has finished handling events and has gone back to the main loop to wait for
+    new events.
+
+    Args:
+        window (sg.Window): The window to refresh and process idle tasks for.
+
+    Returns:
+        sg.Window: The window so that calls can be easily "chained".
+    """
+    if window.TKrootDestroyed:
+        return window
+    try:
+        rc = window.TKroot.update_idletasks()
+    except:
+        pass
+    return window
+
+
 def resize_window_relative_to_screen(
     window: sg.Window,
     width_factor: Union[float, int],
