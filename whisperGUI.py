@@ -277,34 +277,57 @@ def start_GUI() -> None:
             ),
             [
                 sg.Text("Prompt Profile"),
-                sg.Column(
-                    [
-                        [
-                            sg.Text(
-                                "Initial Prompt",
-                                tooltip=(
-                                    "Use this when a dialect/style of a language or punctuation is desired.\n"
-                                    "Does NOT guarantee the result will follow the initial prompt.\n"
-                                    "Initial prompt will NOT be included in the result.\n"
-                                    "Try a larger model if the result does not follow the initial prompt.\n\n"
-                                    "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                                ),
-                                key=initial_prompt_text_key,
-                            ),
-                            InfoImage(
-                                tooltip=(
-                                    "Use this when a dialect/style of a language or punctuation is desired.\n"
-                                    "Does NOT guarantee the result will follow the initial prompt.\n"
-                                    "Initial prompt will NOT be included in the result.\n"
-                                    "Try a larger model if the result does not follow the initial prompt.\n\n"
-                                    "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                                ),
-                                key=initial_prompt_info_key,
-                                size_match=True,
-                                size_match_element_type=sg.Text,
-                            ),
-                        ]
-                    ],
+                # sg.Column(
+                #     layout=[
+                #         [
+                #             sg.Text(
+                #                 "Initial Prompt",
+                #                 tooltip=(
+                #                     "Use this when a dialect/style of a language or punctuation is desired.\n"
+                #                     "Does NOT guarantee the result will follow the initial prompt.\n"
+                #                     "Initial prompt will NOT be included in the result.\n"
+                #                     "Try a larger model if the result does not follow the initial prompt.\n\n"
+                #                     "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                #                 ),
+                #                 key=initial_prompt_text_key,
+                #             ),
+                #             InfoImage(
+                #                 tooltip=(
+                #                     "Use this when a dialect/style of a language or punctuation is desired.\n"
+                #                     "Does NOT guarantee the result will follow the initial prompt.\n"
+                #                     "Initial prompt will NOT be included in the result.\n"
+                #                     "Try a larger model if the result does not follow the initial prompt.\n\n"
+                #                     "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                #                 ),
+                #                 key=initial_prompt_info_key,
+                #                 size_match=True,
+                #                 size_match_element_type=sg.Text,
+                #             ),
+                #         ]
+                #     ],
+                # ),
+                sg.Text(
+                    "Initial Prompt",
+                    tooltip=(
+                        "Use this when a dialect/style of a language or punctuation is desired.\n"
+                        "Does NOT guarantee the result will follow the initial prompt.\n"
+                        "Initial prompt will NOT be included in the result.\n"
+                        "Try a larger model if the result does not follow the initial prompt.\n\n"
+                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                    ),
+                    key=initial_prompt_text_key,
+                ),
+                InfoImage(
+                    tooltip=(
+                        "Use this when a dialect/style of a language or punctuation is desired.\n"
+                        "Does NOT guarantee the result will follow the initial prompt.\n"
+                        "Initial prompt will NOT be included in the result.\n"
+                        "Try a larger model if the result does not follow the initial prompt.\n\n"
+                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                    ),
+                    key=initial_prompt_info_key,
+                    size_match=True,
+                    size_match_element_type=sg.Text,
                 ),
             ],
             [
@@ -537,6 +560,8 @@ def start_GUI() -> None:
                     justification="center",
                 ),
                 sg.Push(),
+                sg.Button("Toggle Propagate"),
+                sg.Button("Set Size"),
                 sg.Button("Start", key=start_key, auto_size_button=True),
             ],
         ]
@@ -549,7 +574,7 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
-            alpha_channel=0,
+            # alpha_channel=0,
         )
 
         # Set the window size relative to the screen
@@ -838,6 +863,10 @@ def start_GUI() -> None:
 
     modal_window_manager = ModalWindowManager()
 
+    auto_size = False
+
+    toggle = False
+
     while True:
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
@@ -855,6 +884,52 @@ def start_GUI() -> None:
                 prompt_manager_window = None
 
             window.close()
+        elif event == "Toggle Propagate":
+
+            # auto_size ^= True
+            # print(f"auto size={auto_size}")
+            # change_row_autosizing(
+            #     element=window[initial_prompt_info_key], auto_size=auto_size
+            # )
+            # element = window[initial_prompt_info_key]
+            # sign = 1 if auto_size else -1
+            # base = 100
+            # size = base + sign * base
+
+            # toggle ^= True
+
+            # print(f"Toggle={toggle}")
+
+            # # change_row_autosizing(
+            # #     element=window[initial_prompt_info_key], auto_size=auto_size
+            # # )
+            # element = window[initial_prompt_info_key]
+
+            # base = 100
+            # size = base + toggle * base
+
+            auto_size ^= True
+
+            print(f"auto size={auto_size}")
+
+            change_row_autosizing(
+                element=window[initial_prompt_info_key], auto_size=auto_size
+            )
+            # element = window[initial_prompt_info_key]
+
+            # base = 100
+            # size = base + toggle * base
+
+            # element.set_size(size=(size, size))
+        elif event == "Set Size":
+            toggle ^= True
+            element = window[initial_prompt_info_key]
+            base = 100
+            size = base + toggle * base
+            element.set_size(size=(size, size))
+            w: tk.Widget = element.widget
+            w.configure
+            print(f"set size to {(size, size)}")
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
         # User selected an output directory
@@ -2206,7 +2281,8 @@ class Multiline(sg.Multiline):
             text (str): The text to format.
         """
         # remove the auto appended '\n' by every Multiline.get() call when rstrip is False
-        _text = text if self.rstrip else text[:-1]
+        # _text = text if self.rstrip else text[:-1]
+        _text = text
 
         # Replace all \r with \n
         processed_text = re.sub(r"\r", "\n", _text)
@@ -2342,6 +2418,53 @@ class Grid(sg.Column, SuperElement):
     def _setup_binds(self) -> None:
         # Update the layout when the widget is made visible. Needed for widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self._update_layout(), add="+")
+        self._bind_layout_element_resize_to_layout_update()
+
+    def _bind_layout_element_resize_to_layout_update(self):
+        # Set up binds to make the layout update when an element in the layout resizes
+        columns = self._get_columns_from_layout()
+
+        @function_details
+        def update_grid_on_element_resize(event: tk.Event) -> None:
+            widget: tk.Widget = event.widget
+            lookup = widget_to_element_with_window(widget)
+            if not lookup or not lookup.element or not lookup.window:
+                print("element window lookup for widget failed")
+                return
+
+            element = lookup.element
+
+            # change_row_autosizing(element=element, auto_size=True)
+
+            print(
+                f"update_grid_on_element_resize called for element with key: {element.key}"
+            )
+
+            ...
+            # widget: tk.Widget = self.widget
+            # widget.event_generate("<Map>")
+
+            # self.widget.event_generate("<Map>")
+
+
+
+        if columns:
+            for col in columns:
+                for row in col.Rows:
+                    # if row:
+                    #     ele: sg.Element = row[0]
+                    #     row_frame: tk.Frame = ele.ParentRowFrame
+                    #     detect_all_widget_events(row_frame)
+
+                    for element in row:
+                        element.widget.bind(
+                            "<Configure>",
+                            update_grid_on_element_resize,
+                            add="+",
+                        )
+                        detect_all_widget_events(element.widget)
+
+
 
     def _update_internals(self) -> None:
         self._update_layout()
@@ -2349,8 +2472,11 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self) -> None:
         # Horizontally align the rows between the columns
 
+        print("_update_layout() called")
+
         if self.widget.winfo_ismapped():
-            # Refresh the window for this element so its rows are rendered
+            # Refresh the window for this element so its rows are updated
+            # refresh_idletasks(self.ParentForm)
             self.ParentForm.refresh()
 
             columns = self._get_columns_from_layout()
@@ -2491,7 +2617,7 @@ def set_row_size_of_element(
     new_width = width if width is not None else current_width
     new_height = height if height is not None else current_height
 
-    # row_frame.config(bg="skyblue3")  # set a background color to see the row size
+    row_frame.config(bg="skyblue3")  # set a background color to see the row size
     row_frame.config(width=new_width, height=new_height)
     row_frame.pack_propagate(flag=False)
 
@@ -2654,6 +2780,9 @@ class ImageBase(sg.Image, SuperElement):
             )
         else:
             self.update(source=new_source)
+
+        # widget: tk.Widget = self.widget
+        # widget.event_generate("<Configure>")
 
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
