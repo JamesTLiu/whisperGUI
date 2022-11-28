@@ -435,59 +435,140 @@ def start_GUI() -> None:
             LANGUAGE_SPECIFIER_AS_CODE,
         )
 
+        # # settings tab
+        # tab2_layout = [
+        #     [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
+        #     [
+        #         sg.Frame(
+        #             title="Resize the Application",
+        #             layout=[
+        #                 [
+        #                     sg.Text(
+        #                         f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+        #                         key=scaling_text_setting_key,
+        #                     ),
+        #                     sg.Column(
+        #                         layout=[
+        #                             [
+        #                                 sg.Input(
+        #                                     sg.user_settings_get_entry(
+        #                                         scaling_input_setting_key,
+        #                                         DEFAULT_GLOBAL_SCALING,
+        #                                     ),
+        #                                     size=(5),
+        #                                     key=scaling_input_setting_key,
+        #                                 ),
+        #                                 sg.Button(
+        #                                     "Apply", key=apply_global_scaling_key
+        #                                 ),
+        #                             ]
+        #                         ]
+        #                     ),
+        #                 ]
+        #             ],
+        #         )
+        #     ],
+        #     [
+        #         sg.Frame(
+        #             title="Output Folder",
+        #             layout=[
+        #                 size_matched_image_element(
+        #                     size_match_element=sg.Text(
+        #                         text="Remember Output Folder",
+        #                         key=save_output_dir_text_key,
+        #                     ),
+        #                     image_element=FancyCheckbox(
+        #                         start_toggled_on=save_output_dir,
+        #                         key=save_output_dir_checkbox_key,
+        #                         enable_events=True,
+        #                         size_match=True,
+        #                     ),
+        #                 )
+        #             ],
+        #         )
+        #     ],
+        #     [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+        #     [
+        #         sg.Text(
+        #             "Language Specifier in Output File Names",
+        #             key=language_specifier_text_setting_key,
+        #         ),
+        #         sg.Combo(
+        #             values=language_specifier_options,
+        #             key=language_specifier_setting_key,
+        #             default_value=sg.user_settings_get_entry(
+        #                 language_specifier_setting_key, language_specifier_options[0]
+        #             ),
+        #             auto_size_text=True,
+        #             readonly=True,
+        #             enable_events=True,
+        #         ),
+        #     ],
+        #     [
+        #         sg.Column(
+        #             [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
+        #             pad=0,
+        #         ),
+        #         sg.Column(
+        #             [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
+        #         ),
+        #     ],
+        #     [
+        #         sg.Frame(
+        #             title="Settings File Path",
+        #             layout=[
+        #                 [
+        #                     sg.Input(
+        #                         f"{config_file_path}",
+        #                         size=len(config_file_path) - 6,
+        #                         disabled=True,
+        #                     )
+        #                 ]
+        #             ],
+        #         )
+        #     ],
+        # ]
+
         # settings tab
         tab2_layout = [
             [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
+            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+            [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
             [
-                sg.Frame(
-                    title="Resize the Application",
+                sg.Text(
+                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                    key=scaling_text_setting_key,
+                ),
+                sg.Column(
                     layout=[
                         [
-                            sg.Text(
-                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                                key=scaling_text_setting_key,
+                            sg.Input(
+                                sg.user_settings_get_entry(
+                                    scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
+                                ),
+                                size=(5),
+                                key=scaling_input_setting_key,
                             ),
-                            sg.Column(
-                                layout=[
-                                    [
-                                        sg.Input(
-                                            sg.user_settings_get_entry(
-                                                scaling_input_setting_key,
-                                                DEFAULT_GLOBAL_SCALING,
-                                            ),
-                                            size=(5),
-                                            key=scaling_input_setting_key,
-                                        ),
-                                        sg.Button(
-                                            "Apply", key=apply_global_scaling_key
-                                        ),
-                                    ]
-                                ]
-                            ),
+                            sg.Button("Apply", key=apply_global_scaling_key),
                         ]
                     ],
-                )
+                    pad=0,
+                ),
             ],
-            [
-                sg.Frame(
-                    title="Output Folder",
-                    layout=[
-                        size_matched_image_element(
-                            size_match_element=sg.Text(
-                                text="Remember Output Folder",
-                                key=save_output_dir_text_key,
-                            ),
-                            image_element=FancyCheckbox(
-                                start_toggled_on=save_output_dir,
-                                key=save_output_dir_checkbox_key,
-                                enable_events=True,
-                                size_match=True,
-                            ),
-                        )
-                    ],
-                )
-            ],
-            [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+            size_matched_image_element(
+                size_match_element=sg.Text(
+                    text="Remember Output Folder",
+                    key=save_output_dir_text_key,
+                ),
+                image_element=FancyCheckbox(
+                    start_toggled_on=save_output_dir,
+                    key=save_output_dir_checkbox_key,
+                    enable_events=True,
+                    size_match=True,
+                ),
+            ),
+            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
             [
                 sg.Text(
                     "Language Specifier in Output File Names",
@@ -504,27 +585,13 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
+            [sg.Text("      Language:"), sg.Text("video.english.txt")],
+            [sg.Text("      Language Code:"), sg.Text("video.en.txt")],
+            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+            [sg.Text(f"Location of the Settings File:")],
             [
-                sg.Column(
-                    [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
-                    pad=0,
-                ),
-                sg.Column(
-                    [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
-                ),
-            ],
-            [
-                sg.Frame(
-                    title="Settings File Path",
-                    layout=[
-                        [
-                            sg.Input(
-                                f"{config_file_path}",
-                                size=len(config_file_path) - 6,
-                                disabled=True,
-                            )
-                        ]
-                    ],
+                sg.Input(
+                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
                 )
             ],
         ]
@@ -542,8 +609,8 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                # [[Grid(layout=tab2_layout)]],
-                                tab2_layout,
+                                [[Grid(layout=tab2_layout)]],
+                                # tab2_layout,
                                 key=settings_tab_key,
                             ),
                         ]
@@ -560,7 +627,7 @@ def start_GUI() -> None:
                     justification="center",
                 ),
                 sg.Push(),
-                sg.Button("Toggle Propagate"),
+                sg.Button("Pad change"),
                 sg.Button("Set Size"),
                 sg.Button("Start", key=start_key, auto_size_button=True),
             ],
@@ -863,7 +930,7 @@ def start_GUI() -> None:
 
     modal_window_manager = ModalWindowManager()
 
-    auto_size = False
+    pad_toggle = False
 
     toggle = False
 
@@ -884,43 +951,12 @@ def start_GUI() -> None:
                 prompt_manager_window = None
 
             window.close()
-        elif event == "Toggle Propagate":
-
-            # auto_size ^= True
-            # print(f"auto size={auto_size}")
-            # change_row_autosizing(
-            #     element=window[initial_prompt_info_key], auto_size=auto_size
-            # )
-            # element = window[initial_prompt_info_key]
-            # sign = 1 if auto_size else -1
-            # base = 100
-            # size = base + sign * base
-
-            # toggle ^= True
-
-            # print(f"Toggle={toggle}")
-
-            # # change_row_autosizing(
-            # #     element=window[initial_prompt_info_key], auto_size=auto_size
-            # # )
-            # element = window[initial_prompt_info_key]
-
-            # base = 100
-            # size = base + toggle * base
-
-            auto_size ^= True
-
-            print(f"auto size={auto_size}")
-
-            change_row_autosizing(
-                element=window[initial_prompt_info_key], auto_size=auto_size
-            )
-            # element = window[initial_prompt_info_key]
-
-            # base = 100
-            # size = base + toggle * base
-
-            # element.set_size(size=(size, size))
+        elif event == "Pad change":
+            pad_toggle ^= True
+            element = window[initial_prompt_info_key]
+            element_wrapper: sg.Element = element.ParentContainer
+            pad = 30 if pad_toggle else 0
+            element_wrapper.widget.pack_configure(pady=pad)
         elif event == "Set Size":
             toggle ^= True
             element = window[initial_prompt_info_key]
@@ -2383,6 +2419,8 @@ class Grid(sg.Column, SuperElement):
         # A list to track the previous max width for the elements in a vertical set of blocks in the Grid
         self._vertical_group_widths = {}
 
+        self._layout_blocks_widget_sizes: Dict[tk.Widget, WidgetSize] = {}
+
         super().__init__(
             layout=processed_layout,
             background_color=background_color,
@@ -2436,7 +2474,18 @@ class Grid(sg.Column, SuperElement):
             print(
                 f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
             )
-            self._update_layout()
+
+            # Widget changed size. Update the Grid layout
+            widget_width, widget_height = get_widget_size(widget)
+            if widget_width is not None and widget_height is not None:
+                last_size = self._layout_blocks_widget_sizes[widget]
+                if widget_width != last_size.width or widget_height != last_size.height:
+                    # print(f"\twidget size changed. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}")
+                    last_size.width = widget_width
+                    last_size.height = widget_height
+                    self._update_layout()
+
+            # self._update_layout()
 
         for row in rows:
             for wrapper_element in row:
@@ -2506,6 +2555,10 @@ class Grid(sg.Column, SuperElement):
                                     keep_on_top=True,
                                     image=_random_error_emoji(),
                                 )
+
+                            self._layout_blocks_widget_sizes[
+                                element.widget
+                            ] = WidgetSize(width=element_width, height=element_height)
                     # Save the max width for this vertical group of rows
                     vertical_element_group_widths[group_num] = max_element_width
 
@@ -2560,6 +2613,12 @@ class Grid(sg.Column, SuperElement):
             new_layout.append(new_row)
 
         return new_layout
+
+
+@dataclass
+class WidgetSize:
+    width: int
+    height: int
 
 
 def detect_all_widget_events(
