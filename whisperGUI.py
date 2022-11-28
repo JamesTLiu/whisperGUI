@@ -2550,7 +2550,9 @@ class Grid(sg.Column, SuperElement):
         return None
 
 
-def detect_all_widget_events(widget: tk.Widget, ignored_events: Iterable[str] = tuple()):
+def detect_all_widget_events(
+    widget: tk.Widget, ignored_events: Iterable[str] = tuple()
+):
     """Add event detail printing bindings to the widget for every possible tkinter event.
 
     Args:
@@ -2558,6 +2560,7 @@ def detect_all_widget_events(widget: tk.Widget, ignored_events: Iterable[str] = 
         ignored_events (Iterable[str], optional): An Iterable of names for ignored tkinter events.
             Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
     """
+
     @function_details
     def event_handler(event: tk.Event):
         widget: tk.Widget = event.widget
@@ -2583,10 +2586,7 @@ def detect_all_widget_events(widget: tk.Widget, ignored_events: Iterable[str] = 
 
     for event in tk.EventType:
         # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
-        if (
-            event.name not in undocumented_events
-            and event.name not in ignored_events
-        ):
+        if event.name not in undocumented_events and event.name not in ignored_events:
             widget.bind(
                 f"<{event.name}>",
                 event_handler,
