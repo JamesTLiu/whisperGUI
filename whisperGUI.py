@@ -2522,17 +2522,23 @@ class Grid(sg.Column, SuperElement):
                                 wrapper_widget: tk.Widget = wrapper_element.widget
 
                                 if self.equal_block_sizes:
-                                    height_padding = uniform_block_height - element_height
+                                    height_padding = (
+                                        uniform_block_height - element_height
+                                    )
+
                                     right_padding = uniform_block_width - element_width
                                     wrapper_widget.pack_configure(
-                                        padx=(0, right_padding), pady=height_padding // 2
+                                        padx=(0, right_padding),
+                                        pady=height_padding // 2,
                                     )
                                 else:
                                     right_padding = (
                                         vertical_element_group_widths[group_num]
                                         - element_width
                                     )
-                                    wrapper_widget.pack_configure(padx=(0, right_padding))
+                                    wrapper_widget.pack_configure(
+                                        padx=(0, right_padding)
+                                    )
                             else:
                                 sg.PopupError(
                                     "Error when updating the Grid layout",
