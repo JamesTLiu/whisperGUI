@@ -2324,11 +2324,11 @@ class SuperElement(sg.Element):
             )
 
     def _setup_binds(self) -> None:
-        """Set up tkinter bind events."""
+        """Set up tkinter bind events. Automatically called when self._setup() is called."""
         ...
 
     def _update_internals(self) -> None:
-        """Update internal components."""
+        """Update internal components. Automatically called when self._setup() is called."""
         ...
 
     def _unbind_all(self) -> None:
