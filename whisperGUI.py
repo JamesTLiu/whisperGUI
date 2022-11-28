@@ -2380,12 +2380,13 @@ class Grid(sg.Column, SuperElement):
 
         ensure_valid_layout(layout)
 
-        columns_layout = convert_rows_to_columns_for_elements(
-            rows=layout, fill_element_type=sg.Text
-        )
+        processed_layout = self._process_layout(layout=layout)
+
+        # A list to track the previous max width for the elements in a vertical set of blocks in the Grid
+        self._vertical_group_widths = {}
 
         super().__init__(
-            layout=columns_layout,
+            layout=processed_layout,
             background_color=background_color,
             size=size,
             s=s,
@@ -2422,7 +2423,7 @@ class Grid(sg.Column, SuperElement):
 
     def _bind_layout_element_resize_to_layout_update(self):
         # Set up binds to make the layout update when an element in the layout resizes
-        columns = self._get_columns_from_layout()
+        rows = self.Rows
 
         @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
@@ -2432,122 +2433,92 @@ class Grid(sg.Column, SuperElement):
                 print("element window lookup for widget failed")
                 return
 
-            element = lookup.element
-
-            # change_row_autosizing(element=element, auto_size=True)
+            wrapper_element = lookup.element
 
             print(
-                f"update_grid_on_element_resize called for element with key: {element.key}"
+                f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
             )
 
-            ...
-            # widget: tk.Widget = self.widget
-            # widget.event_generate("<Map>")
-
-            # self.widget.event_generate("<Map>")
-
-
-
-        if columns:
-            for col in columns:
-                for row in col.Rows:
-                    # if row:
-                    #     ele: sg.Element = row[0]
-                    #     row_frame: tk.Frame = ele.ParentRowFrame
-                    #     detect_all_widget_events(row_frame)
-
-                    for element in row:
-                        element.widget.bind(
-                            "<Configure>",
-                            update_grid_on_element_resize,
-                            add="+",
-                        )
-                        detect_all_widget_events(element.widget)
-
-
-
-    def _update_internals(self) -> None:
-        self._update_layout()
-
-    def _update_layout(self) -> None:
-        # Horizontally align the rows between the columns
-
-        print("_update_layout() called")
-
-        if self.widget.winfo_ismapped():
-            # Refresh the window for this element so its rows are updated
-            # refresh_idletasks(self.ParentForm)
-            self.ParentForm.refresh()
-
-            columns = self._get_columns_from_layout()
-
-            if columns:
-                # Group the nth rows from each column
-                layouts_for_columns = [col.Rows for col in columns]
-                grouped_nth_rows_from_columns = tuple(zip(*layouts_for_columns))
-
-                # A list to track the max height for each row among the columns
-                max_row_heights: List[int] = []
-
-                # Get the max height for each group of rows
-                for rows_to_align in grouped_nth_rows_from_columns:
-                    max_row_height = 1
-                    # Get the max height of each row and update the max row height if it's greater
-                    for row in rows_to_align:
-                        if row:
-                            element: sg.Element = row[0]
-                            row_frame: tk.Frame = element.ParentRowFrame
-                            _, row_height = get_widget_size(row_frame)
-                            if row_height is not None and row_height > max_row_height:
-                                max_row_height = row_height
-                    # Save the max height for this group of rows
-                    max_row_heights.append(max_row_height)
-
-                # The max row height among the columns
-                equal_block_sizes_height = max(max_row_heights)
-
-                # Horizontally align the rows between the columns
-                for aligned_row_height, rows_to_align in zip(
-                    max_row_heights, grouped_nth_rows_from_columns
-                ):
-                    for row in rows_to_align:
-                        if row:
-                            elmt: sg.Element = row[0]
-                            if self.equal_block_sizes:
-                                new_height = equal_block_sizes_height
-                            else:
-                                new_height = aligned_row_height
-                            set_row_size_of_element(element=elmt, height=new_height)
-
-    def _get_columns_from_layout(self) -> Optional[Tuple[sg.Column, ...]]:
-        """Extract the iterable of Column elements from this element's layout.
-
-        Returns:
-            Optional[Iterable[sg.Column]]: Iterable of Columns or None.
-        """
-        # Ensure layout exists
-        if self.Rows:
-            columns = tuple(self.Rows[0])
-
-            # Ensure each element is a column
-            for col in columns:
-                if not isinstance(col, sg.Column):
+        for row in rows:
+            for wrapper_element in row:
+                if wrapper_element and isinstance(wrapper_element, sg.Column):
+                    element: sg.Element = wrapper_element.Rows[0][0]
+                    element.widget.bind(
+                        "<Configure>",
+                        update_grid_on_element_resize,
+                        add="+",
+                    )
+                    # detect_all_widget_events(element.widget)
+                else:
                     sg.PopupError(
                         "Error in layout",
-                        "Your layout is not an Iterable[Iterable[sg.Column]]",
+                        "The processed layout should contain rows whose original elements are wrapped in Column elements.",
                         "Instead of a sg.Column, the type found was {}".format(
-                            type(col)
+                            type(wrapper_element)
                         ),
                         "The offensive layout = ",
                         self.Rows,
                         keep_on_top=True,
                         image=_random_error_emoji(),
                     )
-                    return None
 
-            return columns
+    def _update_internals(self) -> None:
+        self._update_layout()
 
-        return None
+    def _update_layout(self) -> None:
+        # Vertically align the rows
+
+        print("_update_layout() called")
+
+        if self.widget.winfo_ismapped():
+            # Refresh the window for this element so its rows are updated
+            self.ParentForm.refresh()
+
+            rows = self.Rows
+
+            if rows:
+                vertical_element_groups = tuple(zip_longest(*rows, fillvalue=None))
+                # Get the max width for each vertical group of rows
+                for group_num, vertical_group in enumerate(vertical_element_groups):
+                    max_element_width = 1
+                    for wrapper_element in vertical_group:
+                        # Update the max width of the vertical group of rows if it's not a filler value
+                        if wrapper_element and isinstance(wrapper_element, sg.Column):
+                            element: sg.Element = wrapper_element.Rows[0][0]
+                            element_width = element.get_size()[0]
+                            if (
+                                element_width is not None
+                                and element_width > max_element_width
+                            ):
+                                max_element_width = element_width
+                    # Save the max width for this vertical group of rows
+                    self._vertical_group_widths[group_num] = max_element_width
+
+                # Vertically align the elements
+                for group_num, vertical_group in enumerate(vertical_element_groups):
+                    width_to_match = self._vertical_group_widths[group_num]
+                    for wrapper_element in vertical_group:
+                        # Use the wrapper element's padding to vertically align it if it's not a filler value
+                        if wrapper_element and isinstance(wrapper_element, sg.Column):
+                            element = wrapper_element.Rows[0][0]
+                            element_width = element.get_size()[0]
+
+                            right_padding = width_to_match - element_width
+
+                            widget: tk.Widget = wrapper_element.widget
+                            widget.pack_configure(padx=(0, right_padding))
+
+    def _process_layout(
+        self, layout: Sequence[Sequence[sg.Element]]
+    ) -> List[List[sg.Element]]:
+        # Wrap each element in the layout in a Column whose padding will be used for vertical alignment
+        new_layout = []
+
+        for row in layout:
+            new_row = [sg.Column(layout=[[element]], pad=0) for element in row]
+            new_layout.append(new_row)
+
+        return new_layout
 
 
 def detect_all_widget_events(
