@@ -924,11 +924,9 @@ def start_GUI() -> None:
         elif event == "Set Size":
             toggle ^= True
             element = window[initial_prompt_info_key]
-            base = 100
+            base = 50
             size = base + toggle * base
             element.set_size(size=(size, size))
-            w: tk.Widget = element.widget
-            w.configure
             print(f"set size to {(size, size)}")
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
@@ -2438,6 +2436,7 @@ class Grid(sg.Column, SuperElement):
             print(
                 f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
             )
+            self._update_layout()
 
         for row in rows:
             for wrapper_element in row:
