@@ -2491,16 +2491,21 @@ class Grid(sg.Column, SuperElement):
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element: sg.Element = wrapper_element.Rows[0][0]
                             element_width, element_height = element.get_size()
-                            if (
-                                element_width is not None
-                                and element_width > max_element_width
-                            ):
-                                max_element_width = element_width
-                            if (
-                                element_height is not None
-                                and element_height > uniform_block_height
-                            ):
-                                uniform_block_height = element_height
+
+                            if None not in (element_width, element_height):
+                                if element_width > max_element_width:
+                                    max_element_width = element_width
+                                if element_height > uniform_block_height:
+                                    uniform_block_height = element_height
+                            else:
+                                sg.PopupError(
+                                    "Error when updating the Grid layout",
+                                    "Unable to get the size of an element",
+                                    "The offensive element = ",
+                                    element,
+                                    keep_on_top=True,
+                                    image=_random_error_emoji(),
+                                )
                     # Save the max width for this vertical group of rows
                     vertical_element_group_widths[group_num] = max_element_width
 
@@ -2513,16 +2518,30 @@ class Grid(sg.Column, SuperElement):
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element = wrapper_element.Rows[0][0]
                             element_width, element_height = element.get_size()
+                            if None not in (element_width, element_height):
+                                wrapper_widget: tk.Widget = wrapper_element.widget
 
-                            widget: tk.Widget = wrapper_element.widget
-
-                            if self.equal_block_sizes:
-                                height_padding = uniform_block_height - element_height
-                                right_padding = uniform_block_width - element_width
-                                widget.pack_configure(padx=(0, right_padding), pady=height_padding//2)
+                                if self.equal_block_sizes:
+                                    height_padding = uniform_block_height - element_height
+                                    right_padding = uniform_block_width - element_width
+                                    wrapper_widget.pack_configure(
+                                        padx=(0, right_padding), pady=height_padding // 2
+                                    )
+                                else:
+                                    right_padding = (
+                                        vertical_element_group_widths[group_num]
+                                        - element_width
+                                    )
+                                    wrapper_widget.pack_configure(padx=(0, right_padding))
                             else:
-                                right_padding = vertical_element_group_widths[group_num] - element_width
-                                widget.pack_configure(padx=(0, right_padding))
+                                sg.PopupError(
+                                    "Error when updating the Grid layout",
+                                    "Unable to get the size of an element",
+                                    "The offensive element = ",
+                                    element,
+                                    keep_on_top=True,
+                                    image=_random_error_emoji(),
+                                )
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
