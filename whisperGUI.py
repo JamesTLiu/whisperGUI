@@ -2416,7 +2416,7 @@ class Grid(sg.Column, SuperElement):
 
     def _setup_binds(self) -> None:
         # Update the layout when the widget is made visible. Needed for widgets that are not visible on window creation.
-        self.widget.bind("<Map>", lambda e: self._update_layout(), add="+")
+        # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
         self._bind_layout_element_resize_to_layout_update()
 
     def _bind_layout_element_resize_to_layout_update(self):
