@@ -387,7 +387,7 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout)],
+            [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
             [
                 sg.pin(
                     sg.Table(
@@ -2465,10 +2465,11 @@ class Grid(sg.Column, SuperElement):
     def _update_internals(self) -> None:
         self._update_layout()
 
+    @function_details
     def _update_layout(self) -> None:
         # Vertically align the rows
 
-        print("_update_layout() called")
+        # print("_update_layout() called")
 
         if self.widget.winfo_ismapped():
             # Refresh the window for this element so its rows are updated
@@ -2477,7 +2478,12 @@ class Grid(sg.Column, SuperElement):
             rows = self.Rows
 
             if rows:
+                # Group the elements vertically
                 vertical_element_groups = tuple(zip_longest(*rows, fillvalue=None))
+                vertical_element_group_widths = {}
+
+                uniform_block_height = 1
+
                 # Get the max width for each vertical group of rows
                 for group_num, vertical_group in enumerate(vertical_element_groups):
                     max_element_width = 1
@@ -2485,28 +2491,39 @@ class Grid(sg.Column, SuperElement):
                         # Update the max width of the vertical group of rows if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element: sg.Element = wrapper_element.Rows[0][0]
-                            element_width = element.get_size()[0]
+                            element_width, element_height = element.get_size()
                             if (
                                 element_width is not None
                                 and element_width > max_element_width
                             ):
                                 max_element_width = element_width
+                            if (
+                                element_height is not None
+                                and element_height > uniform_block_height
+                            ):
+                                uniform_block_height = element_height
                     # Save the max width for this vertical group of rows
-                    self._vertical_group_widths[group_num] = max_element_width
+                    vertical_element_group_widths[group_num] = max_element_width
+
+                uniform_block_width = max(vertical_element_group_widths.values())
 
                 # Vertically align the elements
                 for group_num, vertical_group in enumerate(vertical_element_groups):
-                    width_to_match = self._vertical_group_widths[group_num]
                     for wrapper_element in vertical_group:
                         # Use the wrapper element's padding to vertically align it if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element = wrapper_element.Rows[0][0]
-                            element_width = element.get_size()[0]
-
-                            right_padding = width_to_match - element_width
+                            element_width, element_height = element.get_size()
 
                             widget: tk.Widget = wrapper_element.widget
-                            widget.pack_configure(padx=(0, right_padding))
+
+                            if self.equal_block_sizes:
+                                height_padding = uniform_block_height - element_height
+                                right_padding = uniform_block_width - element_width
+                                widget.pack_configure(padx=(0, right_padding), pady=height_padding//2)
+                            else:
+                                right_padding = vertical_element_group_widths[group_num] - element_width
+                                widget.pack_configure(padx=(0, right_padding))
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
