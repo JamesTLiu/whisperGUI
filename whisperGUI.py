@@ -2463,14 +2463,18 @@ class Grid(sg.Column, SuperElement):
 
         @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
+            """Update the Grid's layout when the element of a block resizes. Used as an
+            event handler function for a tkinter widget binding.
+
+            Args:
+                event (tk.Event): The event that triggered this event handler function.
+            """
             widget: tk.Widget = event.widget
             lookup = widget_to_element_with_window(widget)
             if not lookup or not lookup.element or not lookup.window:
-                print("element window lookup for widget failed")
+                print("widget is not tracked by an active window")
                 return
-
             wrapper_element = lookup.element
-
             print(
                 f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
             )
