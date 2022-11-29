@@ -2475,17 +2475,23 @@ class Grid(sg.Column, SuperElement):
                 f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
             )
 
-            # Widget changed size. Update the Grid layout
-            widget_width, widget_height = get_widget_size(widget)
-            if widget_width is not None and widget_height is not None:
-                last_size = self._layout_blocks_widget_sizes[widget]
-                if widget_width != last_size.width or widget_height != last_size.height:
-                    # print(f"\twidget size changed. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}")
-                    last_size.width = widget_width
-                    last_size.height = widget_height
+            # Only handle resizes for mapped widgets
+            if self.widget.winfo_ismapped():
+                # Dict with previous widget sizes for the blocks in the layout is populated
+                if self._layout_blocks_widget_sizes:
+                    # Widget changed size. Update the Grid layout
+                    widget_width, widget_height = get_widget_size(widget)
+                    if widget_width is not None and widget_height is not None:
+                        last_size = self._layout_blocks_widget_sizes[widget]
+                        if widget_width != last_size.width or widget_height != last_size.height:
+                            # print(f"\twidget size changed. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}")
+                            last_size.width = widget_width
+                            last_size.height = widget_height
+                            self._update_layout()
+                # No previous widget sizes for the blocks in the layout since update layout has
+                # never been called while the Grid was visible
+                else:
                     self._update_layout()
-
-            # self._update_layout()
 
         for row in rows:
             for wrapper_element in row:
@@ -2519,6 +2525,7 @@ class Grid(sg.Column, SuperElement):
 
         # print("_update_layout() called")
 
+        # Only update the Grid if it's visible
         if self.widget.winfo_ismapped():
             # Refresh the window for this element so its rows are updated
             self.ParentForm.refresh()
