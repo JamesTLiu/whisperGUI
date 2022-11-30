@@ -1822,8 +1822,8 @@ def update_size_matched_image(
         image_element.update(
             source=convert_to_bytes(
                 file_or_bytes=image_file_or_bytes,
-                resize=(width, height),
-                fill=False,
+                width=width,
+                height=height,
             )
         )
     else:
@@ -1838,17 +1838,27 @@ import io
 import PIL.Image
 
 
-def convert_to_bytes(file_or_bytes, resize=None, fill=False):
-    """
-    Will convert into bytes and optionally resize an image that is a file or a base64 bytes object.
-    Turns into  PNG format in the process so that can be displayed by tkinter
-    :param file_or_bytes: either a string filename or a bytes base64 image object
+def convert_to_bytes(
+    file_or_bytes: Union[str, bytes],
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    fill: bool = False,
+) -> bytes:
+    """Will convert into bytes and optionally resize an image that is a file or a base64 bytes object.
+    Turns into PNG format in the process so that it can be displayed by tkinter.
+    :param file_or_bytes: Either a string filename or a bytes base64 image object.
     :type file_or_bytes:  (Union[str, bytes])
-    :param resize:  optional new size
-    :type resize: (Tuple[int, int] or None)
-    :param fill: If True then the image is filled/padded so that the image is not distorted
+    :param width:  Optional new width. The image's aspect ratio will be maintained while resizing. If
+        width and height are both given, the image will be resized to meet the requested size as much
+        as possible while maintaining the aspect ratio.
+    :type width: (int or None)
+    :param height:  Optional new height. The image's aspect ratio will be maintained while resizing. If
+        width and height are both given, the image will be resized to meet the requested size as much
+        as possible while maintaining the aspect ratio.
+    :type height: (int or None)
+    :param fill: If True, then the image is filled/padded into a square so that the image is not distorted.
     :type fill: (bool)
-    :return: (bytes) a byte-string object
+    :return: (bytes) A byte-string object.
     :rtype: (bytes)
     """
 
@@ -1869,16 +1879,23 @@ def convert_to_bytes(file_or_bytes, resize=None, fill=False):
             img = PIL.Image.open(dataBytesIO)
 
     cur_width, cur_height = img.size
-    if resize:
-        new_width, new_height = resize
-        scale = min(new_height / cur_height, new_width / cur_width)
+
+    if width is not None or height is not None:
+        dimension_changes = ((width, cur_width), (height, cur_height))
+        scale = min(
+            new_length / cur_length
+            for new_length, cur_length in dimension_changes
+            if new_length is not None
+        )
+
         img = img.resize(
             (int(cur_width * scale), int(cur_height * scale)),
             PIL.Image.Resampling.LANCZOS,
         )
-    if fill:
-        if resize is not None:
-            img = make_square(img, resize[0])
+
+        if fill:
+            img = make_square(img, width)
+
     with io.BytesIO() as bio:
         img.save(bio, format="PNG")
         del img
@@ -2487,7 +2504,10 @@ class Grid(sg.Column, SuperElement):
                     widget_width, widget_height = get_widget_size(widget)
                     if widget_width is not None and widget_height is not None:
                         last_size = self._layout_blocks_widget_sizes[widget]
-                        if widget_width != last_size.width or widget_height != last_size.height:
+                        if (
+                            widget_width != last_size.width
+                            or widget_height != last_size.height
+                        ):
                             # print(f"\twidget size changed. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}")
                             last_size.width = widget_width
                             last_size.height = widget_height
