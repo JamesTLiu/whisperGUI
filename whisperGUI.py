@@ -1729,7 +1729,7 @@ def setup_height_matched_images(
     image_element: sg.Image = None,
     size_match_element: sg.Element = None,
     closest_element_type: Type[sg.Element] = sg.Element,
-) -> None:
+) -> Dict[sg.Image, sg.Element]:
     """Assign the same image to all Image elements in the window with a height that matches
     the target element if given or the closest element of the specified type.
 
@@ -1752,11 +1752,14 @@ def setup_height_matched_images(
         closest_element_type (Type[sg.Element]): The type of the closest Element to size match. Defaults to sg.Element.
 
     Raises:
-        InvalidElementSize: The width and/or height of a closest element of the specified type is not greater than 0.
         ClosestElementOfSpecifiedTypeNotFoundInWindow: Unable to find closest element of the specified type in the window.
-    """
 
+    Returns:
+        Dict[sg.Image, sg.Element]: A dict with each handled Image whose value is its size matched element.
+    """
     element_list = window.element_list()
+
+    size_matched_pairs = {}
 
     for index, element in enumerate(element_list):
         # Image element given and found in list.
@@ -1789,6 +1792,7 @@ def setup_height_matched_images(
                     element_to_size_match=element_to_size_match,
                     size_match_mode=SizeMatchMode.HEIGHT,
                 )
+                size_matched_pairs[element] = element_to_size_match
             else:
                 raise ClosestElementOfSpecifiedTypeNotFoundInWindow(
                     f"Unable to find closest {closest_element_type} element to the Image element with the key={element.key} in the main window."
@@ -1796,7 +1800,10 @@ def setup_height_matched_images(
 
             # Stop after updating only the specified Image
             if image_element:
-                return
+                return size_matched_pairs
+
+    return size_matched_pairs
+
 
 SizeMatchMode = Enum("SizeMatchMode", "BOTH WIDTH HEIGHT")
 
@@ -1820,7 +1827,7 @@ def update_size_matched_image(
             as much as possible while maintaining the image's aspect ratio.. Defaults to SizeMatchMode.BOTH.
 
     Raises:
-        InvalidElementSize: The closest element has an unusable size.
+        InvalidElementSize: The width and/or height of the element to size match is None or not greater than 0.
     """
     if image_file_or_bytes is None:
         image_element.update(source=None)
@@ -2894,13 +2901,15 @@ class ImageBase(sg.Image, SuperElement):
         new_source = self._determine_new_source(source)
 
         if window and self.size_match:
-            setup_height_matched_images(
+            size_matched_pairs = setup_height_matched_images(
                 image_file_or_bytes=new_source,
                 window=window,
                 image_element=self,
                 size_match_element=self.size_match_element,
                 closest_element_type=self.size_match_element_type,
             )
+            if self.size_match_element is None:
+                self.size_match_element = size_matched_pairs.get(self, None)
         else:
             self.update(source=new_source)
 
