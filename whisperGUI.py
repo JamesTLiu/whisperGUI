@@ -1717,11 +1717,11 @@ class InvalidElementSize(Exception):
     """The width and/or height of the element is not greater than 0."""
 
 
-class ClosestTextElementInWindowNotFound(Warning):
-    """Unable to find closest Text element in the window."""
+class ClosestElementOfSpecifiedTypeNotFoundInWindow(Warning):
+    """Unable to find closest element of the specified type in the window."""
 
 
-def setup_line_height_images(
+def setup_height_matched_images(
     image_file_or_bytes: Union[str, bytes, None],
     window: sg.Window,
     image_subkey: str = "",
@@ -1730,11 +1730,11 @@ def setup_line_height_images(
     closest_element_type: Type[sg.Element] = sg.Element,
 ) -> None:
     """Assign the same image to all Image elements in the window with a height that matches
-    the target element if given or the closest Text element.
+    the target element if given or the closest element of the specified type.
 
     Usage:
         Put an Image element next to a Text element in a layout. (Optionally) Assign a key that
-        contains a unique string to the Image (Ex. key='-CHECKBOX-10' where '-CHECKBOX-' will be
+        contains a unique string to the Image (Ex. key='-CHECKBOX-10' where image_subkey='-CHECKBOX-' will be
         passed to this f(x) when you intend to only update Image's whose key contains '-CHECKBOX-').
         Call this f(x).
 
@@ -1751,8 +1751,8 @@ def setup_line_height_images(
         closest_element_type (Type[sg.Element]): The type of the closest Element to size match. Defaults to sg.Element.
 
     Raises:
-        InvalidElementSize: The width and/or height of a closest Text element is not greater than 0.
-        ClosestTextElementInWindowNotFound: Unable to find closest Text element for an Image element in this window.
+        InvalidElementSize: The width and/or height of a closest element of the specified type is not greater than 0.
+        ClosestElementOfSpecifiedTypeNotFoundInWindow: Unable to find closest element of the specified type in the window.
     """
 
     element_list = window.element_list()
@@ -1780,7 +1780,7 @@ def setup_line_height_images(
                     element_class=closest_element_type,
                 )
 
-            # Update the Image element with an image whose size matches the closest Text element.
+            # Update the Image element with an image whose size matches the closest element of the specified type.
             if element_to_size_match:
                 update_size_matched_image(
                     image_file_or_bytes=image_file_or_bytes,
@@ -1788,8 +1788,8 @@ def setup_line_height_images(
                     element_to_size_match=element_to_size_match,
                 )
             else:
-                raise ClosestTextElementInWindowNotFound(
-                    f"Unable to find closest Text element to Image element with key={element.key} in the  main window."
+                raise ClosestElementOfSpecifiedTypeNotFoundInWindow(
+                    f"Unable to find closest {closest_element_type} element to the Image element with the key={element.key} in the main window."
                 )
 
             # Stop after updating only the Image with the given key
@@ -2853,7 +2853,7 @@ class ImageBase(sg.Image, SuperElement):
         new_source = self._determine_new_source(source)
 
         if window and self.size_match:
-            setup_line_height_images(
+            setup_height_matched_images(
                 image_file_or_bytes=new_source,
                 window=window,
                 image_element=self,
