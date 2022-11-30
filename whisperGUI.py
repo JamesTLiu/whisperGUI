@@ -1794,7 +1794,7 @@ def setup_height_matched_images(
                     f"Unable to find closest {closest_element_type} element to the Image element with the key={element.key} in the main window."
                 )
 
-            # Stop after updating only the Image with the given key
+            # Stop after updating only the specified Image
             if image_element:
                 return
 
