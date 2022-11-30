@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import decimal
+from enum import Enum
 from functools import partial, partialmethod
 import io
 import multiprocessing
@@ -1786,6 +1787,7 @@ def setup_height_matched_images(
                     image_file_or_bytes=image_file_or_bytes,
                     image_element=element,
                     element_to_size_match=element_to_size_match,
+                    size_match_mode=SizeMatchMode.HEIGHT,
                 )
             else:
                 raise ClosestElementOfSpecifiedTypeNotFoundInWindow(
@@ -1796,19 +1798,26 @@ def setup_height_matched_images(
             if image_element:
                 return
 
+SizeMatchMode = Enum("SizeMatchMode", "BOTH WIDTH HEIGHT")
+
 
 def update_size_matched_image(
     image_file_or_bytes: Union[str, bytes, None],
     image_element: sg.Image,
     element_to_size_match: sg.Element,
+    size_match_mode: SizeMatchMode = SizeMatchMode.BOTH,
 ) -> None:
-    """Update the Image element with an image that size matches a target element.
+    """Update the Image element with an image that size matches a target element as much as possible while
+    maintaining the image's aspect ratio.
 
     Args:
         image_file_or_bytes (Union[str, bytes, None]): Either a string filename for an image file or a bytes
             base64 image object.
         image_element (sg.Image): The Image element whose image is to be updated.
         element_to_size_match (sg.Element): The element that the image needs to size match.
+        size_match_mode (SizeMatchMode, optional): Size match the width, height, or both width and height of
+            the target element. If both width and height are to be size matched, the image will be resized
+            as much as possible while maintaining the image's aspect ratio.. Defaults to SizeMatchMode.BOTH.
 
     Raises:
         InvalidElementSize: The closest element has an unusable size.
@@ -1819,6 +1828,18 @@ def update_size_matched_image(
 
     width, height = element_to_size_match.get_size()
     if width is not None and height is not None and width > 0 and height > 0:
+        if size_match_mode == SizeMatchMode.BOTH:
+            ...
+        elif size_match_mode == SizeMatchMode.WIDTH:
+            height = None
+        elif size_match_mode == SizeMatchMode.HEIGHT:
+            width = None
+        else:
+            raise ValueError(
+                f"Invalid size_match_mode value of {size_match_mode}."
+                f"Valid values: {list(SizeMatchMode)}"
+            )
+
         image_element.update(
             source=convert_to_bytes(
                 file_or_bytes=image_file_or_bytes,
