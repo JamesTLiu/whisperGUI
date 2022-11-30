@@ -1818,7 +1818,7 @@ def update_size_matched_image(
         return
 
     width, height = element_to_size_match.get_size()
-    if width > 0 and height > 0:
+    if width is not None and height is not None and width > 0 and height > 0:
         image_element.update(
             source=convert_to_bytes(
                 file_or_bytes=image_file_or_bytes,
