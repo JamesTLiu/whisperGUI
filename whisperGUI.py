@@ -278,57 +278,29 @@ def start_GUI() -> None:
             ),
             [
                 sg.Text("Prompt Profile"),
-                # sg.Column(
-                #     layout=[
-                #         [
-                #             sg.Text(
-                #                 "Initial Prompt",
-                #                 tooltip=(
-                #                     "Use this when a dialect/style of a language or punctuation is desired.\n"
-                #                     "Does NOT guarantee the result will follow the initial prompt.\n"
-                #                     "Initial prompt will NOT be included in the result.\n"
-                #                     "Try a larger model if the result does not follow the initial prompt.\n\n"
-                #                     "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                #                 ),
-                #                 key=initial_prompt_text_key,
-                #             ),
-                #             InfoImage(
-                #                 tooltip=(
-                #                     "Use this when a dialect/style of a language or punctuation is desired.\n"
-                #                     "Does NOT guarantee the result will follow the initial prompt.\n"
-                #                     "Initial prompt will NOT be included in the result.\n"
-                #                     "Try a larger model if the result does not follow the initial prompt.\n\n"
-                #                     "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                #                 ),
-                #                 key=initial_prompt_info_key,
-                #                 size_match=True,
-                #                 size_match_element_type=sg.Text,
-                #             ),
-                #         ]
-                #     ],
-                # ),
-                sg.Text(
-                    "Initial Prompt",
-                    tooltip=(
-                        "Use this when a dialect/style of a language or punctuation is desired.\n"
-                        "Does NOT guarantee the result will follow the initial prompt.\n"
-                        "Initial prompt will NOT be included in the result.\n"
-                        "Try a larger model if the result does not follow the initial prompt.\n\n"
-                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                *size_matched_image_element(
+                    size_match_element=sg.Text(
+                        "Initial Prompt",
+                        tooltip=(
+                            "Use this when a dialect/style of a language or punctuation is desired.\n"
+                            "Does NOT guarantee the result will follow the initial prompt.\n"
+                            "Initial prompt will NOT be included in the result.\n"
+                            "Try a larger model if the result does not follow the initial prompt.\n\n"
+                            "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                        ),
+                        key=initial_prompt_text_key,
                     ),
-                    key=initial_prompt_text_key,
-                ),
-                InfoImage(
-                    tooltip=(
-                        "Use this when a dialect/style of a language or punctuation is desired.\n"
-                        "Does NOT guarantee the result will follow the initial prompt.\n"
-                        "Initial prompt will NOT be included in the result.\n"
-                        "Try a larger model if the result does not follow the initial prompt.\n\n"
-                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                    image_element=InfoImage(
+                        tooltip=(
+                            "Use this when a dialect/style of a language or punctuation is desired.\n"
+                            "Does NOT guarantee the result will follow the initial prompt.\n"
+                            "Initial prompt will NOT be included in the result.\n"
+                            "Try a larger model if the result does not follow the initial prompt.\n\n"
+                            "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                        ),
+                        key=initial_prompt_info_key,
+                        size_match=True,
                     ),
-                    key=initial_prompt_info_key,
-                    size_match=True,
-                    size_match_element_type=sg.Text,
                 ),
             ],
             [
@@ -357,16 +329,15 @@ def start_GUI() -> None:
                     size_match=True,
                 ),
             ),
-            [
-                sg.Text("Model Information"),
-                FancyToggle(
+            size_matched_image_element(
+                size_match_element=sg.Text("Model Information"),
+                image_element=FancyToggle(
                     start_toggled_on=show_model_info_at_start,
                     key=model_info_toggle_key,
                     size_match=True,
-                    size_match_element_type=sg.Text,
                     enable_events=True,
                 ),
-            ],
+            ),
         ]
 
         # main tab
@@ -388,7 +359,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
+            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            # *tab1_options_layout,
             [
                 sg.pin(
                     sg.Table(
@@ -610,8 +582,8 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                [[Grid(layout=tab2_layout)]],
-                                # tab2_layout,
+                                # [[Grid(layout=tab2_layout)]],
+                                tab2_layout,
                                 key=settings_tab_key,
                             ),
                         ]
