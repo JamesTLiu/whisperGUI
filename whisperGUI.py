@@ -959,12 +959,19 @@ def start_GUI() -> None:
             pad = 30 if pad_toggle else 0
             element_wrapper.widget.pack_configure(pady=pad)
         elif event == "Set Size":
+            # toggle ^= True
+            # element = window[initial_prompt_info_key]
+            # base = 50
+            # size = base + toggle * base
+            # print(f"set size to {(size, size)}")
+            # element.set_size(size=(size, size))
+
             toggle ^= True
-            element = window[initial_prompt_info_key]
-            base = 50
+            element = window[initial_prompt_text_key]
+            base = 1
             size = base + toggle * base
-            element.set_size(size=(size, size))
-            print(f"set size to {(size, size)}")
+            print(f"set size to {(None, size)}")
+            element.set_size(size=(None, size))
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
         # User selected an output directory
@@ -2873,6 +2880,12 @@ class ImageBase(sg.Image, SuperElement):
         self.size_match_element = size_match_element
         self.size_match_element_type = size_match_element_type
 
+        # Track if auto size matching a target element is set up
+        self._auto_size_match_set_up = False
+
+        # Track the size match element's last size
+        self._target_element_last_size: Optional[WidgetSize] = None
+
         super().__init__(
             source=source,
             filename=filename,
@@ -2897,6 +2910,7 @@ class ImageBase(sg.Image, SuperElement):
     def _update_internals(self) -> None:
         self._update_image()
 
+    @function_details
     def _update_image(self, source: Union[str, bytes, None, ellipsis] = ...) -> None:
         """Update the image with the given source. If size matching is on, a size-matched version of
         the source will be used.
@@ -2918,11 +2932,44 @@ class ImageBase(sg.Image, SuperElement):
             )
             if self.size_match_element is None:
                 self.size_match_element = size_matched_pairs.get(self, None)
+
+            if not self._auto_size_match_set_up and self.size_match_element is not None:
+                self._set_up_auto_size_match_element(self.size_match_element)
+                self._auto_size_match_set_up = True
         else:
             self.update(source=new_source)
 
         # widget: tk.Widget = self.widget
         # widget.event_generate("<Configure>")
+
+    def _set_up_auto_size_match_element(self, element: sg.Element):
+        @function_details
+        def update_image_on_element_resize(event: tk.Event):
+            # Only handle resizes if the Image's widget is mapped
+            if self.widget.winfo_ismapped():
+                widget: tk.Widget = event.widget
+                widget_width, widget_height = get_widget_size(widget)
+
+                # Failed to get widget size
+                if widget_width is None or widget_height is None:
+                    return
+
+                last_size = self._target_element_last_size
+
+                # Target element resized so update the image
+                if last_size:
+                    if (
+                        widget_width != last_size.width
+                        or widget_height != last_size.height
+                    ):
+                        last_size.width = widget_width
+                        last_size.height = widget_height
+                        self._update_internals()
+                else:
+                    self._update_internals()
+
+        # Make the Image update size matching whenever its element to size match resizes
+        element.widget.bind("<Configure>", update_image_on_element_resize, add="+")
 
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
