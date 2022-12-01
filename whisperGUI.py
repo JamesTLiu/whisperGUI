@@ -95,6 +95,7 @@ def start_GUI() -> None:
     model_text_key = "-MODEL-TEXT-"
     translate_to_english_text_key = "-TRANSLATE-OPTION-TEXT-"
     translate_to_english_checkbox_key = checkbox_key_prefix + "TRANSLATE-"
+    model_info_text_key = "-MODEL-TABLE-TEXT-"
     model_info_toggle_key = "-TOGGLE-MODEL-TABLE-"
     model_info_table_key = "-MODEL-TABLE-"
     initial_prompt_text_key = "-INITIAL-PROMPT-TEXT-"
@@ -264,43 +265,43 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            element_with_size_matching_image(
-                size_match_element=sg.Text(
+            [
+                sg.Text(
                     text="Translate to English",
                     key=translate_to_english_text_key,
                 ),
-                image_element=FancyCheckbox(
+                FancyCheckbox(
                     start_toggled_on=translate_to_english_last_choice,
                     key=translate_to_english_checkbox_key,
                     enable_events=True,
                     size_match=True,
+                    size_match_target=translate_to_english_text_key,
                 ),
-            ),
+            ],
             [
                 sg.Text("Prompt Profile"),
-                *element_with_size_matching_image(
-                    size_match_element=sg.Text(
-                        "Initial Prompt",
-                        tooltip=(
-                            "Use this when a dialect/style of a language or punctuation is desired.\n"
-                            "Does NOT guarantee the result will follow the initial prompt.\n"
-                            "Initial prompt will NOT be included in the result.\n"
-                            "Try a larger model if the result does not follow the initial prompt.\n\n"
-                            "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                        ),
-                        key=initial_prompt_text_key,
+                sg.Text(
+                    "Initial Prompt",
+                    tooltip=(
+                        "Use this when a dialect/style of a language or punctuation is desired.\n"
+                        "Does NOT guarantee the result will follow the initial prompt.\n"
+                        "Initial prompt will NOT be included in the result.\n"
+                        "Try a larger model if the result does not follow the initial prompt.\n\n"
+                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
                     ),
-                    image_element=InfoImage(
-                        tooltip=(
-                            "Use this when a dialect/style of a language or punctuation is desired.\n"
-                            "Does NOT guarantee the result will follow the initial prompt.\n"
-                            "Initial prompt will NOT be included in the result.\n"
-                            "Try a larger model if the result does not follow the initial prompt.\n\n"
-                            "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                        ),
-                        key=initial_prompt_info_key,
-                        size_match=True,
+                    key=initial_prompt_text_key,
+                ),
+                InfoImage(
+                    tooltip=(
+                        "Use this when a dialect/style of a language or punctuation is desired.\n"
+                        "Does NOT guarantee the result will follow the initial prompt.\n"
+                        "Initial prompt will NOT be included in the result.\n"
+                        "Try a larger model if the result does not follow the initial prompt.\n\n"
+                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
                     ),
+                    key=initial_prompt_info_key,
+                    size_match=True,
+                    size_match_target=initial_prompt_text_key,
                 ),
             ],
             [
@@ -320,24 +321,26 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            element_with_size_matching_image(
-                size_match_element=sg.Button(
+            [
+                sg.Button(
                     "Prompt Manager",
                     key=start_prompt_manager_key,
                 ),
-                image_element=EmptyImage(
+                EmptyImage(
                     size_match=True,
+                    size_match_target=start_prompt_manager_key,
                 ),
-            ),
-            element_with_size_matching_image(
-                size_match_element=sg.Text("Model Information"),
-                image_element=FancyToggle(
+            ],
+            [
+                sg.Text("Model Information", key=model_info_text_key),
+                FancyToggle(
                     start_toggled_on=show_model_info_at_start,
                     key=model_info_toggle_key,
-                    size_match=True,
                     enable_events=True,
+                    size_match=True,
+                    size_match_target=model_info_text_key,
                 ),
-            ),
+            ],
         ]
 
         # main tab
@@ -528,19 +531,19 @@ def start_GUI() -> None:
                     pad=0,
                 ),
             ],
-            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            element_with_size_matching_image(
-                size_match_element=sg.Text(
+            [
+                sg.Text(
                     text="Remember Output Folder",
                     key=save_output_dir_text_key,
                 ),
-                image_element=FancyCheckbox(
+                FancyCheckbox(
                     start_toggled_on=save_output_dir,
                     key=save_output_dir_checkbox_key,
                     enable_events=True,
                     size_match=True,
+                    size_match_target=save_output_dir_text_key,
                 ),
-            ),
+            ],
             # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
             [
                 sg.Text(
@@ -2290,23 +2293,6 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
         if element:
             return ElementWindow(element, window)
     return None
-
-
-def element_with_size_matching_image(
-    size_match_element: sg.Element, image_element: ImageBase
-) -> List[sg.Element]:
-    """Return the element and the image element that's set to size match it.
-
-    Args:
-        size_match_element (sg.Element): The element that the image element will size match.
-        image_element (ImageBase): The image element that will be set to size match the given element.
-
-    Returns:
-        List[sg.Element]: A list with the element and the image element set to size match it.
-    """
-    image_element.size_match = True
-    image_element.size_match_element = size_match_element
-    return [size_match_element, image_element]
 
 
 class Multiline(sg.Multiline):
@@ -4563,6 +4549,24 @@ def write_transcript_to_files(
 # ===================================================#
 # =============== Unused f(x)s below ================#
 # ===================================================#
+
+
+def element_with_size_matching_image(
+    size_match_element: sg.Element, image_element: ImageBase
+) -> List[sg.Element]:
+    """Return the element and the image element that's set to size match it.
+
+    Args:
+        size_match_element (sg.Element): The element that the image element will size match.
+        image_element (ImageBase): The image element that will be set to size match the given element.
+
+    Returns:
+        List[sg.Element]: A list with the element and the image element set to size match it.
+    """
+    image_element.size_match = True
+    image_element.size_match_element = size_match_element
+    return [size_match_element, image_element]
+
 
 # import os
 
