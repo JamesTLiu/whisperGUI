@@ -264,7 +264,7 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            size_matched_image_element(
+            element_with_size_matching_image(
                 size_match_element=sg.Text(
                     text="Translate to English",
                     key=translate_to_english_text_key,
@@ -278,7 +278,7 @@ def start_GUI() -> None:
             ),
             [
                 sg.Text("Prompt Profile"),
-                *size_matched_image_element(
+                *element_with_size_matching_image(
                     size_match_element=sg.Text(
                         "Initial Prompt",
                         tooltip=(
@@ -320,7 +320,7 @@ def start_GUI() -> None:
                     enable_events=True,
                 ),
             ],
-            size_matched_image_element(
+            element_with_size_matching_image(
                 size_match_element=sg.Button(
                     "Prompt Manager",
                     key=start_prompt_manager_key,
@@ -329,7 +329,7 @@ def start_GUI() -> None:
                     size_match=True,
                 ),
             ),
-            size_matched_image_element(
+            element_with_size_matching_image(
                 size_match_element=sg.Text("Model Information"),
                 image_element=FancyToggle(
                     start_toggled_on=show_model_info_at_start,
@@ -529,7 +529,7 @@ def start_GUI() -> None:
                 ),
             ],
             # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            size_matched_image_element(
+            element_with_size_matching_image(
                 size_match_element=sg.Text(
                     text="Remember Output Folder",
                     key=save_output_dir_text_key,
@@ -2292,7 +2292,7 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
     return None
 
 
-def size_matched_image_element(
+def element_with_size_matching_image(
     size_match_element: sg.Element, image_element: ImageBase
 ) -> List[sg.Element]:
     """Return the element and the image element that's set to size match it.
