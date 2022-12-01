@@ -2956,8 +2956,23 @@ class ImageBase(sg.Image, SuperElement):
 
                 last_size = self._target_element_last_size
 
+                # lookup = widget_to_element_with_window(widget)
+                # if not lookup or not lookup.element or not lookup.window:
+                #     print("\tevent widget is not tracked by an active window")
+                # else:
+                #     wrapper_element = lookup.element
+                #     print(
+                #         f"\tevent element key: {wrapper_element.key}"
+                #     )
+
                 # Target element resized so update the image
                 if last_size:
+                    # print(
+                    #     f"\tlast size: {last_size.width, last_size.height}. "
+                    #     f"current size: {widget.winfo_width(), widget.winfo_height()}. "
+                    #     f"event size: {event.width, event.height}."
+                    # )
+
                     if (
                         widget_width != last_size.width
                         or widget_height != last_size.height
@@ -2966,6 +2981,11 @@ class ImageBase(sg.Image, SuperElement):
                         last_size.height = widget_height
                         self._update_internals()
                 else:
+                    # print(f"\tInit last size to {widget_width, widget_height}")
+
+                    self._target_element_last_size = WidgetSize(
+                        width=widget_width, height=widget_height
+                    )
                     self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
