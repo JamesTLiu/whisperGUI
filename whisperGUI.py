@@ -2506,7 +2506,7 @@ class Grid(sg.Column, SuperElement):
         # Set up binds to make the layout update when an element in the layout resizes
         rows = self.Rows
 
-        @function_details
+        # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
             """Update the Grid's layout when the element of a block resizes. Used as an
             event handler function for a tkinter widget binding.
@@ -2514,36 +2514,44 @@ class Grid(sg.Column, SuperElement):
             Args:
                 event (tk.Event): The event that triggered this event handler function.
             """
-            widget: tk.Widget = event.widget
-            lookup = widget_to_element_with_window(widget)
-            if not lookup or not lookup.element or not lookup.window:
-                print("widget is not tracked by an active window")
-                return
-            wrapper_element = lookup.element
-            print(
-                f"update_grid_on_element_resize called for element with key: {wrapper_element.key}"
-            )
+            # widget: tk.Widget = event.widget
+            # lookup = widget_to_element_with_window(widget)
+            # if not lookup or not lookup.element or not lookup.window:
+            #     print("\twidget is not tracked by an active window")
+            #     return
+            # wrapper_element = lookup.element
+            # print(
+            #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
+            # )
 
-            # Only handle resizes for mapped widgets
+            # Only handle resizes if the Grid is mapped
             if self.widget.winfo_ismapped():
-                # Dict with previous widget sizes for the blocks in the layout is populated
-                if self._layout_blocks_widget_sizes:
-                    # Widget changed size. Update the Grid layout
-                    widget_width, widget_height = get_widget_size(widget)
-                    if widget_width is not None and widget_height is not None:
-                        last_size = self._layout_blocks_widget_sizes[widget]
-                        if (
-                            widget_width != last_size.width
-                            or widget_height != last_size.height
-                        ):
-                            # print(f"\twidget size changed. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}")
-                            last_size.width = widget_width
-                            last_size.height = widget_height
-                            self._update_layout()
+                widget: tk.Widget = event.widget
+                widget_width, widget_height = get_widget_size(widget)
+
+                # Failed to get widget size
+                if widget_width is None or widget_height is None:
+                    return
+
+                last_size = self._layout_blocks_widget_sizes.get(widget, None)
+
+                # A block's element resized so update the Grid
+                if last_size:
+                    if (
+                        widget_width != last_size.width
+                        or widget_height != last_size.height
+                    ):
+                        # print(
+                        #     f"\twidget size: CHANGED. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}"
+                        # )
+
+                        last_size.width = widget_width
+                        last_size.height = widget_height
+                        self._update_internals()
                 # No previous widget sizes for the blocks in the layout since update layout has
                 # never been called while the Grid was visible
                 else:
-                    self._update_layout()
+                    self._update_internals()
 
         for row in rows:
             for wrapper_element in row:
@@ -2571,7 +2579,7 @@ class Grid(sg.Column, SuperElement):
     def _update_internals(self) -> None:
         self._update_layout()
 
-    @function_details
+    # @function_details
     def _update_layout(self) -> None:
         # Vertically align the rows
 
