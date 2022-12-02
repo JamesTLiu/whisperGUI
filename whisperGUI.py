@@ -2853,7 +2853,6 @@ class ImageBase(sg.Image, SuperElement):
         # Track if auto size matching a target element is set up
         self._auto_size_match_set_up = False
 
-
         super().__init__(
             source=source,
             filename=filename,
@@ -2937,7 +2936,7 @@ class ImageBase(sg.Image, SuperElement):
                 if widget_width is None or widget_height is None:
                     return
 
-                last_size: Optional[WidgetSize] = getattr(widget, "_last_size", None)
+                last_size: Optional[WidgetSize] = get_widget_last_size(widget)
 
                 # lookup = widget_to_element_with_window(widget)
                 # if not lookup or not lookup.element or not lookup.window:
@@ -2966,12 +2965,6 @@ class ImageBase(sg.Image, SuperElement):
                 else:
                     # print(f"\tInit last size to {widget_width, widget_height}")
 
-                    setattr(
-                        widget,
-                        "_last_size",
-                        WidgetSize(width=widget_width, height=widget_height),
-                    )
-
                     self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
@@ -2989,6 +2982,26 @@ class ImageBase(sg.Image, SuperElement):
             Union[str, bytes, None]:  The new source.
         """
         return source if source is not ... else self.Source
+
+
+def get_widget_last_size(widget: tk.Widget):
+    last_size_attr = "_last_size"
+    last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
+
+    # No last size attribute yet. Add the last size attribute to the widget with the current size.
+    if last_size is None:
+        widget_width, widget_height = get_widget_size(widget)
+        if widget_width is not None and widget_height is not None:
+            last_size = WidgetSize(width=widget_width, height=widget_height)
+            setattr(
+                widget,
+                last_size_attr,
+                last_size,
+            )
+        else:
+            print("Failed to get the widget's size while adding last size attr to widget.")
+
+    return last_size
 
 
 class Image(ImageBase):
