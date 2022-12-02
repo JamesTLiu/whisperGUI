@@ -2853,8 +2853,6 @@ class ImageBase(sg.Image, SuperElement):
         # Track if auto size matching a target element is set up
         self._auto_size_match_set_up = False
 
-        # Track the size match element's last size
-        self._target_element_last_size: Optional[WidgetSize] = None
 
         super().__init__(
             source=source,
@@ -2939,7 +2937,7 @@ class ImageBase(sg.Image, SuperElement):
                 if widget_width is None or widget_height is None:
                     return
 
-                last_size = self._target_element_last_size
+                last_size: Optional[WidgetSize] = getattr(widget, "_last_size", None)
 
                 # lookup = widget_to_element_with_window(widget)
                 # if not lookup or not lookup.element or not lookup.window:
@@ -2968,9 +2966,12 @@ class ImageBase(sg.Image, SuperElement):
                 else:
                     # print(f"\tInit last size to {widget_width, widget_height}")
 
-                    self._target_element_last_size = WidgetSize(
-                        width=widget_width, height=widget_height
+                    setattr(
+                        widget,
+                        "_last_size",
+                        WidgetSize(width=widget_width, height=widget_height),
                     )
+
                     self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
