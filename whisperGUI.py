@@ -2429,8 +2429,6 @@ class Grid(sg.Column, SuperElement):
         # A list to track the previous max width for the elements in a vertical set of blocks in the Grid
         self._vertical_group_widths = {}
 
-        self._layout_blocks_widget_sizes: Dict[tk.Widget, WidgetSize] = {}
-
         super().__init__(
             layout=processed_layout,
             background_color=background_color,
@@ -2498,7 +2496,7 @@ class Grid(sg.Column, SuperElement):
                 if widget_width is None or widget_height is None:
                     return
 
-                last_size = self._layout_blocks_widget_sizes.get(widget, None)
+                last_size = get_widget_last_size(widget)
 
                 # A block's element resized so update the Grid
                 if last_size:
@@ -2588,9 +2586,6 @@ class Grid(sg.Column, SuperElement):
                                     image=_random_error_emoji(),
                                 )
 
-                            self._layout_blocks_widget_sizes[
-                                element.widget
-                            ] = WidgetSize(width=element_width, height=element_height)
                     # Save the max width for this vertical group of rows
                     vertical_element_group_widths[group_num] = max_element_width
 
