@@ -326,10 +326,6 @@ def start_GUI() -> None:
                     "Prompt Manager",
                     key=start_prompt_manager_key,
                 ),
-                EmptyImage(
-                    size_match=True,
-                    size_match_target=start_prompt_manager_key,
-                ),
             ],
             [
                 sg.Text("Model Information", key=model_info_text_key),
@@ -944,7 +940,7 @@ def start_GUI() -> None:
             toggle ^= True
             element = window[initial_prompt_text_key]
             base = 1
-            size = base + toggle * base
+            size = base + toggle * 2
             print(f"set size to {(None, size)}")
             element.set_size(size=(None, size))
         elif event == PRINT_ME:
@@ -2490,31 +2486,13 @@ class Grid(sg.Column, SuperElement):
             # Only handle resizes if the Grid is mapped
             if self.widget.winfo_ismapped():
                 widget: tk.Widget = event.widget
-                widget_width, widget_height = get_widget_size(widget)
-
-                # Failed to get widget size
-                if widget_width is None or widget_height is None:
-                    return
-
-                last_size = get_widget_last_size(widget)
 
                 # A block's element resized so update the Grid
-                if last_size:
-                    if (
-                        widget_width != last_size.width
-                        or widget_height != last_size.height
-                    ):
-                        # print(
-                        #     f"\twidget size: CHANGED. last size: {last_size}. current size: {widget_width, widget_height}. event size: {event.width, event.height}"
-                        # )
-
-                        last_size.width = widget_width
-                        last_size.height = widget_height
-                        self._update_internals()
+                if widget_resized(widget):
+                    self._update_internals()
                 # No previous widget sizes for the blocks in the layout since update layout has
                 # never been called while the Grid was visible
-                else:
-                    self._update_internals()
+
 
         for row in rows:
             for wrapper_element in row:
@@ -2722,7 +2700,7 @@ def set_row_size_of_element(
 
 def get_widget_size(widget: tk.Widget) -> Union[Tuple[int, int], Tuple[None, None]]:
     """
-    Return the size of a widget in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this get_size method.
+    Return the size of a widget in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this method.
     :return: width and height of the element
     :rtype:  (int, int)
     """
@@ -2925,41 +2903,28 @@ class ImageBase(sg.Image, SuperElement):
             # Only handle resizes if the Image's widget is mapped
             if self.widget.winfo_ismapped():
                 widget: tk.Widget = event.widget
-                widget_width, widget_height = get_widget_size(widget)
+                # widget_width, widget_height = get_widget_size(widget)
 
-                # Failed to get widget size
-                if widget_width is None or widget_height is None:
-                    return
+                # # Failed to get widget size
+                # if widget_width is None or widget_height is None:
+                #     return
 
-                last_size: Optional[WidgetSize] = get_widget_last_size(widget)
-
-                # lookup = widget_to_element_with_window(widget)
-                # if not lookup or not lookup.element or not lookup.window:
-                #     print("\tevent widget is not tracked by an active window")
-                # else:
-                #     wrapper_element = lookup.element
-                #     print(
-                #         f"\tevent element key: {wrapper_element.key}"
-                #     )
+                lookup = widget_to_element_with_window(widget)
+                if not lookup or not lookup.element or not lookup.window:
+                    print("\tevent widget is not tracked by an active window")
+                else:
+                    wrapper_element = lookup.element
+                    print(
+                        f"\tevent element key: {wrapper_element.key}"
+                    )
 
                 # Target element resized so update the image
-                if last_size:
+                if widget_resized(widget):
                     # print(
                     #     f"\tlast size: {last_size.width, last_size.height}. "
                     #     f"current size: {widget.winfo_width(), widget.winfo_height()}. "
                     #     f"event size: {event.width, event.height}."
                     # )
-
-                    if (
-                        widget_width != last_size.width
-                        or widget_height != last_size.height
-                    ):
-                        last_size.width = widget_width
-                        last_size.height = widget_height
-                        self._update_internals()
-                else:
-                    # print(f"\tInit last size to {widget_width, widget_height}")
-
                     self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
@@ -2979,7 +2944,15 @@ class ImageBase(sg.Image, SuperElement):
         return source if source is not ... else self.Source
 
 
-def get_widget_last_size(widget: tk.Widget):
+def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
+    """Return the last size of the widget.
+
+    Args:
+        widget (tk.Widget): The widget.
+
+    Returns:
+        Optional[WidgetSize]: The size of the widget.
+    """
     last_size_attr = "_last_size"
     last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
 
@@ -2993,10 +2966,46 @@ def get_widget_last_size(widget: tk.Widget):
                 last_size_attr,
                 last_size,
             )
-        else:
-            print("Failed to get the widget's size while adding last size attr to widget.")
+            print("last size attr added to widget")
 
     return last_size
+
+
+def widget_resized(widget: tk.Widget) -> bool:
+    """Return whether the widget has resized by comparing the last size and the current
+    size returned by the tkinter windows manager.
+
+    Args:
+        widget (tk.Widget): The widget to check for resizing.
+
+    Returns:
+        bool: True if widget has resized.
+    """
+    lookup = widget_to_element_with_window(widget)
+    if not lookup or not lookup.element or not lookup.window:
+        print("\tchecking if widget resized. widget is not tracked by an active window")
+    else:
+        wrapper_element = lookup.element
+        print(
+            f"\tchecking if widget resized for element w/ key: {wrapper_element.key}"
+        )
+
+
+    last_size = get_widget_last_size(widget)
+    widget_width, widget_height = get_widget_size(widget)
+
+    # Failed to get widget's last or current size
+    if last_size is None or widget_width is None or widget_height is None:
+        return False
+
+    # Widget resized. Update the last size.
+    if widget_width != last_size.width or widget_height != last_size.height:
+        last_size.width = widget_width
+        last_size.height = widget_height
+        return True
+    # Widget has not resized
+    else:
+        return False
 
 
 class Image(ImageBase):
