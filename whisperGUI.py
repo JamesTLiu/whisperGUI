@@ -173,6 +173,22 @@ def start_GUI() -> None:
     icon_data = b"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"
     sg.set_global_icon(icon_data)
 
+    _ = Window("", layout=[[sg.Text()]], finalize=True, alpha_channel=0)
+
+    # Setup up the <<Resize>> event for all widgets
+    # Window.hidden_master_root.event_add("<<Resize>>", "None")
+    # Window.hidden_master_root.bind_all("<Configure>", forward_resize_event, add="+")
+    _.TKroot.event_add("<<Resize>>", "None")
+    _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
+
+    # @function_details
+    # def resize_handler(e):
+    #     ...
+
+    # _.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
+
+    _.close()
+
     # number of rows for the table
     num_table_rows = 5
 
@@ -359,8 +375,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
-            # *tab1_options_layout,
+            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            *tab1_options_layout,
             [
                 sg.pin(
                     sg.Table(
@@ -1528,6 +1544,25 @@ class Window(sg.Window):
         self.refresh()
 
 
+# @function_details
+def forward_resize_event(event: tk.Event) -> None:
+    widget: tk.Widget = event.widget
+
+    try:
+        has_widget_resized = widget_resized(widget)
+    except GetWidgetSizeError:
+        print(
+            f"Warning: Error while determining if the event's widget resized."
+            f"Ignoring event. widget: {widget}"
+        )
+        return
+
+    if has_widget_resized:
+        widget.event_generate(
+            "<<Resize>>",
+        )
+
+
 def refresh_idletasks(window: sg.Window) -> sg.Window:
     """Refreshes the window by calling tkroot.update_idletasks().
     Call this when you want all tkinter idle callbacks to be processed. This
@@ -2684,12 +2719,10 @@ def set_row_size_of_element(
     """
     row_frame: tk.Frame = element.ParentRowFrame
 
-    current_width, current_height = get_widget_size(row_frame)
-    if current_width is None:
-        current_width = 1
-
-    if current_height is None:
-        current_height = 1
+    try:
+        current_width, current_height = get_widget_size(row_frame)
+    except GetWidgetSizeError:
+        current_width = current_height = 1
 
     new_width = width if width is not None else current_width
     new_height = height if height is not None else current_height
@@ -2699,19 +2732,24 @@ def set_row_size_of_element(
     row_frame.pack_propagate(flag=False)
 
 
-def get_widget_size(widget: tk.Widget) -> Union[Tuple[int, int], Tuple[None, None]]:
-    """
-    Return the size of a widget in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this method.
-    :return: width and height of the element
-    :rtype:  (int, int)
-    """
+def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
+    """Return the size of a widget in Pixels.  Care must be taken as some elements use
+    characters to specify their size but will return pixels when calling this method.
 
+    Args:
+        widget (tk.Widget): A widget.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
+    Returns:
+        Tuple[int, int]: Width and height of the widget as reported by the tkinter windows manager.
+    """
     try:
         w = widget.winfo_width()
         h = widget.winfo_height()
-    except Exception:
-        print(f"Warning, error getting size of widget: {widget}")
-        return None, None
+    except Exception as e:
+        raise GetWidgetSizeError(f"Error getting size of widget: {widget}") from e
     return w, h
 
 
@@ -2945,31 +2983,8 @@ class ImageBase(sg.Image, SuperElement):
         return source if source is not ... else self.Source
 
 
-def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
-    """Return the last size of the widget.
-
-    Args:
-        widget (tk.Widget): The widget.
-
-    Returns:
-        Optional[WidgetSize]: The size of the widget.
-    """
-    last_size_attr = "_last_size"
-    last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
-
-    # No last size attribute yet. Add the last size attribute to the widget with the current size.
-    if last_size is None:
-        widget_width, widget_height = get_widget_size(widget)
-        if widget_width is not None and widget_height is not None:
-            last_size = WidgetSize(width=widget_width, height=widget_height)
-            setattr(
-                widget,
-                last_size_attr,
-                last_size,
-            )
-            print("last size attr added to widget")
-
-    return last_size
+class GetWidgetSizeError(Exception):
+    """Error while getting the size of the widget."""
 
 
 def widget_resized(widget: tk.Widget) -> bool:
@@ -2979,34 +2994,68 @@ def widget_resized(widget: tk.Widget) -> bool:
     Args:
         widget (tk.Widget): The widget to check for resizing.
 
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
     Returns:
         bool: True if widget has resized.
-    """
-    lookup = widget_to_element_with_window(widget)
-    if not lookup or not lookup.element or not lookup.window:
-        print("\tchecking if widget resized. widget is not tracked by an active window")
-    else:
-        wrapper_element = lookup.element
-        print(
-            f"\tchecking if widget resized for element w/ key: {wrapper_element.key}"
-        )
-
+    # """
+    # lookup = widget_to_element_with_window(widget)
+    # if not lookup or not lookup.element or not lookup.window:
+    #     print("\tchecking if widget resized. widget is not tracked by an active window")
+    # else:
+    #     wrapper_element = lookup.element
+    #     print(f"\tchecking if widget resized for element w/ key: {wrapper_element.key}")
 
     last_size = get_widget_last_size(widget)
+
     widget_width, widget_height = get_widget_size(widget)
 
-    # Failed to get widget's last or current size
-    if last_size is None or widget_width is None or widget_height is None:
-        return False
-
+    # No last size for widget
+    if last_size is None:
+        return True
     # Widget resized. Update the last size.
-    if widget_width != last_size.width or widget_height != last_size.height:
+    elif widget_width != last_size.width or widget_height != last_size.height:
         last_size.width = widget_width
         last_size.height = widget_height
         return True
     # Widget has not resized
     else:
         return False
+
+
+def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
+    """Return the last size of the widget.
+
+    If there's no last size for the widget, one will be created using the current size for future calls
+    and None will be returned.
+
+    Args:
+        widget (tk.Widget): The widget.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
+    Returns:
+        Optional[WidgetSize]: The last size of the widget.
+    """
+    last_size_attr = "_last_size"
+    last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
+
+    # No last size attribute yet. Add the last size attribute to the widget with the current size.
+    if last_size is None:
+        widget_width, widget_height = get_widget_size(widget)
+
+        # last_size = WidgetSize(width=widget_width, height=widget_height)
+        last_size_val = WidgetSize(width=widget_width, height=widget_height)
+        setattr(
+            widget,
+            last_size_attr,
+            last_size_val,
+        )
+        # print("last size attr added to widget")
+
+    return last_size
 
 
 class Image(ImageBase):
