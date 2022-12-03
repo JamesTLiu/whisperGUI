@@ -1451,7 +1451,7 @@ class Window(sg.Window):
         sbar_frame_color=None,
         sbar_relief=None,
         metadata=None,
-    ):
+    ) -> None:
         super().__init__(
             title=title,
             layout=layout,
@@ -1517,7 +1517,7 @@ class Window(sg.Window):
 
         self._setup()
 
-    def _setup(self):
+    def _setup(self) -> None:
         self.refresh()
 
         # Run the setup for each element if it exists
