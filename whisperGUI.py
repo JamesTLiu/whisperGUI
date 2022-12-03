@@ -2948,11 +2948,11 @@ class ImageBase(sg.Image, SuperElement):
         # widget: tk.Widget = self.widget
         # widget.event_generate("<Configure>")
 
-    def _set_up_auto_size_match_element(self, element: sg.Element):
+    def _set_up_auto_size_match_element(self, element: sg.Element) -> None:
         # Set up a binding so that this element updates when the size match element resizes
 
         # @function_details
-        def update_image_on_element_resize(event: tk.Event):
+        def update_image_on_element_resize(event: tk.Event) -> None:
             # Only handle resizes if the Image's widget is mapped
             if self.widget.winfo_ismapped():
                 widget: tk.Widget = event.widget
