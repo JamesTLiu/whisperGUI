@@ -2531,8 +2531,7 @@ class Grid(sg.Column, SuperElement):
 
             # Only handle resizes if the Grid is mapped
             if self.widget.winfo_ismapped():
-                widget: tk.Widget = event.widget
-
+                # widget: tk.Widget = event.widget
                 # lookup = widget_to_element_with_window(widget)
                 # if not lookup or not lookup.element or not lookup.window:
                 #     print("\tevent widget is not tracked by an active window")
