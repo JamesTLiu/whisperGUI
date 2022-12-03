@@ -2955,29 +2955,31 @@ class ImageBase(sg.Image, SuperElement):
         def update_image_on_element_resize(event: tk.Event) -> None:
             # Only handle resizes if the Image's widget is mapped
             if self.widget.winfo_ismapped():
-                widget: tk.Widget = event.widget
-                # widget_width, widget_height = get_widget_size(widget)
+                # widget: tk.Widget = event.widget
 
-                # # Failed to get widget size
-                # if widget_width is None or widget_height is None:
-                #     return
-
-                lookup = widget_to_element_with_window(widget)
-                if not lookup or not lookup.element or not lookup.window:
-                    print("\tevent widget is not tracked by an active window")
-                else:
-                    wrapper_element = lookup.element
-                    print(f"\tevent element key: {wrapper_element.key}")
+                # lookup = widget_to_element_with_window(widget)
+                # if not lookup or not lookup.element or not lookup.window:
+                #     print("\tevent widget is not tracked by an active window")
+                # else:
+                #     wrapper_element = lookup.element
+                #     print(f"\tevent element key: {wrapper_element.key}")
 
                 # # Target element resized so update the image
                 # last_size = get_widget_last_size(widget)
                 # last_size_output = ""
                 # if last_size:
                 #     last_size_output = f"last size: {last_size.width, last_size.height}. "
+                # try:
+                #     widget_width, widget_height = get_widget_size(widget)
+                # except GetWidgetSizeError:
+                #     current_size_output = ""
+                # else:
+                #     current_size_output = f"current size: {widget_width, widget_height}. "
 
                 # print(
-                #     f"\tcurrent size: {widget.winfo_width(), widget.winfo_height()}. "
-                #     f"event size: {event.width, event.height}.",
+                #     f"\t" +
+                #     current_size_output +
+                #     f"event size: {event.width, event.height}." +
                 #     last_size_output
                 # )
 
