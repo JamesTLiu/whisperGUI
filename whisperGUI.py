@@ -375,8 +375,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
-            *tab1_options_layout,
+            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            # *tab1_options_layout,
             [
                 sg.pin(
                     sg.Table(
@@ -598,7 +598,7 @@ def start_GUI() -> None:
                             ),
                             sg.Tab(
                                 "Settings",
-                                # [[Grid(layout=tab2_layout)]],
+                                # [[Grid(layout=tab2_layout, equal_block_sizes=False)]],
                                 tab2_layout,
                                 key=settings_tab_key,
                             ),
@@ -1558,6 +1558,16 @@ def forward_resize_event(event: tk.Event) -> None:
         return
 
     if has_widget_resized:
+        # lookup = widget_to_element_with_window(widget)
+        # if not lookup or not lookup.element or not lookup.window:
+        #     # print(f"forwarding resize event.")
+        #     # print("\tevent widget is not tracked by an active window")
+        #     ...
+        # else:
+        #     wrapper_element = lookup.element
+        #     print(f"forwarding resize event.")
+        #     print(f"\tevent element key: {wrapper_element.key}. size: {event.width, event.height}.")
+
         widget.event_generate(
             "<<Resize>>",
         )
@@ -2528,7 +2538,7 @@ class Grid(sg.Column, SuperElement):
                 #     print("\tevent widget is not tracked by an active window")
                 # else:
                 #     wrapper_element = lookup.element
-                #     print(f"\tevent element key: {wrapper_element.key}")
+                #     print(f"\tevent element key: {wrapper_element.key}.")
 
                 self._update_internals()
 
@@ -2891,7 +2901,7 @@ class ImageBase(sg.Image, SuperElement):
     def _update_internals(self) -> None:
         self._update_image()
 
-    @function_details
+    # @function_details
     def _update_image(self, source: Union[str, bytes, None, ellipsis] = ...) -> None:
         """Update the image with the given source. If size matching is on, a size-matched version of
         the source will be used.
@@ -2939,7 +2949,7 @@ class ImageBase(sg.Image, SuperElement):
         # widget.event_generate("<Configure>")
 
     def _set_up_auto_size_match_element(self, element: sg.Element):
-        @function_details
+        # @function_details
         def update_image_on_element_resize(event: tk.Event):
             # Only handle resizes if the Image's widget is mapped
             if self.widget.winfo_ismapped():
@@ -2957,15 +2967,17 @@ class ImageBase(sg.Image, SuperElement):
                     wrapper_element = lookup.element
                     print(f"\tevent element key: {wrapper_element.key}")
 
-
                 # # Target element resized so update the image
-                # if widget_resized(widget):
-                #     # print(
-                #     #     f"\tlast size: {last_size.width, last_size.height}. "
-                #     #     f"current size: {widget.winfo_width(), widget.winfo_height()}. "
-                #     #     f"event size: {event.width, event.height}."
-                #     # )
-                #     self._update_internals()
+                # last_size = get_widget_last_size(widget)
+                # last_size_output = ""
+                # if last_size:
+                #     last_size_output = f"last size: {last_size.width, last_size.height}. "
+
+                # print(
+                #     f"\tcurrent size: {widget.winfo_width(), widget.winfo_height()}. "
+                #     f"event size: {event.width, event.height}.",
+                #     last_size_output
+                # )
 
                 self._update_internals()
 
@@ -3002,7 +3014,7 @@ def widget_resized(widget: tk.Widget) -> bool:
 
     Returns:
         bool: True if widget has resized.
-    # """
+    """
     # lookup = widget_to_element_with_window(widget)
     # if not lookup or not lookup.element or not lookup.window:
     #     print("\tchecking if widget resized. widget is not tracked by an active window")
