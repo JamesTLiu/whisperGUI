@@ -2523,19 +2523,21 @@ class Grid(sg.Column, SuperElement):
             if self.widget.winfo_ismapped():
                 widget: tk.Widget = event.widget
 
-                # A block's element resized so update the Grid
-                if widget_resized(widget):
-                    self._update_internals()
-                # No previous widget sizes for the blocks in the layout since update layout has
-                # never been called while the Grid was visible
+                # lookup = widget_to_element_with_window(widget)
+                # if not lookup or not lookup.element or not lookup.window:
+                #     print("\tevent widget is not tracked by an active window")
+                # else:
+                #     wrapper_element = lookup.element
+                #     print(f"\tevent element key: {wrapper_element.key}")
 
+                self._update_internals()
 
         for row in rows:
             for wrapper_element in row:
                 if wrapper_element and isinstance(wrapper_element, sg.Column):
                     element: sg.Element = wrapper_element.Rows[0][0]
                     element.widget.bind(
-                        "<Configure>",
+                        "<<Resize>>",
                         update_grid_on_element_resize,
                         add="+",
                     )
@@ -2953,21 +2955,22 @@ class ImageBase(sg.Image, SuperElement):
                     print("\tevent widget is not tracked by an active window")
                 else:
                     wrapper_element = lookup.element
-                    print(
-                        f"\tevent element key: {wrapper_element.key}"
-                    )
+                    print(f"\tevent element key: {wrapper_element.key}")
 
-                # Target element resized so update the image
-                if widget_resized(widget):
-                    # print(
-                    #     f"\tlast size: {last_size.width, last_size.height}. "
-                    #     f"current size: {widget.winfo_width(), widget.winfo_height()}. "
-                    #     f"event size: {event.width, event.height}."
-                    # )
-                    self._update_internals()
+
+                # # Target element resized so update the image
+                # if widget_resized(widget):
+                #     # print(
+                #     #     f"\tlast size: {last_size.width, last_size.height}. "
+                #     #     f"current size: {widget.winfo_width(), widget.winfo_height()}. "
+                #     #     f"event size: {event.width, event.height}."
+                #     # )
+                #     self._update_internals()
+
+                self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
-        element.widget.bind("<Configure>", update_image_on_element_resize, add="+")
+        element.widget.bind("<<Resize>>", update_image_on_element_resize, add="+")
 
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
