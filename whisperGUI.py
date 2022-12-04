@@ -2595,7 +2595,7 @@ class Grid(sg.Column, SuperElement):
                             element: sg.Element = wrapper_element.Rows[0][0]
                             element_width, element_height = element.get_size()
 
-                            if None not in (element_width, element_height):
+                            if element_width is not None and element_height is not None:
                                 if element_width > max_element_width:
                                     max_element_width = element_width
                                 if element_height > self.uniform_block_height:
