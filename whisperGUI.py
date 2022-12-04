@@ -2584,7 +2584,7 @@ class Grid(sg.Column, SuperElement):
                 vertical_element_groups = tuple(zip_longest(*rows, fillvalue=None))
                 vertical_element_group_widths = {}
 
-                uniform_block_height = 1
+                self.uniform_block_height = 1
 
                 # Get the max width for each vertical group of rows
                 for group_num, vertical_group in enumerate(vertical_element_groups):
@@ -2598,8 +2598,8 @@ class Grid(sg.Column, SuperElement):
                             if None not in (element_width, element_height):
                                 if element_width > max_element_width:
                                     max_element_width = element_width
-                                if element_height > uniform_block_height:
-                                    uniform_block_height = element_height
+                                if element_height > self.uniform_block_height:
+                                    self.uniform_block_height = element_height
                             else:
                                 sg.PopupError(
                                     "Error when updating the Grid layout",
@@ -2613,7 +2613,7 @@ class Grid(sg.Column, SuperElement):
                     # Save the max width for this vertical group of rows
                     vertical_element_group_widths[group_num] = max_element_width
 
-                uniform_block_width = max(vertical_element_group_widths.values())
+                self.uniform_block_width = max(vertical_element_group_widths.values())
 
                 # Vertically align the elements
                 for group_num, vertical_group in enumerate(vertical_element_groups):
@@ -2627,10 +2627,12 @@ class Grid(sg.Column, SuperElement):
 
                                 if self.equal_block_sizes:
                                     height_padding = (
-                                        uniform_block_height - element_height
+                                        self.uniform_block_height - element_height
                                     )
 
-                                    right_padding = uniform_block_width - element_width
+                                    right_padding = (
+                                        self.uniform_block_width - element_width
+                                    )
                                     wrapper_widget.pack_configure(
                                         padx=(0, right_padding),
                                         pady=height_padding // 2,
