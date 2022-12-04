@@ -2580,10 +2580,10 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows
 
-        update_target_column_of_blocks = False
+        update_vertical_alignment_group = False
         event = kwargs.get("event", None)
         if isinstance(event, tk.Event):
-            update_target_column_of_blocks = True
+            update_vertical_alignment_group = True
 
         # print("_update_layout() called")
 
