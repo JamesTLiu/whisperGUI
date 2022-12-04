@@ -2425,6 +2425,12 @@ class SuperElement(sg.Element):
             self.unbind(event)
 
 
+@dataclass
+class VerticalAlignmentGroup:
+    elements: Sequence[sg.Column]
+    width: int
+
+
 class Grid(sg.Column, SuperElement):
     """Grid element - a container element that is used to create a horizontally and vertically aligned
     layout within your window's layout
@@ -2470,6 +2476,10 @@ class Grid(sg.Column, SuperElement):
 
         # A list to track the previous max width for the elements in a vertical set of blocks in the Grid
         self._vertical_group_widths = {}
+
+        self._widget_to_vertical_alignment_group: Dict[
+            tk.Widget, VerticalAlignmentGroup
+        ] = {}
 
         super().__init__(
             layout=processed_layout,
@@ -2589,6 +2599,10 @@ class Grid(sg.Column, SuperElement):
                 # Get the max width for each vertical group of rows
                 for group_num, vertical_group in enumerate(vertical_element_groups):
                     max_element_width = 1
+                    vertical_alignment_group = VerticalAlignmentGroup(
+                        elements=vertical_group, width=0
+                    )
+
                     for wrapper_element in vertical_group:
                         # Update the max width of the vertical group of rows if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
@@ -2610,8 +2624,14 @@ class Grid(sg.Column, SuperElement):
                                     image=_random_error_emoji(),
                                 )
 
+                            self._widget_to_vertical_alignment_group[
+                                element.widget
+                            ] = vertical_alignment_group
+
                     # Save the max width for this vertical group of rows
                     vertical_element_group_widths[group_num] = max_element_width
+
+                    vertical_alignment_group.width = max_element_width
 
                 self.uniform_block_width = max(vertical_element_group_widths.values())
 
