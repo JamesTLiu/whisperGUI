@@ -2548,7 +2548,7 @@ class Grid(sg.Column, SuperElement):
                 #     wrapper_element = lookup.element
                 #     print(f"\tevent element key: {wrapper_element.key}.")
 
-                self._update_internals()
+                self._update_internals(event=event)
 
         for row in self.Rows:
             for wrapper_element in row:
@@ -2573,12 +2573,12 @@ class Grid(sg.Column, SuperElement):
                         image=_random_error_emoji(),
                     )
 
-    def _update_internals(self) -> None:
-        self._update_layout()
+    def _update_internals(self, **kwargs) -> None:
+        self._update_layout(**kwargs)
 
     # @function_details
-    def _update_layout(self) -> None:
-        # Vertically align the rows
+    def _update_layout(self, **kwargs) -> None:
+        # Update the layout and vertically align the rows
 
         # print("_update_layout() called")
 
