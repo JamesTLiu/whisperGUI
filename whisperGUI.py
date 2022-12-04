@@ -2582,6 +2582,7 @@ class Grid(sg.Column, SuperElement):
 
         update_vertical_alignment_group = False
         event = kwargs.get("event", None)
+        # Update is caused by a resize event for block's inner element
         if isinstance(event, tk.Event):
             update_vertical_alignment_group = True
 
