@@ -2693,6 +2693,12 @@ class Grid(sg.Column, SuperElement):
 
         return new_layout
 
+    def layout(self, rows: List[List[sg.Element]]) -> sg.Column:
+        processed_layout = self._process_layout(rows)
+        return super().layout(processed_layout)
+
+    Layout = layout
+
     def add_row(self, *args):
         # process the elements in the list by wrapping them in Columns
 
