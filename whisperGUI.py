@@ -2665,6 +2665,23 @@ class Grid(sg.Column, SuperElement):
 
         return new_layout
 
+    def add_row(self, *args):
+        return
+
+        # process the elements in the list by wrapping them in Columns
+
+        super().add_row(*args)
+
+        # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
+
+        # Update the Grid when a new row is added
+        # if self.widget.winfo_ismapped():
+        #     self._update_internals()
+
+        self._update_internals()
+
+    AddRow = add_row
+
 
 @dataclass
 class WidgetSize:
