@@ -2509,7 +2509,6 @@ class Grid(sg.Column, SuperElement):
 
     def _bind_layout_element_resize_to_layout_update(self):
         # Set up binds to make the layout update when an element in the layout resizes
-        rows = self.Rows
 
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
@@ -2541,7 +2540,7 @@ class Grid(sg.Column, SuperElement):
 
                 self._update_internals()
 
-        for row in rows:
+        for row in self.Rows:
             for wrapper_element in row:
                 if wrapper_element and isinstance(wrapper_element, sg.Column):
                     element: sg.Element = wrapper_element.Rows[0][0]
