@@ -2694,7 +2694,6 @@ class Grid(sg.Column, SuperElement):
         return new_layout
 
     def add_row(self, *args):
-
         # process the elements in the list by wrapping them in Columns
 
         super().add_row(*args)
