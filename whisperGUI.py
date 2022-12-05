@@ -2588,6 +2588,17 @@ class Grid(sg.Column, SuperElement):
 
         # print("_update_layout() called")
 
+        # _rows: Iterable[sg.Element] = self.Rows
+        # _widget: tk.Widget = self.widget
+        # _sg_widgets = [row[0].ParentRowFrame for row in _rows]
+
+        # _tk_subwidgets = [widget for widget in _widget.children.values()]
+
+        # paired_widgets = zip(_sg_widgets, _tk_subwidgets)
+        # same_widgets = all(
+        #     [_sg_widget is _tk_widget for _sg_widget, _tk_widget in paired_widgets]
+        # )
+
         # Only update the Grid if it's visible
         if self.widget.winfo_ismapped():
             # Refresh the window for this element so its rows are updated
