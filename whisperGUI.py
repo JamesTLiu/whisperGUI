@@ -2659,7 +2659,7 @@ class Grid(sg.Column, SuperElement):
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element = wrapper_element.Rows[0][0]
                             element_width, element_height = element.get_size()
-                            if None not in (element_width, element_height):
+                            if element_width is not None and element_height is not None:
                                 wrapper_widget: tk.Widget = wrapper_element.widget
 
                                 if self.equal_block_sizes:
