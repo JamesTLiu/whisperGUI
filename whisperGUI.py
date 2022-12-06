@@ -2823,6 +2823,23 @@ def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
     return w, h
 
 
+def get_element_size(element: sg.Element) -> Tuple[int, int]:
+    """Return the size of an Element's widget in Pixels.  Care must be taken as some elements use
+    characters to specify their size but will return pixels when calling this method.
+
+    Args:
+        element (sg.Element): An Element.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget for this element.
+
+    Returns:
+        Tuple[int, int]: Width and height of the element's widget as reported by the tkinter windows manager.
+    """
+    widget = element.widget
+    return get_widget_size(widget)
+
+
 def change_row_autosizing(
     row: tk.Frame = None, element: sg.Element = None, auto_size: bool = False
 ) -> None:
