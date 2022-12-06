@@ -1550,7 +1550,7 @@ def forward_resize_event(event: tk.Event) -> None:
     indicates a widget resize.
 
     Args:
-        event (tk.Event): The tkinter event.
+        event (tk.Event): A tkinter <Configure> event.
     """
     valid_event_type = tk.EventType.Configure
 
