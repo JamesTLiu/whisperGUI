@@ -2637,7 +2637,6 @@ class Grid(sg.Column, SuperElement):
 
                 # Get the max width for each vertical group of rows
                 for group_num, vertical_group in enumerate(vertical_element_groups):
-                    max_element_width = 1
                     vertical_alignment_group = VerticalAlignmentGroup(
                         elements=vertical_group, width=0
                     )
@@ -2646,6 +2645,7 @@ class Grid(sg.Column, SuperElement):
                         # Update the max width of the vertical group of rows if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element: sg.Element = wrapper_element.Rows[0][0]
+
                             try:
                                 element_width, element_height = get_element_size(
                                     element
@@ -2661,8 +2661,8 @@ class Grid(sg.Column, SuperElement):
                                 )
                                 continue
 
-                            if element_width > max_element_width:
-                                max_element_width = element_width
+                            if element_width > vertical_alignment_group.width:
+                                vertical_alignment_group.width = element_width
                             if element_height > self.uniform_block_height:
                                 self.uniform_block_height = element_height
 
@@ -2671,9 +2671,7 @@ class Grid(sg.Column, SuperElement):
                             ] = vertical_alignment_group
 
                     # Save the max width for this vertical group of rows
-                    vertical_element_group_widths[group_num] = max_element_width
-
-                    vertical_alignment_group.width = max_element_width
+                    vertical_element_group_widths[group_num] = vertical_alignment_group.width
 
                 # self.uniform_block_width = max(vertical_element_group_widths.values())
                 self.uniform_block_width = max({group.width for group in self._widget_to_vertical_alignment_group.values()})
