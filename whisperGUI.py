@@ -2455,7 +2455,10 @@ class BlockColumn:
 
 class Grid(sg.Column, SuperElement):
     """Grid element - a container element that is used to create a horizontally and vertically aligned
-    layout within your window's layout
+    layout within your window's layout.
+
+    Note: The Elements in each row of the passed in layout will be wrapped non-recursively in a Column which acts as a
+    block in the grid.
     """
 
     def __init__(
@@ -2496,10 +2499,10 @@ class Grid(sg.Column, SuperElement):
 
         processed_layout = self._process_layout(layout=layout)
 
-        # Lookup a widget's vertical alignment group
+        # Lookup the block column that a widget is in
         self._widget_to_block_col: Dict[tk.Widget, BlockColumn] = {}
 
-        # Lookup a vertical alignment group by number. Block columns are numbered left to right starting from 0.
+        # Lookup a block column by number. Block columns are numbered left to right starting from 0.
         self.block_col_num_to_col: Dict[int, BlockColumn] = {}
 
         super().__init__(
