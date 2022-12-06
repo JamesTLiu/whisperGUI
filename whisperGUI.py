@@ -2448,7 +2448,7 @@ class SuperElement(sg.Element):
 
 
 @dataclass
-class VerticalAlignmentGroup:
+class BlockColumn:
     elements: Sequence[sg.Column]
     width: int
 
@@ -2497,14 +2497,10 @@ class Grid(sg.Column, SuperElement):
         processed_layout = self._process_layout(layout=layout)
 
         # Lookup a widget's vertical alignment group
-        self._widget_to_vertical_alignment_group: Dict[
-            tk.Widget, VerticalAlignmentGroup
-        ] = {}
+        self._widget_to_block_col: Dict[tk.Widget, BlockColumn] = {}
 
         # Lookup a vertical alignment group by number. Block columns are numbered left to right starting from 0.
-        self._group_num_to_vertical_alignment_group: Dict[
-            int, VerticalAlignmentGroup
-        ] = {}
+        self.block_col_num_to_col: Dict[int, BlockColumn] = {}
 
         super().__init__(
             layout=processed_layout,
@@ -2626,7 +2622,7 @@ class Grid(sg.Column, SuperElement):
 
         # Only update the Grid if it's visible
         if self.widget.winfo_ismapped():
-            # Refresh the window for this element so its rows are updated
+            # Refresh the window for this element before updating the layout
             self.ParentForm.refresh()
 
             rows = self.Rows
@@ -2643,28 +2639,24 @@ class Grid(sg.Column, SuperElement):
                         image=_random_error_emoji(),
                     )
 
-                # Group the elements vertically
-                vertical_element_groups: Tuple[Tuple[sg.Column, ...], ...] = tuple(
+                # Group the blocks vertically into columns of blocks
+                block_cols: Tuple[Tuple[sg.Column, ...], ...] = tuple(
                     zip_longest(*rows, fillvalue=None)
                 )
 
+                # The height to set all blocks to when uniform block sizes are used
                 self.uniform_block_height = 1
 
+                # A list of blocks with their block column number and block column list
                 blocks = tuple(
-                    (block, group_num, vertical_group)
-                    for group_num, vertical_group in enumerate(vertical_element_groups)
-                    for block in vertical_group
+                    (block, block_col_num, block_col_list)
+                    for block_col_num, block_col_list in enumerate(block_cols)
+                    for block in block_col_list
                     if block and isinstance(block, sg.Column)
                 )
 
-                for block, vertical_group_num, vertical_group in blocks:
-                    block_alignment_group = (
-                        self._group_num_to_vertical_alignment_group.setdefault(
-                            vertical_group_num,
-                            VerticalAlignmentGroup(elements=vertical_group, width=0),
-                        )
-                    )
-
+                # Find the vertical alignment width for each block column and the needed height for uniform blocks
+                for block, block_col_num, block_col_list in blocks:
                     inner_element: sg.Element = block.Rows[0][0]
 
                     try:
@@ -2675,25 +2667,28 @@ class Grid(sg.Column, SuperElement):
                         popup_update_error(inner_element)
                         continue
 
-                    if inner_element_width > block_alignment_group.width:
-                        block_alignment_group.width = inner_element_width
+                    block_col = self.block_col_num_to_col.setdefault(
+                        block_col_num,
+                        BlockColumn(elements=block_col_list, width=0),
+                    )
+
+                    if inner_element_width > block_col.width:
+                        block_col.width = inner_element_width
                     if inner_element_height > self.uniform_block_height:
                         self.uniform_block_height = inner_element_height
 
-                    self._widget_to_vertical_alignment_group[
-                        inner_element.widget
-                    ] = block_alignment_group
+                    self._widget_to_block_col[inner_element.widget] = block_col
 
-                # self.uniform_block_width = max(vertical_element_group_widths.values())
+                # Get the width needed for uniform blocks
                 self.uniform_block_width = max(
                     {
-                        group.width
-                        for group in self._group_num_to_vertical_alignment_group.values()
+                        block_col.width
+                        for block_col in self.block_col_num_to_col.values()
                     }
                 )
 
                 # Vertically align the elements
-                for block, vertical_group_num, vertical_group in blocks:
+                for block, block_col_num, _ in blocks:
                     inner_element = block.Rows[0][0]
 
                     try:
@@ -2706,6 +2701,7 @@ class Grid(sg.Column, SuperElement):
 
                     block_widget: tk.Widget = block.widget
 
+                    # Set all blocks to the same size using padding
                     if self.equal_block_sizes:
                         height_padding = (
                             self.uniform_block_height - inner_element_height
@@ -2718,9 +2714,7 @@ class Grid(sg.Column, SuperElement):
                         )
                     else:
                         right_padding = (
-                            self._group_num_to_vertical_alignment_group[
-                                vertical_group_num
-                            ].width
+                            self.block_col_num_to_col[block_col_num].width
                             - inner_element_width
                         )
                         block_widget.pack_configure(padx=(0, right_padding))
