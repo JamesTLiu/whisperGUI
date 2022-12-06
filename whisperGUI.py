@@ -2496,11 +2496,14 @@ class Grid(sg.Column, SuperElement):
 
         processed_layout = self._process_layout(layout=layout)
 
-        # A list to track the previous max width for the elements in a vertical set of blocks in the Grid
-        self._vertical_group_widths = {}
-
+        # Lookup a widget's vertical alignment group
         self._widget_to_vertical_alignment_group: Dict[
             tk.Widget, VerticalAlignmentGroup
+        ] = {}
+
+        # Lookup a vertical alignment group by number (left to right starting from 0).
+        self._group_num_to_vertical_alignment_group: Dict[
+            int, VerticalAlignmentGroup
         ] = {}
 
         super().__init__(
@@ -2630,63 +2633,63 @@ class Grid(sg.Column, SuperElement):
 
             if rows:
                 # Group the elements vertically
-                vertical_element_groups = tuple(zip_longest(*rows, fillvalue=None))
-                vertical_element_group_widths = {}
+                vertical_element_groups: Tuple[Tuple[sg.Column, ...], ...] = tuple(zip_longest(*rows, fillvalue=None))
 
                 self.uniform_block_height = 1
 
-                # Get the max width for each vertical group of rows
-                for group_num, vertical_group in enumerate(vertical_element_groups):
-                    vertical_alignment_group = VerticalAlignmentGroup(
-                        elements=vertical_group, width=0
+                blocks = tuple(
+                    (block, group_num, vertical_group)
+                    for group_num, vertical_group in enumerate(vertical_element_groups)
+                    for block in vertical_group
+                    if block and isinstance(block, sg.Column)
+                )
+
+                for block, vertical_group_num, vertical_group in blocks:
+                    block_alignment_group = self._group_num_to_vertical_alignment_group.setdefault(
+                        vertical_group_num,
+                        VerticalAlignmentGroup(elements=vertical_group, width=0),
                     )
 
-                    for wrapper_element in vertical_group:
-                        # Update the max width of the vertical group of rows if it's not a filler value
-                        if wrapper_element and isinstance(wrapper_element, sg.Column):
-                            element: sg.Element = wrapper_element.Rows[0][0]
+                    element: sg.Element = block.Rows[0][0]
 
-                            try:
-                                element_width, element_height = get_element_size(
-                                    element
-                                )
-                            except GetWidgetSizeError:
-                                sg.PopupError(
-                                    "Error when updating the Grid layout",
-                                    "Unable to get the size of an element",
-                                    "The offensive element = ",
-                                    element,
-                                    keep_on_top=True,
-                                    image=_random_error_emoji(),
-                                )
-                                continue
+                    try:
+                        element_width, element_height = get_element_size(
+                            element
+                        )
+                    except GetWidgetSizeError:
+                        sg.PopupError(
+                            "Error when updating the Grid layout",
+                            "Unable to get the size of an element",
+                            "The offensive element = ",
+                            element,
+                            keep_on_top=True,
+                            image=_random_error_emoji(),
+                        )
+                        continue
 
-                            if element_width > vertical_alignment_group.width:
-                                vertical_alignment_group.width = element_width
-                            if element_height > self.uniform_block_height:
-                                self.uniform_block_height = element_height
+                    if element_width > block_alignment_group.width:
+                        block_alignment_group.width = element_width
+                    if element_height > self.uniform_block_height:
+                        self.uniform_block_height = element_height
 
-                            self._widget_to_vertical_alignment_group[
-                                element.widget
-                            ] = vertical_alignment_group
-
-                    # Save the max width for this vertical group of rows
-                    vertical_element_group_widths[group_num] = vertical_alignment_group.width
+                    self._widget_to_vertical_alignment_group[
+                        element.widget
+                    ] = block_alignment_group
 
                 # self.uniform_block_width = max(vertical_element_group_widths.values())
                 self.uniform_block_width = max(
                     {
                         group.width
-                        for group in self._widget_to_vertical_alignment_group.values()
+                        for group in self._group_num_to_vertical_alignment_group.values()
                     }
                 )
 
                 # Vertically align the elements
                 for group_num, vertical_group in enumerate(vertical_element_groups):
-                    for wrapper_element in vertical_group:
+                    for block in vertical_group:
                         # Use the wrapper element's padding to vertically align it if it's not a filler value
-                        if wrapper_element and isinstance(wrapper_element, sg.Column):
-                            element = wrapper_element.Rows[0][0]
+                        if block and isinstance(block, sg.Column):
+                            element = block.Rows[0][0]
 
                             try:
                                 element_width, element_height = get_element_size(
@@ -2703,7 +2706,7 @@ class Grid(sg.Column, SuperElement):
                                 )
                                 continue
 
-                            wrapper_widget: tk.Widget = wrapper_element.widget
+                            block_widget: tk.Widget = block.widget
 
                             if self.equal_block_sizes:
                                 height_padding = (
@@ -2711,16 +2714,16 @@ class Grid(sg.Column, SuperElement):
                                 )
 
                                 right_padding = self.uniform_block_width - element_width
-                                wrapper_widget.pack_configure(
+                                block_widget.pack_configure(
                                     padx=(0, right_padding),
                                     pady=height_padding // 2,
                                 )
                             else:
                                 right_padding = (
-                                    vertical_element_group_widths[group_num]
+                                    self._group_num_to_vertical_alignment_group[group_num].width
                                     - element_width
                                 )
-                                wrapper_widget.pack_configure(padx=(0, right_padding))
+                                block_widget.pack_configure(padx=(0, right_padding))
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
