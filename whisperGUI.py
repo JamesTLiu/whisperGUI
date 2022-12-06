@@ -2804,8 +2804,7 @@ def set_row_size_of_element(
 
 
 def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
-    """Return the size of a widget in Pixels.  Care must be taken as some elements use
-    characters to specify their size but will return pixels when calling this method.
+    """Return the size of a widget in Pixels.
 
     Args:
         widget (tk.Widget): A widget.
