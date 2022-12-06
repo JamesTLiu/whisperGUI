@@ -2674,7 +2674,12 @@ class Grid(sg.Column, SuperElement):
                     vertical_element_group_widths[group_num] = vertical_alignment_group.width
 
                 # self.uniform_block_width = max(vertical_element_group_widths.values())
-                self.uniform_block_width = max({group.width for group in self._widget_to_vertical_alignment_group.values()})
+                self.uniform_block_width = max(
+                    {
+                        group.width
+                        for group in self._widget_to_vertical_alignment_group.values()
+                    }
+                )
 
                 # Vertically align the elements
                 for group_num, vertical_group in enumerate(vertical_element_groups):
