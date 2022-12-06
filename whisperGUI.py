@@ -2646,14 +2646,11 @@ class Grid(sg.Column, SuperElement):
                         # Update the max width of the vertical group of rows if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element: sg.Element = wrapper_element.Rows[0][0]
-                            element_width, element_height = element.get_size()
-
-                            if element_width is not None and element_height is not None:
-                                if element_width > max_element_width:
-                                    max_element_width = element_width
-                                if element_height > self.uniform_block_height:
-                                    self.uniform_block_height = element_height
-                            else:
+                            try:
+                                element_width, element_height = get_element_size(
+                                    element
+                                )
+                            except GetWidgetSizeError:
                                 sg.PopupError(
                                     "Error when updating the Grid layout",
                                     "Unable to get the size of an element",
@@ -2662,6 +2659,12 @@ class Grid(sg.Column, SuperElement):
                                     keep_on_top=True,
                                     image=_random_error_emoji(),
                                 )
+                                continue
+
+                            if element_width > max_element_width:
+                                max_element_width = element_width
+                            if element_height > self.uniform_block_height:
+                                self.uniform_block_height = element_height
 
                             self._widget_to_vertical_alignment_group[
                                 element.widget
@@ -2681,31 +2684,12 @@ class Grid(sg.Column, SuperElement):
                         # Use the wrapper element's padding to vertically align it if it's not a filler value
                         if wrapper_element and isinstance(wrapper_element, sg.Column):
                             element = wrapper_element.Rows[0][0]
-                            element_width, element_height = element.get_size()
-                            if element_width is not None and element_height is not None:
-                                wrapper_widget: tk.Widget = wrapper_element.widget
 
-                                if self.equal_block_sizes:
-                                    height_padding = (
-                                        self.uniform_block_height - element_height
-                                    )
-
-                                    right_padding = (
-                                        self.uniform_block_width - element_width
-                                    )
-                                    wrapper_widget.pack_configure(
-                                        padx=(0, right_padding),
-                                        pady=height_padding // 2,
-                                    )
-                                else:
-                                    right_padding = (
-                                        vertical_element_group_widths[group_num]
-                                        - element_width
-                                    )
-                                    wrapper_widget.pack_configure(
-                                        padx=(0, right_padding)
-                                    )
-                            else:
+                            try:
+                                element_width, element_height = get_element_size(
+                                    element
+                                )
+                            except GetWidgetSizeError:
                                 sg.PopupError(
                                     "Error when updating the Grid layout",
                                     "Unable to get the size of an element",
@@ -2714,6 +2698,26 @@ class Grid(sg.Column, SuperElement):
                                     keep_on_top=True,
                                     image=_random_error_emoji(),
                                 )
+                                continue
+
+                            wrapper_widget: tk.Widget = wrapper_element.widget
+
+                            if self.equal_block_sizes:
+                                height_padding = (
+                                    self.uniform_block_height - element_height
+                                )
+
+                                right_padding = self.uniform_block_width - element_width
+                                wrapper_widget.pack_configure(
+                                    padx=(0, right_padding),
+                                    pady=height_padding // 2,
+                                )
+                            else:
+                                right_padding = (
+                                    vertical_element_group_widths[group_num]
+                                    - element_width
+                                )
+                                wrapper_widget.pack_configure(padx=(0, right_padding))
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
