@@ -1546,6 +1546,17 @@ class Window(sg.Window):
 
 # @function_details
 def forward_resize_event(event: tk.Event) -> None:
+    """Generates a <<Resize>> virtual event if the passed <Configure> event
+    indicates a widget resize.
+
+    Args:
+        event (tk.Event): The tkinter event.
+    """
+    if event.type != tk.EventType.Configure:
+        print(f"Warning: forward_resize_event() was passed an event that's not {tk.EventType.Configure.name}. Ignoring the event.")
+        return
+
+
     widget: tk.Widget = event.widget
 
     try:
