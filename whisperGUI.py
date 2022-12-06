@@ -2604,6 +2604,16 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows
 
+        def popup_update_error(element: sg.Element):
+            sg.PopupError(
+                "Error when updating the Grid layout",
+                "Unable to get the size of an element",
+                "The offensive element = ",
+                element,
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
+
         update_vertical_alignment_group = False
         event = kwargs.get("event", None)
         # Update is caused by a resize event for block's inner element
@@ -2624,103 +2634,89 @@ class Grid(sg.Column, SuperElement):
         # )
 
         # Only update the Grid if it's visible
-        if self.widget.winfo_ismapped():
-            # Refresh the window for this element before updating the layout
-            self.ParentForm.refresh()
+        if not self.widget.winfo_ismapped():
+            return
 
-            rows = self.Rows
+        # Refresh the window for this element before updating the layout
+        self.ParentForm.refresh()
 
-            if rows:
+        # Only update the Grid if it has a layout
+        if not self.Rows:
+            return
 
-                def popup_update_error(element: sg.Element):
-                    sg.PopupError(
-                        "Error when updating the Grid layout",
-                        "Unable to get the size of an element",
-                        "The offensive element = ",
-                        element,
-                        keep_on_top=True,
-                        image=_random_error_emoji(),
-                    )
+        # Group the blocks vertically into columns of blocks
+        block_cols: Tuple[Tuple[sg.Column, ...], ...] = tuple(
+            zip_longest(*self.Rows, fillvalue=None)
+        )
 
-                # Group the blocks vertically into columns of blocks
-                block_cols: Tuple[Tuple[sg.Column, ...], ...] = tuple(
-                    zip_longest(*rows, fillvalue=None)
+        # The height to set all blocks to when uniform block sizes are used
+        self.uniform_block_height = 1
+
+        # A list of blocks with their block column number and block column list
+        blocks = tuple(
+            (block, block_col_num, block_col_list)
+            for block_col_num, block_col_list in enumerate(block_cols)
+            for block in block_col_list
+            if block and isinstance(block, sg.Column)
+        )
+
+        # Find the vertical alignment width for each block column and the needed height for uniform blocks
+        for block, block_col_num, block_col_list in blocks:
+            inner_element: sg.Element = block.Rows[0][0]
+
+            try:
+                inner_element_width, inner_element_height = get_element_size(
+                    inner_element
                 )
+            except GetWidgetSizeError:
+                popup_update_error(inner_element)
+                continue
 
-                # The height to set all blocks to when uniform block sizes are used
-                self.uniform_block_height = 1
+            block_col = self.block_col_num_to_col.setdefault(
+                block_col_num,
+                BlockColumn(elements=block_col_list, width=0),
+            )
 
-                # A list of blocks with their block column number and block column list
-                blocks = tuple(
-                    (block, block_col_num, block_col_list)
-                    for block_col_num, block_col_list in enumerate(block_cols)
-                    for block in block_col_list
-                    if block and isinstance(block, sg.Column)
+            if inner_element_width > block_col.width:
+                block_col.width = inner_element_width
+            if inner_element_height > self.uniform_block_height:
+                self.uniform_block_height = inner_element_height
+
+            self._widget_to_block_col[inner_element.widget] = block_col
+
+        # Get the width needed for uniform blocks
+        self.uniform_block_width = max(
+            {block_col.width for block_col in self.block_col_num_to_col.values()}
+        )
+
+        # Vertically align the elements
+        for block, block_col_num, _ in blocks:
+            inner_element = block.Rows[0][0]
+
+            try:
+                inner_element_width, inner_element_height = get_element_size(
+                    inner_element
                 )
+            except GetWidgetSizeError:
+                popup_update_error(inner_element)
+                continue
 
-                # Find the vertical alignment width for each block column and the needed height for uniform blocks
-                for block, block_col_num, block_col_list in blocks:
-                    inner_element: sg.Element = block.Rows[0][0]
+            block_widget: tk.Widget = block.widget
 
-                    try:
-                        inner_element_width, inner_element_height = get_element_size(
-                            inner_element
-                        )
-                    except GetWidgetSizeError:
-                        popup_update_error(inner_element)
-                        continue
+            # Set all blocks to the same size using padding
+            if self.equal_block_sizes:
+                height_padding = self.uniform_block_height - inner_element_height
 
-                    block_col = self.block_col_num_to_col.setdefault(
-                        block_col_num,
-                        BlockColumn(elements=block_col_list, width=0),
-                    )
-
-                    if inner_element_width > block_col.width:
-                        block_col.width = inner_element_width
-                    if inner_element_height > self.uniform_block_height:
-                        self.uniform_block_height = inner_element_height
-
-                    self._widget_to_block_col[inner_element.widget] = block_col
-
-                # Get the width needed for uniform blocks
-                self.uniform_block_width = max(
-                    {
-                        block_col.width
-                        for block_col in self.block_col_num_to_col.values()
-                    }
+                right_padding = self.uniform_block_width - inner_element_width
+                block_widget.pack_configure(
+                    padx=(0, right_padding),
+                    pady=height_padding // 2,
                 )
-
-                # Vertically align the elements
-                for block, block_col_num, _ in blocks:
-                    inner_element = block.Rows[0][0]
-
-                    try:
-                        inner_element_width, inner_element_height = get_element_size(
-                            inner_element
-                        )
-                    except GetWidgetSizeError:
-                        popup_update_error(inner_element)
-                        continue
-
-                    block_widget: tk.Widget = block.widget
-
-                    # Set all blocks to the same size using padding
-                    if self.equal_block_sizes:
-                        height_padding = (
-                            self.uniform_block_height - inner_element_height
-                        )
-
-                        right_padding = self.uniform_block_width - inner_element_width
-                        block_widget.pack_configure(
-                            padx=(0, right_padding),
-                            pady=height_padding // 2,
-                        )
-                    else:
-                        right_padding = (
-                            self.block_col_num_to_col[block_col_num].width
-                            - inner_element_width
-                        )
-                        block_widget.pack_configure(padx=(0, right_padding))
+            else:
+                right_padding = (
+                    self.block_col_num_to_col[block_col_num].width - inner_element_width
+                )
+                block_widget.pack_configure(padx=(0, right_padding))
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
