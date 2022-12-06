@@ -1552,19 +1552,30 @@ def forward_resize_event(event: tk.Event) -> None:
     Args:
         event (tk.Event): The tkinter event.
     """
-    if event.type != tk.EventType.Configure:
-        print(f"Warning: forward_resize_event() was passed an event that's not {tk.EventType.Configure.name}. Ignoring the event.")
-        return
+    valid_event_type = tk.EventType.Configure
 
+    if event.type != valid_event_type:
+        sg.PopupError(
+            f"Warning: forward_resize_event() was passed an event of the wrong type.",
+            f"The event's type must be <{valid_event_type.name}>.",
+            f"The offensive event = ",
+            event,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+        return
 
     widget: tk.Widget = event.widget
 
     try:
         has_widget_resized = widget_resized(widget)
     except GetWidgetSizeError:
-        print(
-            f"Warning: Error while determining if the event's widget resized."
-            f"Ignoring event. widget: {widget}"
+        sg.PopupError(
+            f"Warning: Error while determining if the event's widget resized.",
+            f"The offensive widget = ",
+            widget,
+            keep_on_top=True,
+            image=_random_error_emoji(),
         )
         return
 
