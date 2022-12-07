@@ -2449,12 +2449,12 @@ class SuperElement(sg.Element):
 
 @dataclass
 class BlockColumn:
-    elements: Sequence[sg.Column]
+    blocks: BlockList
     width: int
 
 
-Block = sg.Column
-BlockList = Sequence[sg.Column]
+Block: TypeAlias = sg.Column
+BlockList: TypeAlias = Sequence[Block]
 
 
 class Grid(sg.Column, SuperElement):
