@@ -2453,6 +2453,10 @@ class BlockColumn:
     width: int
 
 
+Block = sg.Column
+BlockList = Sequence[sg.Column]
+
+
 class Grid(sg.Column, SuperElement):
     """Grid element - a container element that is used to create a horizontally and vertically aligned
     layout within your window's layout.
@@ -2645,7 +2649,7 @@ class Grid(sg.Column, SuperElement):
             return
 
         # Group the blocks vertically into columns of blocks
-        block_cols: Tuple[Tuple[sg.Column, ...], ...] = tuple(
+        block_cols: Tuple[BlockList, ...] = tuple(
             zip_longest(*self.Rows, fillvalue=None)
         )
 
@@ -2657,7 +2661,7 @@ class Grid(sg.Column, SuperElement):
             (block, block_col_num, block_col_list)
             for block_col_num, block_col_list in enumerate(block_cols)
             for block in block_col_list
-            if block and isinstance(block, sg.Column)
+            if block and isinstance(block, Block)
         )
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
