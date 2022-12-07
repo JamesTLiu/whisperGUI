@@ -2637,15 +2637,11 @@ class Grid(sg.Column, SuperElement):
         #     [_sg_widget is _tk_widget for _sg_widget, _tk_widget in paired_widgets]
         # )
 
-        # Only update the Grid if it's visible
-        if not self.widget.winfo_ismapped():
-            return
-
         # Refresh the window for this element before updating the layout
         self.ParentForm.refresh()
 
-        # Only update the Grid if it has a layout
-        if not self.Rows:
+        # Only update the Grid if it's visible and has a layout
+        if not self._is_visible_with_layout():
             return
 
         # Group the blocks vertically into columns of blocks
@@ -2721,6 +2717,10 @@ class Grid(sg.Column, SuperElement):
                     self.block_col_num_to_col[block_col_num].width - inner_element_width
                 )
                 block_widget.pack_configure(padx=(0, right_padding))
+
+    def _is_visible_with_layout(self) -> bool:
+        # Return True if the Grid is visible and has a layout
+        return True if self.widget.winfo_ismapped() and self.Rows else False
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
