@@ -2654,16 +2654,14 @@ class Grid(sg.Column, SuperElement):
 
         # A list of blocks with their block column number and block column list
         blocks = tuple(
-            (block, block_col_num, block_col_list)
+            (block.Rows[0][0], block, block_col_num, block_col_list)
             for block_col_num, block_col_list in enumerate(block_cols)
             for block in block_col_list
             if block and isinstance(block, Block)
         )
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
-        for block, block_col_num, block_col_list in blocks:
-            inner_element: sg.Element = block.Rows[0][0]
-
+        for inner_element, block, block_col_num, block_col_list in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     inner_element
@@ -2690,9 +2688,7 @@ class Grid(sg.Column, SuperElement):
         )
 
         # Vertically align the elements
-        for block, block_col_num, _ in blocks:
-            inner_element = block.Rows[0][0]
-
+        for inner_element, block, block_col_num, _ in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     inner_element
