@@ -27,6 +27,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generator,
     Iterable,
     Iterator,
     List,
@@ -36,6 +37,7 @@ from typing import (
     TextIO,
     Tuple,
     Type,
+    TypeAlias,
     TypeVar,
     Union,
 )
@@ -2507,7 +2509,9 @@ class Grid(sg.Column, SuperElement):
         self._widget_to_block_col: Dict[tk.Widget, BlockColumn] = {}
 
         # Lookup a block column by number. Block columns are numbered left to right starting from 0.
-        self.block_col_num_to_col: Dict[int, BlockColumn] = {}
+        self.block_col_num_to_block_col: Dict[int, BlockColumn] = {}
+
+        self.uniform_block_width = self.uniform_block_height = None
 
         super().__init__(
             layout=processed_layout,
@@ -2546,7 +2550,7 @@ class Grid(sg.Column, SuperElement):
         self._bind_layout_element_resize_to_layout_update()
 
     def _bind_layout_element_resize_to_layout_update(self):
-        # Set up binds to make the layout update when an element in the layout resizes
+        # Set up binds to make the layout update when an element in the layout resizes.
 
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
@@ -2566,17 +2570,61 @@ class Grid(sg.Column, SuperElement):
             #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
             # )
 
-            # Only handle resizes if the Grid is mapped
-            if self.widget.winfo_ismapped():
-                # widget: tk.Widget = event.widget
-                # lookup = widget_to_element_with_window(widget)
-                # if not lookup or not lookup.element or not lookup.window:
-                #     print("\tevent widget is not tracked by an active window")
-                # else:
-                #     wrapper_element = lookup.element
-                #     print(f"\tevent element key: {wrapper_element.key}.")
+            # Only update the Grid if it's visible and has a layout
+            if not self._is_visible_with_layout():
+                return
 
-                self._update_internals(event=event)
+            # widget: tk.Widget = event.widget
+            # lookup = widget_to_element_with_window(widget)
+            # if not lookup or not lookup.element or not lookup.window:
+            #     print("\tevent widget is not tracked by an active window")
+            # else:
+            #     wrapper_element = lookup.element
+            #     print(f"\tevent element key: {wrapper_element.key}.")
+
+            # The block columns have never been vertically aligned
+            if not self._widget_to_block_col:
+                self._update_layout()
+                return
+
+            widget: tk.Widget = event.widget
+
+            try:
+                width, height = get_widget_size(widget)
+            except GetWidgetSizeError:
+                sg.PopupError(
+                    "Error when updating the Grid layout on widget resize",
+                    "Unable to get the size of a widget",
+                    "The offensive widget = ",
+                    widget,
+                    keep_on_top=True,
+                    image=_random_error_emoji(),
+                )
+                return
+
+            if (
+                self.uniform_block_width is not None
+                and self.uniform_block_height is not None
+            ):
+                new_uniform_block_width = width > self.uniform_block_width
+                new_uniform_block_height = height > self.uniform_block_height
+
+                if new_uniform_block_width:
+                    self.uniform_block_width = width
+                if new_uniform_block_height:
+                    self.uniform_block_height = height
+
+            if self.equal_block_sizes:
+
+                # New uniform block size
+                if new_uniform_block_width or new_uniform_block_height:
+                    ...
+
+            else:
+                ...
+
+            # Update a block column due to a resize event for a block's inner element
+            block_col = self._widget_to_block_col[widget]
 
         for row in self.Rows:
             for wrapper_element in row:
@@ -2604,25 +2652,19 @@ class Grid(sg.Column, SuperElement):
     def _update_internals(self, **kwargs) -> None:
         self._update_layout(**kwargs)
 
+    def _popup_update_error(self, element: sg.Element):
+        sg.PopupError(
+            "Error when updating the Grid layout",
+            "Unable to get the size of an element",
+            "The offensive element = ",
+            element,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+
     # @function_details
     def _update_layout(self, **kwargs) -> None:
-        # Update the layout and vertically align the rows
-
-        def popup_update_error(element: sg.Element):
-            sg.PopupError(
-                "Error when updating the Grid layout",
-                "Unable to get the size of an element",
-                "The offensive element = ",
-                element,
-                keep_on_top=True,
-                image=_random_error_emoji(),
-            )
-
-        update_vertical_alignment_group = False
-        event = kwargs.get("event", None)
-        # Update is caused by a resize event for block's inner element
-        if isinstance(event, tk.Event):
-            update_vertical_alignment_group = True
+        # Update the layout and vertically align the rows.
 
         # print("_update_layout() called")
 
@@ -2637,9 +2679,6 @@ class Grid(sg.Column, SuperElement):
         #     [_sg_widget is _tk_widget for _sg_widget, _tk_widget in paired_widgets]
         # )
 
-        # Refresh the window for this element before updating the layout
-        self.ParentForm.refresh()
-
         # Only update the Grid if it's visible and has a layout
         if not self._is_visible_with_layout():
             return
@@ -2653,12 +2692,7 @@ class Grid(sg.Column, SuperElement):
         self.uniform_block_height = 1
 
         # A list of blocks with their block column number and block column list
-        blocks = tuple(
-            (block.Rows[0][0], block, block_col_num, block_col_list)
-            for block_col_num, block_col_list in enumerate(block_cols)
-            for block in block_col_list
-            if block and isinstance(block, Block)
-        )
+        blocks = self._block_cols_to_blocks_with_info(block_cols)
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for inner_element, block, block_col_num, block_col_list in blocks:
@@ -2667,12 +2701,12 @@ class Grid(sg.Column, SuperElement):
                     inner_element
                 )
             except GetWidgetSizeError:
-                popup_update_error(inner_element)
+                self._popup_update_error(inner_element)
                 continue
 
-            block_col = self.block_col_num_to_col.setdefault(
+            block_col = self.block_col_num_to_block_col.setdefault(
                 block_col_num,
-                BlockColumn(elements=block_col_list, width=0),
+                BlockColumn(blocks=block_col_list, width=0),
             )
 
             if inner_element_width > block_col.width:
@@ -2684,17 +2718,38 @@ class Grid(sg.Column, SuperElement):
 
         # Get the width needed for uniform blocks
         self.uniform_block_width = max(
-            {block_col.width for block_col in self.block_col_num_to_col.values()}
+            {block_col.width for block_col in self.block_col_num_to_block_col.values()}
         )
 
-        # Vertically align the elements
+        self._update_block_sizes()
+
+    def _update_block_sizes(self) -> None:
+        # Update the block sizes based on the current Grid state. Only call this method
+        # after alignment info exists.
+
+        # The alignment info for block columns doesn't exist
+        if not self.block_col_num_to_block_col:
+            sg.PopupError(
+                "Error when updating the Grid's block sizes",
+                "The alignment info for block columns doesn't exist",
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
+            return
+
+        block_cols = (
+            block_col.blocks for block_col in self.block_col_num_to_block_col.values()
+        )
+
+        blocks = self._block_cols_to_blocks_with_info(block_cols)
+
         for inner_element, block, block_col_num, _ in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     inner_element
                 )
             except GetWidgetSizeError:
-                popup_update_error(inner_element)
+                self._popup_update_error(inner_element)
                 continue
 
             block_widget: tk.Widget = block.widget
@@ -2710,18 +2765,30 @@ class Grid(sg.Column, SuperElement):
                 )
             else:
                 right_padding = (
-                    self.block_col_num_to_col[block_col_num].width - inner_element_width
+                    self.block_col_num_to_block_col[block_col_num].width
+                    - inner_element_width
                 )
                 block_widget.pack_configure(padx=(0, right_padding))
 
+    def _block_cols_to_blocks_with_info(
+        self, block_cols: Iterable[BlockList]
+    ) -> Generator[Tuple[sg.Element, Block, int, BlockList], None, None]:
+        return (
+            (block.Rows[0][0], block, block_col_num, block_col_list)
+            for block_col_num, block_col_list in enumerate(block_cols)
+            for block in block_col_list
+            if block and isinstance(block, sg.Column)
+        )
+
     def _is_visible_with_layout(self) -> bool:
-        # Return True if the Grid is visible and has a layout
+        # Return True if the Grid is visible and has a layout.
+        self.ParentForm.refresh()
         return True if self.widget.winfo_ismapped() and self.Rows else False
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
     ) -> List[List[sg.Element]]:
-        # Wrap each element in the layout in a Column whose padding will be used for vertical alignment
+        # Wrap each element in the layout in a Column whose padding will be used for vertical alignment.
         new_layout = []
 
         for row in layout:
@@ -2737,7 +2804,7 @@ class Grid(sg.Column, SuperElement):
     Layout = layout
 
     def add_row(self, *args):
-        # process the elements in the list by wrapping them in Columns
+        # Process the elements in the list by wrapping them in Columns.
 
         super().add_row(*args)
         return
