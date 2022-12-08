@@ -2690,7 +2690,9 @@ class Grid(sg.Column, SuperElement):
             return
 
         # Group the blocks vertically into columns of blocks
-        block_cols: Tuple[Blocks, ...] = tuple(zip_longest(*self.Rows, fillvalue=None))
+        block_cols: Tuple[Sequence[Optional[Block]], ...] = tuple(
+            zip_longest(*self.Rows, fillvalue=None)
+        )
 
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
