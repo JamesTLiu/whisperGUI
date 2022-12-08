@@ -2777,23 +2777,15 @@ class Grid(sg.Column, SuperElement):
                 block_widget.pack_configure(padx=(0, right_padding))
 
     def _block_cols_to_blocks_with_info(
-        self, block_cols: Iterable[Iterable[Block]]
+        self, block_cols: Iterable[Iterable[Optional[Block]]]
     ) -> Generator[Tuple[sg.Element, Block, int, Tuple[Block, ...]], None, None]:
-        blocks = tuple(
-            (block.inner_element, block, block_col_num, tuple(block_col_list))
-            for block_col_num, block_col_list in enumerate(block_cols)
-            for block in block_col_list
-            if block and isinstance(block, Block)
-        )
+        # Return each block's inner element, the block, each block's column number,
+        # and each block's column list.
+        for block_col_num, block_col_list in enumerate(block_cols):
+            block_col_list_cleaned = tuple(obj for obj in block_col_list if isinstance(obj, Block))
+            for block in block_col_list_cleaned:
+                yield (block.inner_element, block, block_col_num, block_col_list_cleaned)
 
-        return (block for block in blocks)
-
-        # return (
-        #     (block.inner_element, block, block_col_num, tuple(block_col_list))
-        #     for block_col_num, block_col_list in enumerate(block_cols)
-        #     for block in block_col_list
-        #     if block and isinstance(block, Block)
-        # )
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
