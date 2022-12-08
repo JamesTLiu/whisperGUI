@@ -2782,17 +2782,22 @@ class Grid(sg.Column, SuperElement):
         # Return each block's inner element, the block, each block's column number,
         # and each block's column list.
         for block_col_num, block_col_list in enumerate(block_cols):
-            block_col_list_cleaned = tuple(obj for obj in block_col_list if isinstance(obj, Block))
+            block_col_list_cleaned = tuple(
+                obj for obj in block_col_list if isinstance(obj, Block)
+            )
             for block in block_col_list_cleaned:
-                yield (block.inner_element, block, block_col_num, block_col_list_cleaned)
-
+                yield (
+                    block.inner_element,
+                    block,
+                    block_col_num,
+                    block_col_list_cleaned,
+                )
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
         self.ParentForm.refresh()
         return True if self.widget.winfo_ismapped() and self.Rows else False
 
-   
     def add_row(self, *args: sg.Element) -> None:
         # Process the elements in the list by wrapping them in Block elements.
         block_wrapped_elements = (Block(layout=[[element]], pad=0) for element in args)
