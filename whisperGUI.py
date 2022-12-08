@@ -2551,7 +2551,7 @@ class Grid(sg.Column, SuperElement):
             self._bind_elements_resize_to_layout_update(row)
 
     def _bind_elements_resize_to_layout_update(
-        self, elements: Iterable[sg.Element]
+        self, blocks: Iterable[Block]
     ) -> None:
         # Bind the elements to update the layout on resize
         # @function_details
@@ -2640,9 +2640,9 @@ class Grid(sg.Column, SuperElement):
                     right_padding = block_col.width - inner_element_width
                     block.widget.pack_configure(padx=(0, right_padding))
 
-        for element in elements:
-            if isinstance(element, Block):
-                inner_element = element.inner_element
+        for block in blocks:
+            if isinstance(block, Block):
+                inner_element = block.inner_element
                 inner_element.widget.bind(
                     "<<Resize>>",
                     update_grid_on_element_resize,
@@ -2653,7 +2653,7 @@ class Grid(sg.Column, SuperElement):
                 sg.PopupError(
                     "Error in layout",
                     "The processed layout should contain rows whose original elements are wrapped in Block elements.",
-                    f"Instead of a {Block}, the type found was {type(element)}",
+                    f"Instead of a {Block}, the type found was {type(block)}",
                     "The offensive layout = ",
                     self.Rows,
                     keep_on_top=True,
