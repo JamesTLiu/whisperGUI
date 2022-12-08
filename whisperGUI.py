@@ -2792,38 +2792,20 @@ class Grid(sg.Column, SuperElement):
         self.ParentForm.refresh()
         return True if self.widget.winfo_ismapped() and self.Rows else False
 
-    def _process_layout(
-        self, layout: Sequence[Sequence[sg.Element]]
-    ) -> tuple[tuple[Block, ...], ...]:
-        # Wrap each element in the layout in a Column whose padding will be used for vertical alignment.
-        def gen_blocks():
-            for row in layout:
-                yield tuple(Block(layout=[[element]], pad=0) for element in row)
+   
+    def add_row(self, *args: sg.Element) -> None:
+        # Process the elements in the list by wrapping them in Block elements.
+        block_wrapped_elements = (Block(layout=[[element]], pad=0) for element in args)
+        super().add_row(*block_wrapped_elements)
+        return
 
-        return tuple(gen_blocks())
+        # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
 
-    @function_details
-    def layout(self, rows: List[List[sg.Element]]) -> Grid:
-        processed_layout = self._process_layout(rows)
-        return super().layout(processed_layout)
+        # Update the Grid when a new row is added
+        # if self.widget.winfo_ismapped():
+        #     self._update_internals()
 
-    Layout = layout
-
-    # def add_row(self, *args) -> None:
-    #     # Process the elements in the list by wrapping them in Block elements.
-    #     block_wrapped_elements = (Block(layout=[[element]], pad=0) for element in args)
-    #     super().add_row(*block_wrapped_elements)
-    #     return
-
-    #     # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
-
-    #     # Update the Grid when a new row is added
-    #     # if self.widget.winfo_ismapped():
-    #     #     self._update_internals()
-
-    #     self._update_internals()
-
-    # AddRow = add_row
+    AddRow = add_row
 
 
 class Block(sg.Column):
