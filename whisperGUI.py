@@ -2636,7 +2636,7 @@ class Grid(sg.Column, SuperElement):
 
         for row in self.Rows:
             for wrapper_element in row:
-                if wrapper_element and isinstance(wrapper_element, Block):
+                if isinstance(wrapper_element, Block):
                     element = wrapper_element.inner_element
                     element.widget.bind(
                         "<<Resize>>",
