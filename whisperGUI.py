@@ -2545,9 +2545,15 @@ class Grid(sg.Column, SuperElement):
         # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
         self._bind_layout_element_resize_to_layout_update()
 
-    def _bind_layout_element_resize_to_layout_update(self):
-        # Set up binds to make the layout update when an element in the layout resizes.
+    def _bind_layout_element_resize_to_layout_update(self) -> None:
+        # Bind the elements in the layout to update the layout on resize
+        for row in self.Rows:
+            self._bind_elements_resize_to_layout_update(row)
 
+    def _bind_elements_resize_to_layout_update(
+        self, elements: Iterable[sg.Element]
+    ) -> None:
+        # Bind the elements to update the layout on resize
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
             """Update the Grid's layout when the element of a block resizes. Used as an
@@ -2634,26 +2640,25 @@ class Grid(sg.Column, SuperElement):
                     right_padding = block_col.width - inner_element_width
                     block.widget.pack_configure(padx=(0, right_padding))
 
-        for row in self.Rows:
-            for wrapper_element in row:
-                if isinstance(wrapper_element, Block):
-                    element = wrapper_element.inner_element
-                    element.widget.bind(
-                        "<<Resize>>",
-                        update_grid_on_element_resize,
-                        add="+",
-                    )
-                    # detect_all_widget_events(element.widget)
-                else:
-                    sg.PopupError(
-                        "Error in layout",
-                        "The processed layout should contain rows whose original elements are wrapped in Block elements.",
-                        f"Instead of a {Block}, the type found was {type(wrapper_element)}",
-                        "The offensive layout = ",
-                        self.Rows,
-                        keep_on_top=True,
-                        image=_random_error_emoji(),
-                    )
+        for element in elements:
+            if isinstance(element, Block):
+                inner_element = element.inner_element
+                inner_element.widget.bind(
+                    "<<Resize>>",
+                    update_grid_on_element_resize,
+                    add="+",
+                )
+                # detect_all_widget_events(element.widget)
+            else:
+                sg.PopupError(
+                    "Error in layout",
+                    "The processed layout should contain rows whose original elements are wrapped in Block elements.",
+                    f"Instead of a {Block}, the type found was {type(element)}",
+                    "The offensive layout = ",
+                    self.Rows,
+                    keep_on_top=True,
+                    image=_random_error_emoji(),
+                )
 
     def _update_internals(self, **kwargs) -> None:
         self._update_layout(**kwargs)
