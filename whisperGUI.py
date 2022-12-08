@@ -2451,12 +2451,8 @@ class SuperElement(sg.Element):
 
 @dataclass
 class BlockColumn:
-    blocks: BlockList
+    blocks: Blocks
     width: int
-
-
-Block: TypeAlias = sg.Column
-BlockList: TypeAlias = Sequence[Block]
 
 
 class Grid(sg.Column, SuperElement):
@@ -2503,7 +2499,7 @@ class Grid(sg.Column, SuperElement):
 
         ensure_valid_layout(layout)
 
-        processed_layout = self._process_layout(layout=layout)
+        # processed_layout = self._process_layout(layout=layout)
 
         # Lookup the block column that a widget is in
         self._widget_to_block_col: Dict[tk.Widget, BlockColumn] = {}
@@ -2514,7 +2510,7 @@ class Grid(sg.Column, SuperElement):
         self.uniform_block_width = self.uniform_block_height = None
 
         super().__init__(
-            layout=processed_layout,
+            layout=layout,
             background_color=background_color,
             size=size,
             s=s,
@@ -2582,7 +2578,7 @@ class Grid(sg.Column, SuperElement):
             #     wrapper_element = lookup.element
             #     print(f"\tevent element key: {wrapper_element.key}.")
 
-            # The block columns have never been vertically aligned
+            # The block columns have never been vertically aligned. Update the layout.
             if not self._widget_to_block_col:
                 self._update_layout()
                 return
@@ -2602,6 +2598,7 @@ class Grid(sg.Column, SuperElement):
                 )
                 return
 
+            # Update the width and height for uniform block mode
             if (
                 self.uniform_block_width is not None
                 and self.uniform_block_height is not None
@@ -2614,22 +2611,33 @@ class Grid(sg.Column, SuperElement):
                 if new_uniform_block_height:
                     self.uniform_block_height = height
 
-            if self.equal_block_sizes:
+            # New uniform block size
+            if self.equal_block_sizes and (
+                new_uniform_block_width or new_uniform_block_height
+            ):
+                self._update_block_sizes()
+                return
 
-                # New uniform block size
-                if new_uniform_block_width or new_uniform_block_height:
-                    ...
-
-            else:
-                ...
-
-            # Update a block column due to a resize event for a block's inner element
             block_col = self._widget_to_block_col[widget]
+
+            # Update only the block column that this widget is in
+            if not self.equal_block_sizes and width > block_col.width:
+                # Vertically align all blocks using the new width
+                block_col.width = width
+                for block in block_col.blocks:
+                    try:
+                        inner_element_width, _ = get_element_size(block.inner_element)
+                    except GetWidgetSizeError:
+                        self._popup_update_error(block.inner_element)
+                        continue
+
+                    right_padding = block_col.width - inner_element_width
+                    block.widget.pack_configure(padx=(0, right_padding))
 
         for row in self.Rows:
             for wrapper_element in row:
-                if wrapper_element and isinstance(wrapper_element, sg.Column):
-                    element: sg.Element = wrapper_element.Rows[0][0]
+                if wrapper_element and isinstance(wrapper_element, Block):
+                    element = wrapper_element.inner_element
                     element.widget.bind(
                         "<<Resize>>",
                         update_grid_on_element_resize,
@@ -2639,10 +2647,8 @@ class Grid(sg.Column, SuperElement):
                 else:
                     sg.PopupError(
                         "Error in layout",
-                        "The processed layout should contain rows whose original elements are wrapped in Column elements.",
-                        "Instead of a sg.Column, the type found was {}".format(
-                            type(wrapper_element)
-                        ),
+                        "The processed layout should contain rows whose original elements are wrapped in Block elements.",
+                        f"Instead of a {Block}, the type found was {type(wrapper_element)}",
                         "The offensive layout = ",
                         self.Rows,
                         keep_on_top=True,
@@ -2684,14 +2690,12 @@ class Grid(sg.Column, SuperElement):
             return
 
         # Group the blocks vertically into columns of blocks
-        block_cols: Tuple[BlockList, ...] = tuple(
-            zip_longest(*self.Rows, fillvalue=None)
-        )
+        block_cols: Tuple[Blocks, ...] = tuple(zip_longest(*self.Rows, fillvalue=None))
 
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
-        # A list of blocks with their block column number and block column list
+        # Blocks with their block column number, block column list, and inner element
         blocks = self._block_cols_to_blocks_with_info(block_cols)
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
@@ -2771,14 +2775,23 @@ class Grid(sg.Column, SuperElement):
                 block_widget.pack_configure(padx=(0, right_padding))
 
     def _block_cols_to_blocks_with_info(
-        self, block_cols: Iterable[BlockList]
-    ) -> Generator[Tuple[sg.Element, Block, int, BlockList], None, None]:
-        return (
-            (block.Rows[0][0], block, block_col_num, block_col_list)
+        self, block_cols: Iterable[Iterable[Block]]
+    ) -> Generator[Tuple[sg.Element, Block, int, Tuple[Block, ...]], None, None]:
+        blocks = tuple(
+            (block.inner_element, block, block_col_num, tuple(block_col_list))
             for block_col_num, block_col_list in enumerate(block_cols)
             for block in block_col_list
-            if block and isinstance(block, sg.Column)
+            if block and isinstance(block, Block)
         )
+
+        return (block for block in blocks)
+
+        # return (
+        #     (block.inner_element, block, block_col_num, tuple(block_col_list))
+        #     for block_col_num, block_col_list in enumerate(block_cols)
+        #     for block in block_col_list
+        #     if block and isinstance(block, Block)
+        # )
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
@@ -2787,36 +2800,45 @@ class Grid(sg.Column, SuperElement):
 
     def _process_layout(
         self, layout: Sequence[Sequence[sg.Element]]
-    ) -> List[List[sg.Element]]:
+    ) -> tuple[tuple[Block, ...], ...]:
         # Wrap each element in the layout in a Column whose padding will be used for vertical alignment.
-        new_layout = []
+        def gen_blocks():
+            for row in layout:
+                yield tuple(Block(layout=[[element]], pad=0) for element in row)
 
-        for row in layout:
-            new_row = [sg.Column(layout=[[element]], pad=0) for element in row]
-            new_layout.append(new_row)
+        return tuple(gen_blocks())
 
-        return new_layout
-
-    def layout(self, rows: List[List[sg.Element]]) -> sg.Column:
+    @function_details
+    def layout(self, rows: List[List[sg.Element]]) -> Grid:
         processed_layout = self._process_layout(rows)
         return super().layout(processed_layout)
 
     Layout = layout
 
-    def add_row(self, *args):
-        # Process the elements in the list by wrapping them in Columns.
+    # def add_row(self, *args) -> None:
+    #     # Process the elements in the list by wrapping them in Block elements.
+    #     block_wrapped_elements = (Block(layout=[[element]], pad=0) for element in args)
+    #     super().add_row(*block_wrapped_elements)
+    #     return
 
-        super().add_row(*args)
-        return
-        # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
+    #     # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
 
-        # Update the Grid when a new row is added
-        # if self.widget.winfo_ismapped():
-        #     self._update_internals()
+    #     # Update the Grid when a new row is added
+    #     # if self.widget.winfo_ismapped():
+    #     #     self._update_internals()
 
-        self._update_internals()
+    #     self._update_internals()
 
-    AddRow = add_row
+    # AddRow = add_row
+
+
+class Block(sg.Column):
+    @property
+    def inner_element(self) -> sg.Element:
+        return self.Rows[0][0]
+
+
+Blocks: TypeAlias = Sequence[Block]
 
 
 @dataclass
