@@ -2804,15 +2804,23 @@ class Grid(sg.Column, SuperElement):
 
     def add_row(self, *args: sg.Element) -> None:
         # Process the elements in the list by wrapping them in Block elements.
-        block_wrapped_elements = (Block(layout=[[element]], pad=0) for element in args)
+        block_wrapped_elements = tuple(
+            Block(layout=[[element]], pad=0) for element in args
+        )
+
         super().add_row(*block_wrapped_elements)
-        return
 
-        # _bind_layout_element_resize_to_layout_update() for just the wrapper elements of this row
+        # Refresh the window after adding the elements
+        try:
+            self.ParentForm.refresh()
+        # No window and therefore no Grid widget yet
+        except AttributeError:
+            return
 
-        # Update the Grid when a new row is added
-        # if self.widget.winfo_ismapped():
-        #     self._update_internals()
+        # Update the layout and bind the resizing of the elements to update the layout
+        if self._is_visible_with_layout():
+            self._update_internals()
+            self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
     AddRow = add_row
 
