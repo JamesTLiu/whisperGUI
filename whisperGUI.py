@@ -2269,12 +2269,13 @@ class Multiline(sg.Multiline):
 class PostInit:
     def __init__(self, *args, **kwargs) -> None:
         self._post_init()
+        super().__init__(*args, **kwargs)
 
     def _post_init(self):
         ...
 
 
-class Window(sg.Window):
+class Window(sg.Window, PostInit):
     """Represents a single Window."""
 
     def __init__(
@@ -2402,10 +2403,13 @@ class Window(sg.Window):
             sbar_relief=sbar_relief,
             metadata=metadata,
         )
+        super(sg.Window, self).__init__()
 
+    def _post_init(self):
         self._setup()
 
     def _setup(self) -> None:
+        # Make sure the window and its contents are drawn.
         self.refresh()
 
         # Run the setup for each element if it exists
@@ -2413,6 +2417,7 @@ class Window(sg.Window):
             with suppress(AttributeError):
                 element._setup()
 
+        # Make the changes appear
         self.refresh()
 
 
@@ -2830,6 +2835,10 @@ class Grid(sg.Column, SuperElement):
             Block(layout=[[element]], pad=0) for element in args
         )
 
+        # Add column number and block column info to the block
+        for block in block_wrapped_elements:
+            ...
+
         super().add_row(*block_wrapped_elements)
 
         # Refresh the window after adding the elements
@@ -2851,6 +2860,10 @@ class Block(sg.Column):
     @property
     def inner_element(self) -> sg.Element:
         return self.Rows[0][0]
+
+    @property
+    def block_col(self):
+        getattr(self, "")
 
 
 Blocks: TypeAlias = Sequence[Block]
