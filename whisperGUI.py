@@ -2408,7 +2408,14 @@ class Multiline(sg.Multiline):
         return processed_text
 
 
-class SuperElement(sg.Element):
+class PostInit:
+    def __init__(self, *args, **kwargs) -> None:
+        self._post_init()
+
+    def _post_init(self):
+        ...
+
+class SuperElement(sg.Element, PostInit):
     """The base class for all Elements but with extra capabilities."""
 
     def _setup(self) -> None:
@@ -3379,8 +3386,6 @@ class Image(ImageBase):
             size_match_target=size_match_target,
             size_match_element_type=size_match_element_type,
         )
-
-        self._post_init()
 
     def _post_init(self):
         self._original_source = self.Source
