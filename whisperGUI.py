@@ -2705,6 +2705,10 @@ class Grid(sg.Column, SuperElement):
         # Blocks with their block column number, block column list, and inner element
         blocks = self._block_cols_to_blocks_with_info(block_cols)
 
+        # Use clean dicts when (re)building the layout
+        self._widget_to_block_col.clear()
+        self.block_col_num_to_block_col.clear()
+
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for inner_element, block, block_col_num, block_col_list in blocks:
             try:
