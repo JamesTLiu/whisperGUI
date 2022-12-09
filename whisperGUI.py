@@ -2616,12 +2616,16 @@ class Grid(sg.Column, SuperElement):
                 if new_uniform_block_height:
                     self.uniform_block_height = height
 
-            # New uniform block size
-            if self.equal_block_sizes and (
-                new_uniform_block_width or new_uniform_block_height
-            ):
+            if self.equal_block_sizes:
+                # # New uniform block size
+                # if new_uniform_block_width or new_uniform_block_height:
+                #     self._update_block_sizes()
+                #     return
+                # # Set the block to the uniform block size
+                # else:
+                #     ...
+                #     return
                 self._update_block_sizes()
-                return
 
             block_col = self._widget_to_block_col[widget]
 
