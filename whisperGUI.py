@@ -2550,9 +2550,7 @@ class Grid(sg.Column, SuperElement):
         for row in self.Rows:
             self._bind_elements_resize_to_layout_update(row)
 
-    def _bind_elements_resize_to_layout_update(
-        self, blocks: Iterable[Block]
-    ) -> None:
+    def _bind_elements_resize_to_layout_update(self, blocks: Iterable[Block]) -> None:
         # Bind the elements to update the layout on resize
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
@@ -2571,6 +2569,7 @@ class Grid(sg.Column, SuperElement):
             # print(
             #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
             # )
+            self.ParentForm.refresh()
 
             # Only update the Grid if it's visible and has a layout
             if not self._is_visible_with_layout():
@@ -2689,6 +2688,7 @@ class Grid(sg.Column, SuperElement):
         # same_widgets = all(
         #     [_sg_widget is _tk_widget for _sg_widget, _tk_widget in paired_widgets]
         # )
+        self.ParentForm.refresh()
 
         # Only update the Grid if it's visible and has a layout
         if not self._is_visible_with_layout():
@@ -2800,7 +2800,6 @@ class Grid(sg.Column, SuperElement):
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
-        self.ParentForm.refresh()
         return True if self.widget.winfo_ismapped() and self.Rows else False
 
     def add_row(self, *args: sg.Element) -> None:
