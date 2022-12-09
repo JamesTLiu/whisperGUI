@@ -2710,13 +2710,13 @@ class Grid(sg.Column, SuperElement):
         self.block_col_num_to_block_col.clear()
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
-        for inner_element, block, block_col_num, block_col_list in blocks:
+        for block, block_col_num, block_col_list in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
-                    inner_element
+                    block.inner_element
                 )
             except GetWidgetSizeError:
-                self._popup_update_error(inner_element)
+                self._popup_update_error(block.inner_element)
                 continue
 
             block_col = self.block_col_num_to_block_col.setdefault(
@@ -2729,7 +2729,7 @@ class Grid(sg.Column, SuperElement):
             if inner_element_height > self.uniform_block_height:
                 self.uniform_block_height = inner_element_height
 
-            self._widget_to_block_col[inner_element.widget] = block_col
+            self._widget_to_block_col[block.inner_element.widget] = block_col
 
         # Get the width needed for uniform blocks
         self.uniform_block_width = max(
@@ -2758,13 +2758,13 @@ class Grid(sg.Column, SuperElement):
 
         blocks = self._block_cols_to_blocks_with_info(block_cols)
 
-        for inner_element, block, block_col_num, _ in blocks:
+        for block, block_col_num, _ in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
-                    inner_element
+                    block.inner_element
                 )
             except GetWidgetSizeError:
-                self._popup_update_error(inner_element)
+                self._popup_update_error(block.inner_element)
                 continue
 
             block_widget: tk.Widget = block.widget
@@ -2787,16 +2787,14 @@ class Grid(sg.Column, SuperElement):
 
     def _block_cols_to_blocks_with_info(
         self, block_cols: Iterable[Iterable[Optional[Block]]]
-    ) -> Generator[Tuple[sg.Element, Block, int, Tuple[Block, ...]], None, None]:
-        # Return each block's inner element, the block, each block's column number,
-        # and each block's column list.
+    ) -> Generator[Tuple[Block, int, Tuple[Block, ...]], None, None]:
+        # Return each block, its column number, and its column list.
         for block_col_num, block_col_list in enumerate(block_cols):
             block_col_list_cleaned = tuple(
                 obj for obj in block_col_list if isinstance(obj, Block)
             )
             for block in block_col_list_cleaned:
                 yield (
-                    block.inner_element,
                     block,
                     block_col_num,
                     block_col_list_cleaned,
@@ -2823,7 +2821,9 @@ class Grid(sg.Column, SuperElement):
 
         # Update the layout and bind the resizing of the elements to update the layout
         if self._is_visible_with_layout():
-            self._update_internals()
+            # self._update_internals()
+
+
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
     AddRow = add_row
