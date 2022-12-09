@@ -2694,6 +2694,10 @@ class Grid(sg.Column, SuperElement):
         if not self._is_visible_with_layout():
             return
 
+        # Use clean dicts when (re)building the layout
+        self._widget_to_block_col.clear()
+        self.block_col_num_to_block_col.clear()
+
         # Group the blocks vertically into columns of blocks
         block_cols: Tuple[Sequence[Optional[Block]], ...] = tuple(
             zip_longest(*self.Rows, fillvalue=None)
@@ -2704,10 +2708,6 @@ class Grid(sg.Column, SuperElement):
 
         # Blocks with their block column number, block column list, and inner element
         blocks = self._block_cols_to_blocks_with_info(block_cols)
-
-        # Use clean dicts when (re)building the layout
-        self._widget_to_block_col.clear()
-        self.block_col_num_to_block_col.clear()
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for block, block_col_num, block_col_list in blocks:
@@ -2822,7 +2822,6 @@ class Grid(sg.Column, SuperElement):
         # Update the layout and bind the resizing of the elements to update the layout
         if self._is_visible_with_layout():
             # self._update_internals()
-
 
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
