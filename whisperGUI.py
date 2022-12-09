@@ -2829,8 +2829,7 @@ class Grid(sg.Column, SuperElement):
 
         # Update the layout and bind the resizing of the elements to update the layout
         if self._is_visible_with_layout():
-            # self._update_internals()
-
+            self._update_internals()
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
     AddRow = add_row
