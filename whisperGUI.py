@@ -2802,7 +2802,15 @@ class Grid(sg.Column, SuperElement):
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
-        return True if self.widget.winfo_ismapped() and self.Rows else False
+        return True if self._is_visible() and self._layout_exists() else False
+
+    def _layout_exists(self) -> bool:
+        # Return True if the Grid has a layout.
+        return True if self.Rows else False
+
+    def _is_visible(self) -> bool:
+        # Return True if the Grid is visible.
+        return True if self.widget.winfo_ismapped() else False
 
     def add_row(self, *args: sg.Element) -> None:
         # Process the elements in the list by wrapping them in Block elements.
