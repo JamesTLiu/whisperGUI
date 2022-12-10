@@ -2764,8 +2764,8 @@ class Grid(sg.Column, SuperElement):
 
         # processed_layout = self._process_layout(layout=layout)
 
-        # Lookup the block column that a widget is in
-        self._widget_to_block_col: Dict[tk.Widget, BlockColumn] = {}
+        # Lookup the block that a widget is in
+        self._widget_to_block: Dict[tk.Widget, Block] = {}
 
         # Lookup a block column by number. Block columns are numbered left to right starting from 0.
         self.block_col_num_to_block_col: Dict[int, BlockColumn] = {}
@@ -2847,7 +2847,7 @@ class Grid(sg.Column, SuperElement):
             #     print(f"\tevent element key: {wrapper_element.key}.")
 
             # The block columns have never been vertically aligned. Update the layout.
-            if not self._widget_to_block_col:
+            if not self._widget_to_block:
                 self._update_layout()
                 return
 
@@ -2880,17 +2880,18 @@ class Grid(sg.Column, SuperElement):
                     self.uniform_block_height = height
 
             if self.equal_block_sizes:
-                # # New uniform block size
-                # if new_uniform_block_width or new_uniform_block_height:
-                #     self._update_block_sizes()
-                #     return
-                # # Set the block to the uniform block size
-                # else:
-                #     ...
-                #     return
-                self._update_all_block_sizes()
+                # New uniform block size
+                if new_uniform_block_width or new_uniform_block_height:
+                    self._update_all_block_sizes()
+                    return
+                # Set the block to the uniform block size
+                else:
+                    widget_block = ...
+                    # self._update_block_sizes((widget_block,))
+                    return
 
-            block_col = self._widget_to_block_col[widget]
+
+            block_col = self._widget_to_block[widget].block_col
 
             # Update only the block column that this widget is in
             if not self.equal_block_sizes and width > block_col.width:
@@ -2982,7 +2983,7 @@ class Grid(sg.Column, SuperElement):
             if inner_element_height > self.uniform_block_height:
                 self.uniform_block_height = inner_element_height
 
-            self._widget_to_block_col[block.inner_element.widget] = block_col
+            self._widget_to_block[block.inner_element.widget] = block
 
         # Get the width needed for uniform blocks
         self.uniform_block_width = max(
