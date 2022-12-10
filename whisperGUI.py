@@ -3082,16 +3082,18 @@ class Grid(sg.Column, SuperElement):
 
         super().add_row(*block_wrapped_elements)
 
-        # Set up block col and block column number attributes for blocks
+        # Set block column and block column number attributes for each block
         for block_col_num, block in enumerate(block_wrapped_elements):
-            block.block_col_num = block_col_num
-
+            # Get the block column for this block col number or create it if it doesn't exist
             block_col = self.block_col_num_to_block_col.setdefault(
                 block_col_num,
                 BlockColumn(blocks=[], width=0),
             )
+
+            # Add this block to the block column
             block_col.blocks.append(block)
 
+            block.block_col_num = block_col_num
             block.block_col = block_col
 
         # Refresh the window after adding the elements
