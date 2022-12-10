@@ -2219,6 +2219,224 @@ def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
     return None
 
 
+def detect_all_widget_events(
+    widget: tk.Widget, ignored_events: Iterable[str] = tuple()
+):
+    """Add event detail printing bindings to the widget for every possible tkinter event.
+
+    Args:
+        widget (tk.Widget): The widget to detect events for.
+        ignored_events (Iterable[str], optional): An Iterable of names for ignored tkinter events.
+            Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
+    """
+
+    @function_details
+    def event_handler(event: tk.Event):
+        widget: tk.Widget = event.widget
+        lookup = widget_to_element_with_window(widget)
+        if not lookup or not lookup.element or not lookup.window:
+            print("element/window not found for widget in event", end="\n\n")
+            return
+        element = lookup.element
+        print(f"event_handler called for element with key: {element.key}", end="\n\n")
+
+    undocumented_events = (
+        "Keymap",
+        "GraphicsExpose",
+        "NoExpose",
+        "CirculateRequest",
+        "SelectionClear",
+        "SelectionRequest",
+        "Selection",
+        "ClientMessage",
+        "Mapping",
+        "VirtualEvent",
+    )
+
+    for event in tk.EventType:
+        # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
+        if event.name not in undocumented_events and event.name not in ignored_events:
+            widget.bind(
+                f"<{event.name}>",
+                event_handler,
+                add="+",
+            )
+
+
+def set_row_size_of_element(
+    element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
+):
+    """Forcefully set the size of the row that the element is in. The row will no longer
+    fit to its children.
+
+    Args:
+        element (sg.Element): The element whose row is to be resized.
+        width (Optional[int], optional): New width of the row. Defaults to None.
+        height (Optional[int], optional): New height of the row. Defaults to None.
+    """
+    row_frame: tk.Frame = element.ParentRowFrame
+
+    try:
+        current_width, current_height = get_widget_size(row_frame)
+    except GetWidgetSizeError:
+        current_width = current_height = 1
+
+    new_width = width if width is not None else current_width
+    new_height = height if height is not None else current_height
+
+    row_frame.config(bg="skyblue3")  # set a background color to see the row size
+    row_frame.config(width=new_width, height=new_height)
+    row_frame.pack_propagate(flag=False)
+
+
+def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
+    """Return the size of a widget in Pixels.
+
+    Args:
+        widget (tk.Widget): A widget.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
+    Returns:
+        Tuple[int, int]: Width and height of the widget as reported by the tkinter windows manager.
+    """
+    try:
+        w = widget.winfo_width()
+        h = widget.winfo_height()
+    except Exception as e:
+        raise GetWidgetSizeError(f"Error getting size of widget: {widget}") from e
+    return w, h
+
+
+def get_element_size(element: sg.Element) -> Tuple[int, int]:
+    """Return the size of an Element's widget in Pixels.  Care must be taken as some elements use
+    characters to specify their size but will return pixels when calling this method.
+
+    Args:
+        element (sg.Element): An Element.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget for this element.
+
+    Returns:
+        Tuple[int, int]: Width and height of the element's widget as reported by the tkinter windows manager.
+    """
+    widget = element.widget
+    return get_widget_size(widget)
+
+
+def change_row_autosizing(
+    row: tk.Frame = None, element: sg.Element = None, auto_size: bool = False
+) -> None:
+    """Set whether the row or the row of an element fits its contents. If both are given,
+    the row will be used.
+
+    Args:
+        row (tk.Frame): The tkinter Frame that represents the row. Defaults to None.
+        element (sg.Element): The element whose row's setting is to be changed. Defaults to None.
+        auto_size (bool): If True, the row will fit its contents. Defaults to False.
+    """
+    if row:
+        row_frame = row
+    elif element:
+        row_frame = element.ParentRowFrame
+    else:
+        return
+
+    row_frame.pack_propagate(flag=auto_size)
+
+
+class GetWidgetSizeError(Exception):
+    """Error while getting the size of the widget."""
+
+
+@dataclass
+class WidgetSize:
+    width: int
+    height: int
+
+
+def widget_resized(widget: tk.Widget) -> bool:
+    """Return whether the widget has resized by comparing the last size and the current
+    size returned by the tkinter windows manager.
+
+    Args:
+        widget (tk.Widget): The widget to check for resizing.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
+    Returns:
+        bool: True if widget has resized.
+    """
+    # lookup = widget_to_element_with_window(widget)
+    # if not lookup or not lookup.element or not lookup.window:
+    #     print("\tchecking if widget resized. widget is not tracked by an active window")
+    # else:
+    #     wrapper_element = lookup.element
+    #     print(f"\tchecking if widget resized for element w/ key: {wrapper_element.key}")
+
+    last_size = get_widget_last_size(widget)
+
+    widget_width, widget_height = get_widget_size(widget)
+
+    # No last size for widget
+    if last_size is None:
+        return True
+    # Widget resized. Update the last size.
+    elif widget_width != last_size.width or widget_height != last_size.height:
+        last_size.width = widget_width
+        last_size.height = widget_height
+        return True
+    # Widget has not resized
+    else:
+        return False
+
+
+def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
+    """Return the last size of the widget.
+
+    If there's no last size for the widget, one will be created using the current size for future calls
+    and None will be returned.
+
+    Args:
+        widget (tk.Widget): The widget.
+
+    Raises:
+        GetWidgetSizeError: Error while getting the size of the widget.
+
+    Returns:
+        Optional[WidgetSize]: The last size of the widget.
+    """
+    last_size_attr = "_last_size"
+    last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
+
+    # No last size attribute yet. Add the last size attribute to the widget with the current size.
+    if last_size is None:
+        widget_width, widget_height = get_widget_size(widget)
+
+        # last_size = WidgetSize(width=widget_width, height=widget_height)
+        last_size_val = WidgetSize(width=widget_width, height=widget_height)
+        setattr(
+            widget,
+            last_size_attr,
+            last_size_val,
+        )
+        # print("last size attr added to widget")
+
+    return last_size
+
+
+class PostInit:
+    def __init__(self, *args, **kwargs) -> None:
+        self._post_init()
+        super().__init__(*args, **kwargs)
+
+    def _post_init(self):
+        ...
+
+
 class Multiline(sg.Multiline):
     """Multiline Element with extra capabilities - Display and/or read multiple lines of text.
     This is both an input and output element.
@@ -2264,15 +2482,6 @@ class Multiline(sg.Multiline):
         )
 
         return processed_text
-
-
-class PostInit:
-    def __init__(self, *args, **kwargs) -> None:
-        self._post_init()
-        super().__init__(*args, **kwargs)
-
-    def _post_init(self):
-        ...
 
 
 class Window(sg.Window, PostInit):
@@ -2505,12 +2714,6 @@ class SuperElement(sg.Element, PostInit):
         """Remove all event bindings for this element's widget."""
         for event in self.widget.bind():
             self.unbind(event)
-
-
-@dataclass
-class BlockColumn:
-    blocks: Blocks
-    width: int
 
 
 class Grid(sg.Column, SuperElement):
@@ -2880,10 +3083,6 @@ class Grid(sg.Column, SuperElement):
             Block(layout=[[element]], pad=0) for element in args
         )
 
-        # Add column number and block column info to the block
-        for block in block_wrapped_elements:
-            ...
-
         super().add_row(*block_wrapped_elements)
 
         # Refresh the window after adding the elements
@@ -2901,151 +3100,19 @@ class Grid(sg.Column, SuperElement):
     AddRow = add_row
 
 
+@dataclass
+class BlockColumn:
+    blocks: Blocks
+    width: int
+
+
 class Block(sg.Column):
     @property
     def inner_element(self) -> sg.Element:
         return self.Rows[0][0]
 
-    @property
-    def block_col(self):
-        getattr(self, "")
-
 
 Blocks: TypeAlias = Sequence[Block]
-
-
-@dataclass
-class WidgetSize:
-    width: int
-    height: int
-
-
-def detect_all_widget_events(
-    widget: tk.Widget, ignored_events: Iterable[str] = tuple()
-):
-    """Add event detail printing bindings to the widget for every possible tkinter event.
-
-    Args:
-        widget (tk.Widget): The widget to detect events for.
-        ignored_events (Iterable[str], optional): An Iterable of names for ignored tkinter events.
-            Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
-    """
-
-    @function_details
-    def event_handler(event: tk.Event):
-        widget: tk.Widget = event.widget
-        lookup = widget_to_element_with_window(widget)
-        if not lookup or not lookup.element or not lookup.window:
-            print("element/window not found for widget in event", end="\n\n")
-            return
-        element = lookup.element
-        print(f"event_handler called for element with key: {element.key}", end="\n\n")
-
-    undocumented_events = (
-        "Keymap",
-        "GraphicsExpose",
-        "NoExpose",
-        "CirculateRequest",
-        "SelectionClear",
-        "SelectionRequest",
-        "Selection",
-        "ClientMessage",
-        "Mapping",
-        "VirtualEvent",
-    )
-
-    for event in tk.EventType:
-        # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
-        if event.name not in undocumented_events and event.name not in ignored_events:
-            widget.bind(
-                f"<{event.name}>",
-                event_handler,
-                add="+",
-            )
-
-
-def set_row_size_of_element(
-    element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
-):
-    """Forcefully set the size of the row that the element is in. The row will no longer
-    fit to its children.
-
-    Args:
-        element (sg.Element): The element whose row is to be resized.
-        width (Optional[int], optional): New width of the row. Defaults to None.
-        height (Optional[int], optional): New height of the row. Defaults to None.
-    """
-    row_frame: tk.Frame = element.ParentRowFrame
-
-    try:
-        current_width, current_height = get_widget_size(row_frame)
-    except GetWidgetSizeError:
-        current_width = current_height = 1
-
-    new_width = width if width is not None else current_width
-    new_height = height if height is not None else current_height
-
-    row_frame.config(bg="skyblue3")  # set a background color to see the row size
-    row_frame.config(width=new_width, height=new_height)
-    row_frame.pack_propagate(flag=False)
-
-
-def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
-    """Return the size of a widget in Pixels.
-
-    Args:
-        widget (tk.Widget): A widget.
-
-    Raises:
-        GetWidgetSizeError: Error while getting the size of the widget.
-
-    Returns:
-        Tuple[int, int]: Width and height of the widget as reported by the tkinter windows manager.
-    """
-    try:
-        w = widget.winfo_width()
-        h = widget.winfo_height()
-    except Exception as e:
-        raise GetWidgetSizeError(f"Error getting size of widget: {widget}") from e
-    return w, h
-
-
-def get_element_size(element: sg.Element) -> Tuple[int, int]:
-    """Return the size of an Element's widget in Pixels.  Care must be taken as some elements use
-    characters to specify their size but will return pixels when calling this method.
-
-    Args:
-        element (sg.Element): An Element.
-
-    Raises:
-        GetWidgetSizeError: Error while getting the size of the widget for this element.
-
-    Returns:
-        Tuple[int, int]: Width and height of the element's widget as reported by the tkinter windows manager.
-    """
-    widget = element.widget
-    return get_widget_size(widget)
-
-
-def change_row_autosizing(
-    row: tk.Frame = None, element: sg.Element = None, auto_size: bool = False
-) -> None:
-    """Set whether the row or the row of an element fits its contents. If both are given,
-    the row will be used.
-
-    Args:
-        row (tk.Frame): The tkinter Frame that represents the row. Defaults to None.
-        element (sg.Element): The element whose row's setting is to be changed. Defaults to None.
-        auto_size (bool): If True, the row will fit its contents. Defaults to False.
-    """
-    if row:
-        row_frame = row
-    elif element:
-        row_frame = element.ParentRowFrame
-    else:
-        return
-
-    row_frame.pack_propagate(flag=auto_size)
 
 
 class ImageBase(sg.Image, SuperElement):
@@ -3262,81 +3329,6 @@ class ImageBase(sg.Image, SuperElement):
             Union[str, bytes, None]:  The new source.
         """
         return source if source is not ... else self.Source
-
-
-class GetWidgetSizeError(Exception):
-    """Error while getting the size of the widget."""
-
-
-def widget_resized(widget: tk.Widget) -> bool:
-    """Return whether the widget has resized by comparing the last size and the current
-    size returned by the tkinter windows manager.
-
-    Args:
-        widget (tk.Widget): The widget to check for resizing.
-
-    Raises:
-        GetWidgetSizeError: Error while getting the size of the widget.
-
-    Returns:
-        bool: True if widget has resized.
-    """
-    # lookup = widget_to_element_with_window(widget)
-    # if not lookup or not lookup.element or not lookup.window:
-    #     print("\tchecking if widget resized. widget is not tracked by an active window")
-    # else:
-    #     wrapper_element = lookup.element
-    #     print(f"\tchecking if widget resized for element w/ key: {wrapper_element.key}")
-
-    last_size = get_widget_last_size(widget)
-
-    widget_width, widget_height = get_widget_size(widget)
-
-    # No last size for widget
-    if last_size is None:
-        return True
-    # Widget resized. Update the last size.
-    elif widget_width != last_size.width or widget_height != last_size.height:
-        last_size.width = widget_width
-        last_size.height = widget_height
-        return True
-    # Widget has not resized
-    else:
-        return False
-
-
-def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
-    """Return the last size of the widget.
-
-    If there's no last size for the widget, one will be created using the current size for future calls
-    and None will be returned.
-
-    Args:
-        widget (tk.Widget): The widget.
-
-    Raises:
-        GetWidgetSizeError: Error while getting the size of the widget.
-
-    Returns:
-        Optional[WidgetSize]: The last size of the widget.
-    """
-    last_size_attr = "_last_size"
-    last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
-
-    # No last size attribute yet. Add the last size attribute to the widget with the current size.
-    if last_size is None:
-        widget_width, widget_height = get_widget_size(widget)
-
-        # last_size = WidgetSize(width=widget_width, height=widget_height)
-        last_size_val = WidgetSize(width=widget_width, height=widget_height)
-        setattr(
-            widget,
-            last_size_attr,
-            last_size_val,
-        )
-        # print("last size attr added to widget")
-
-    return last_size
 
 
 class Image(ImageBase):
