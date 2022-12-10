@@ -2993,6 +2993,11 @@ class Grid(sg.Column, SuperElement):
 
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
+        """Return the block columns for the Grid's layout.
+
+        Returns:
+            Tuple[BlockColumn, ...]: The block columns.
+        """
         return tuple(self.block_col_num_to_block_col.values())
 
     @property
