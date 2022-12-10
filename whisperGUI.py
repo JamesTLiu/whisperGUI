@@ -3051,21 +3051,6 @@ class Grid(sg.Column, SuperElement):
                 right_padding = block_col_width - inner_element_width
                 block_widget.pack_configure(padx=(0, right_padding))
 
-    def _block_cols_to_blocks_with_info(
-        self, block_cols: Iterable[Iterable[Optional[Block]]]
-    ) -> Generator[Tuple[Block, int, Tuple[Block, ...]], None, None]:
-        # Return each block, its column number, and its column list.
-        for block_col_num, block_col_list in enumerate(block_cols):
-            block_col_list_cleaned = tuple(
-                obj for obj in block_col_list if isinstance(obj, Block)
-            )
-            for block in block_col_list_cleaned:
-                yield (
-                    block,
-                    block_col_num,
-                    block_col_list_cleaned,
-                )
-
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
         return True if self._is_visible() and self._layout_exists() else False
