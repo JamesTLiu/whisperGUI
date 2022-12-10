@@ -3025,11 +3025,7 @@ class Grid(sg.Column, SuperElement):
             )
             return
 
-        block_cols = (block_col.blocks for block_col in self.block_columns)
-
-        blocks = self._block_cols_to_blocks_with_info(block_cols)
-
-        for block, block_col_num, _ in blocks:
+        for block in self.blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     block.inner_element
@@ -3050,6 +3046,7 @@ class Grid(sg.Column, SuperElement):
                     pady=height_padding // 2,
                 )
             else:
+                block_col_num = block.block_col.number
                 right_padding = (
                     self.block_col_num_to_block_col[block_col_num].width
                     - inner_element_width
