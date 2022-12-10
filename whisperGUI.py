@@ -3095,13 +3095,6 @@ class Grid(sg.Column, SuperElement):
 
         super().add_row(*block_wrapped_elements)
 
-        # Refresh the window after adding the elements
-        try:
-            self.ParentForm.refresh()
-        # No window and therefore no Grid widget yet
-        except AttributeError:
-            return
-
         # Set up block col and block column number attributes for blocks
         for block_col_num, block in enumerate(block_wrapped_elements):
             block.block_col_num = block_col_num
@@ -3113,6 +3106,13 @@ class Grid(sg.Column, SuperElement):
             block_col.blocks.append(block)
 
             block.block_col = block_col
+
+        # Refresh the window after adding the elements
+        try:
+            self.ParentForm.refresh()
+        # No window and therefore no Grid widget yet
+        except AttributeError:
+            return
 
         # if block's inner element's width > block col's width
         # block_col.width = new width
