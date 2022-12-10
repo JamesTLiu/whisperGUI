@@ -2958,22 +2958,26 @@ class Grid(sg.Column, SuperElement):
             return
 
         # Use clean dicts when (re)building the layout
-        self._widget_to_block_col.clear()
-        self.block_col_num_to_block_col.clear()
+        # self._widget_to_block_col.clear()
+        # self.block_col_num_to_block_col.clear()
 
-        # Group the blocks vertically into columns of blocks
-        block_cols: Tuple[Sequence[Optional[Block]], ...] = tuple(
-            zip_longest(*self.Rows, fillvalue=None)
-        )
+        # # Group the blocks vertically into columns of blocks
+        # block_cols: Tuple[Sequence[Optional[Block]], ...] = tuple(
+        #     zip_longest(*self.Rows, fillvalue=None)
+        # )
 
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
         # Blocks with their block column number, block column list, and inner element
-        blocks = self._block_cols_to_blocks_with_info(block_cols)
+        # blocks = self._block_cols_to_blocks_with_info(block_cols)
+
+        blocks = [block for block_col in self.block_columns for block in block_col.blocks]
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
-        for block, block_col_num, block_col_list in blocks:
+        for block in blocks:
+            block_col_num = block.block_col_num
+            block_col_list = block.block_col.blocks
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     block.inner_element
@@ -3197,7 +3201,8 @@ class Block(sg.Column):
         return self.Rows[0][0]
 
 
-Blocks: TypeAlias = Sequence[Block]
+# Blocks: TypeAlias = Sequence[Block]
+Blocks: TypeAlias = List[Block]
 
 
 class ImageBase(sg.Image, SuperElement):
