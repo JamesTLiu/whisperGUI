@@ -2939,7 +2939,6 @@ class Grid(sg.Column, SuperElement):
             image=_random_error_emoji(),
         )
 
-    # @function_details
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows.
 
@@ -2961,20 +2960,8 @@ class Grid(sg.Column, SuperElement):
         if not self._is_visible_with_layout():
             return
 
-        # Use clean dicts when (re)building the layout
-        # self._widget_to_block_col.clear()
-        # self.block_col_num_to_block_col.clear()
-
-        # # Group the blocks vertically into columns of blocks
-        # block_cols: Tuple[Sequence[Optional[Block]], ...] = tuple(
-        #     zip_longest(*self.Rows, fillvalue=None)
-        # )
-
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
-
-        # Blocks with their block column number, block column list, and inner element
-        # blocks = self._block_cols_to_blocks_with_info(block_cols)
 
         blocks = [block for block_col in self.block_columns for block in block_col.blocks]
 
