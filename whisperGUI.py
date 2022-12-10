@@ -3001,6 +3001,10 @@ class Grid(sg.Column, SuperElement):
 
         self._update_block_sizes()
 
+    @property
+    def block_cols(self) -> Tuple[BlockColumn, ...]:
+        return tuple(self.block_col_num_to_block_col.values())
+
     def _update_block_sizes(self) -> None:
         # Update the block sizes based on the current Grid state. Only call this method
         # after alignment info exists.
