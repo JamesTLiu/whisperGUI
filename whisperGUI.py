@@ -3047,10 +3047,8 @@ class Grid(sg.Column, SuperElement):
                 )
             else:
                 block_col_num = block.block_col.number
-                right_padding = (
-                    self.block_col_num_to_block_col[block_col_num].width
-                    - inner_element_width
-                )
+                block_col_width = self.block_col_num_to_block_col[block_col_num].width
+                right_padding = block_col_width - inner_element_width
                 block_widget.pack_configure(padx=(0, right_padding))
 
     def _block_cols_to_blocks_with_info(
