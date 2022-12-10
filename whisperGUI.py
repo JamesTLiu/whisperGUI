@@ -2996,8 +2996,15 @@ class Grid(sg.Column, SuperElement):
         return tuple(self.block_col_num_to_block_col.values())
 
     @property
-    def blocks(self) -> Generator[Block, None, None]:
-        return (block for block_col in self.block_columns for block in block_col.blocks)
+    def blocks(self) -> Iterator[Block]:
+        """The blocks in the Grid's layout.
+
+        Yields:
+            Block: The next block in the Grid's layout.
+        """
+        for block_col in self.block_columns:
+            for block in block_col.blocks:
+                yield block
 
     def _update_block_sizes(self) -> None:
         # Update the block sizes based on the current Grid state. Only call this method
