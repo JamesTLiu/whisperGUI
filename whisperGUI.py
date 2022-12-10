@@ -2961,6 +2961,13 @@ class Grid(sg.Column, SuperElement):
         if not self._is_visible_with_layout():
             return
 
+        self._update_alignment_uniform_size_info()
+
+        self._update_all_block_sizes()
+
+    def _update_alignment_uniform_size_info(self):
+        # Update the block column widths and the uniform block size
+
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
@@ -2989,8 +2996,6 @@ class Grid(sg.Column, SuperElement):
         self.uniform_block_width = max(
             {block_col.width for block_col in self.block_columns}
         )
-
-        self._update_all_block_sizes()
 
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
