@@ -2996,7 +2996,7 @@ class Grid(sg.Column, SuperElement):
 
         # Get the width needed for uniform blocks
         self.uniform_block_width = max(
-            {block_col.width for block_col in self.block_col_num_to_block_col.values()}
+            {block_col.width for block_col in self.block_columns}
         )
 
         self._update_block_sizes()
@@ -3020,7 +3020,7 @@ class Grid(sg.Column, SuperElement):
             return
 
         block_cols = (
-            block_col.blocks for block_col in self.block_col_num_to_block_col.values()
+            block_col.blocks for block_col in self.block_columns
         )
 
         blocks = self._block_cols_to_blocks_with_info(block_cols)
