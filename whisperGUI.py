@@ -2967,8 +2967,6 @@ class Grid(sg.Column, SuperElement):
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for block in blocks:
-            block_col_num = block.block_col_num
-            block_col_list = block.block_col.blocks
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     block.inner_element
@@ -2977,10 +2975,7 @@ class Grid(sg.Column, SuperElement):
                 self._popup_update_error(block.inner_element)
                 continue
 
-            block_col = self.block_col_num_to_block_col.setdefault(
-                block_col_num,
-                BlockColumn(blocks=block_col_list, width=0),
-            )
+            block_col = block.block_col
 
             if inner_element_width > block_col.width:
                 block_col.width = inner_element_width
