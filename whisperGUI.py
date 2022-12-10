@@ -2888,7 +2888,7 @@ class Grid(sg.Column, SuperElement):
                 # else:
                 #     ...
                 #     return
-                self._update_block_sizes()
+                self._update_all_block_sizes()
 
             block_col = self._widget_to_block_col[widget]
 
@@ -2989,7 +2989,7 @@ class Grid(sg.Column, SuperElement):
             {block_col.width for block_col in self.block_columns}
         )
 
-        self._update_block_sizes()
+        self._update_all_block_sizes()
 
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
@@ -3011,8 +3011,11 @@ class Grid(sg.Column, SuperElement):
             for block in block_col.blocks:
                 yield block
 
-    def _update_block_sizes(self) -> None:
-        # Update the block sizes based on the current Grid state. Only call this method
+    def _update_all_block_sizes(self) -> None:
+        self._update_block_sizes(self.blocks)
+
+    def _update_block_sizes(self, blocks: Iterable[Block]) -> None:
+        # Update the given block's sizes based on the current Grid state. Only call this method
         # after alignment info exists.
 
         # The alignment info for block columns doesn't exist
@@ -3025,7 +3028,7 @@ class Grid(sg.Column, SuperElement):
             )
             return
 
-        for block in self.blocks:
+        for block in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
                     block.inner_element
