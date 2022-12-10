@@ -2629,7 +2629,7 @@ class Window(PostInit, sg.Window):
         self.refresh()
 
 
-class SuperElement(sg.Element, PostInit):
+class SuperElement(PostInit, sg.Element):
     """The base class for all Elements but with extra capabilities."""
 
     def __init__(
@@ -2675,7 +2675,6 @@ class SuperElement(sg.Element, PostInit):
             sbar_frame_color=sbar_frame_color,
             sbar_relief=sbar_relief,
         )
-        super(sg.Element, self).__init__()
 
     def _setup(self) -> None:
         """Set up internal tkinter event binds and update internal components. Only call
