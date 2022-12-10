@@ -2484,7 +2484,7 @@ class Multiline(sg.Multiline):
         return processed_text
 
 
-class Window(sg.Window, PostInit):
+class Window(PostInit, sg.Window):
     """Represents a single Window."""
 
     def __init__(
@@ -2612,7 +2612,6 @@ class Window(sg.Window, PostInit):
             sbar_relief=sbar_relief,
             metadata=metadata,
         )
-        super(sg.Window, self).__init__()
 
     def _post_init(self):
         self._setup()
