@@ -2963,7 +2963,9 @@ class Grid(sg.Column, SuperElement):
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
-        blocks = [block for block_col in self.block_columns for block in block_col.blocks]
+        blocks = [
+            block for block_col in self.block_columns for block in block_col.blocks
+        ]
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for block in blocks:
@@ -3009,9 +3011,7 @@ class Grid(sg.Column, SuperElement):
             )
             return
 
-        block_cols = (
-            block_col.blocks for block_col in self.block_columns
-        )
+        block_cols = (block_col.blocks for block_col in self.block_columns)
 
         blocks = self._block_cols_to_blocks_with_info(block_cols)
 
