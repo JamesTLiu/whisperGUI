@@ -2424,6 +2424,51 @@ class Window(sg.Window, PostInit):
 class SuperElement(sg.Element, PostInit):
     """The base class for all Elements but with extra capabilities."""
 
+    def __init__(
+        self,
+        type=sg.ELEM_TYPE_BLANK,
+        size=(None, None),
+        auto_size_text=None,
+        font=None,
+        background_color=None,
+        text_color=None,
+        key=None,
+        pad=None,
+        tooltip=None,
+        visible=True,
+        metadata=None,
+        sbar_trough_color=None,
+        sbar_background_color=None,
+        sbar_arrow_color=None,
+        sbar_width=None,
+        sbar_arrow_width=None,
+        sbar_frame_color=None,
+        sbar_relief=None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(
+            type=type,
+            size=size,
+            auto_size_text=auto_size_text,
+            font=font,
+            background_color=background_color,
+            text_color=text_color,
+            key=key,
+            pad=pad,
+            tooltip=tooltip,
+            visible=visible,
+            metadata=metadata,
+            sbar_trough_color=sbar_trough_color,
+            sbar_background_color=sbar_background_color,
+            sbar_arrow_color=sbar_arrow_color,
+            sbar_width=sbar_width,
+            sbar_arrow_width=sbar_arrow_width,
+            sbar_frame_color=sbar_frame_color,
+            sbar_relief=sbar_relief,
+        )
+        super(sg.Element, self).__init__()
+
     def _setup(self) -> None:
         """Set up internal tkinter event binds and update internal components. Only call
         this after the widget is created via calling window.refresh() or window.read()
