@@ -2235,7 +2235,6 @@ def detect_all_widget_events(
             Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
     """
 
-    @function_details
     def event_handler(event: tk.Event):
         widget: tk.Widget = event.widget
         lookup = widget_to_element_with_window(widget)
