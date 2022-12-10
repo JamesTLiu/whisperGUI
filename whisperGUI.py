@@ -378,7 +378,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
+            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
             # *tab1_options_layout,
             [
                 sg.pin(
@@ -2886,10 +2887,9 @@ class Grid(sg.Column, SuperElement):
                     return
                 # Set the block to the uniform block size
                 else:
-                    widget_block = ...
-                    # self._update_block_sizes((widget_block,))
+                    widget_block = self._widget_to_block[widget]
+                    self._update_block_sizes((widget_block,))
                     return
-
 
             block_col = self._widget_to_block[widget].block_col
 
