@@ -2833,82 +2833,22 @@ class Grid(sg.Column, SuperElement):
             # print(
             #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
             # )
+
             self.ParentForm.refresh()
 
             # Only update the Grid if it's visible and has a layout
             if not self._is_visible_with_layout():
                 return
 
-            # widget: tk.Widget = event.widget
-            # lookup = widget_to_element_with_window(widget)
-            # if not lookup or not lookup.element or not lookup.window:
-            #     print("\tevent widget is not tracked by an active window")
-            # else:
-            #     wrapper_element = lookup.element
-            #     print(f"\tevent element key: {wrapper_element.key}.")
-
-            # The block columns have never been vertically aligned. Update the layout.
-            if not self._widget_to_block:
-                self._update_layout()
-                return
-
             widget: tk.Widget = event.widget
+            lookup = widget_to_element_with_window(widget)
+            if not lookup or not lookup.element or not lookup.window:
+                print("\tevent widget is not tracked by an active window")
+            else:
+                wrapper_element = lookup.element
+                print(f"\tevent element key: {wrapper_element.key}.")
 
-            try:
-                width, height = get_widget_size(widget)
-            except GetWidgetSizeError:
-                sg.PopupError(
-                    "Error when updating the Grid layout on widget resize",
-                    "Unable to get the size of a widget",
-                    "The offensive widget = ",
-                    widget,
-                    keep_on_top=True,
-                    image=_random_error_emoji(),
-                )
-                return
-
-            widget_block = self._widget_to_block[widget]
-
-            # Update the width for the block column with the block for this widget
-
-            # Update the width and height for uniform block mode
-            if (
-                self.uniform_block_width is not None
-                and self.uniform_block_height is not None
-            ):
-                new_uniform_block_width = width > self.uniform_block_width
-                new_uniform_block_height = height > self.uniform_block_height
-
-                if new_uniform_block_width:
-                    self.uniform_block_width = width
-                if new_uniform_block_height:
-                    self.uniform_block_height = height
-
-            if self.equal_block_sizes:
-                # New uniform block size
-                if new_uniform_block_width or new_uniform_block_height:
-                    self._update_all_block_sizes()
-                    return
-                # Set the block to the uniform block size
-                else:
-                    self._update_block_sizes((widget_block,))
-                    return
-
-            block_col = self._widget_to_block[widget].block_col
-
-            # Update only the block column that this widget is in
-            if not self.equal_block_sizes and width > block_col.width:
-                # Vertically align all blocks using the new width
-                block_col.width = width
-                for block in block_col.blocks:
-                    try:
-                        inner_element_width, _ = get_element_size(block.inner_element)
-                    except GetWidgetSizeError:
-                        self._popup_update_error(block.inner_element)
-                        continue
-
-                    right_padding = block_col.width - inner_element_width
-                    block.widget.pack_configure(padx=(0, right_padding))
+            self._update_layout()
 
         for block in blocks:
             if isinstance(block, Block):
@@ -2943,6 +2883,7 @@ class Grid(sg.Column, SuperElement):
             image=_random_error_emoji(),
         )
 
+    @function_details
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows.
 
