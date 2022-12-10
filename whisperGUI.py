@@ -2963,9 +2963,7 @@ class Grid(sg.Column, SuperElement):
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
-        blocks = [
-            block for block_col in self.block_columns for block in block_col.blocks
-        ]
+        blocks = self.blocks
 
         # Find the vertical alignment width for each block column and the needed height for uniform blocks
         for block in blocks:
@@ -2996,6 +2994,10 @@ class Grid(sg.Column, SuperElement):
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
         return tuple(self.block_col_num_to_block_col.values())
+
+    @property
+    def blocks(self) -> Generator[Block, None, None]:
+        return (block for block_col in self.block_columns for block in block_col.blocks)
 
     def _update_block_sizes(self) -> None:
         # Update the block sizes based on the current Grid state. Only call this method
