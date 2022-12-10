@@ -3002,7 +3002,7 @@ class Grid(sg.Column, SuperElement):
         self._update_block_sizes()
 
     @property
-    def block_cols(self) -> Tuple[BlockColumn, ...]:
+    def block_columns(self) -> Tuple[BlockColumn, ...]:
         return tuple(self.block_col_num_to_block_col.values())
 
     def _update_block_sizes(self) -> None:
