@@ -2974,24 +2974,22 @@ class Grid(sg.Column, SuperElement):
         # The height to set all blocks to when uniform block sizes are used
         self.uniform_block_height = 1
 
-        # Find the vertical alignment width for each block column and the needed height for uniform blocks
-        for block in self.blocks:
-            try:
-                inner_element_width, inner_element_height = get_element_size(
-                    block.inner_element
-                )
-            except GetWidgetSizeError:
-                self._popup_update_error(block.inner_element)
-                continue
+        for block_col in self.block_columns:
+            block_col.width = 1
+            for block in block_col.blocks:
+                try:
+                    inner_element_width, inner_element_height = get_element_size(
+                        block.inner_element
+                    )
+                except GetWidgetSizeError:
+                    self._popup_update_error(block.inner_element)
+                    continue
 
-            block_col = block.block_col
-
-            if inner_element_width > block_col.width:
-                block_col.width = inner_element_width
-            if inner_element_height > self.uniform_block_height:
-                self.uniform_block_height = inner_element_height
-
-            self._widget_to_block[block.inner_element.widget] = block
+                if inner_element_width > block_col.width:
+                    block_col.width = inner_element_width
+                if inner_element_height > self.uniform_block_height:
+                    self.uniform_block_height = inner_element_height
+                self._widget_to_block[block.inner_element.widget] = block
 
         # Get the width needed for uniform blocks
         self.uniform_block_width = max(
