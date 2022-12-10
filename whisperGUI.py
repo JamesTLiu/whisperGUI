@@ -2867,6 +2867,10 @@ class Grid(sg.Column, SuperElement):
                 )
                 return
 
+            widget_block = self._widget_to_block[widget]
+
+            # Update the width for the block column with the block for this widget
+
             # Update the width and height for uniform block mode
             if (
                 self.uniform_block_width is not None
@@ -2887,7 +2891,6 @@ class Grid(sg.Column, SuperElement):
                     return
                 # Set the block to the uniform block size
                 else:
-                    widget_block = self._widget_to_block[widget]
                     self._update_block_sizes((widget_block,))
                     return
 
