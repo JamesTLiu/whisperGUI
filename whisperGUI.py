@@ -3109,6 +3109,73 @@ class BlockColumn:
 
 
 class Block(sg.Column):
+    """A block used in a Grid's layout."""
+
+    def __init__(
+        self,
+        layout,
+        background_color=None,
+        size=(None, None),
+        s=(None, None),
+        size_subsample_width=1,
+        size_subsample_height=2,
+        pad=None,
+        p=None,
+        scrollable=False,
+        vertical_scroll_only=False,
+        right_click_menu=None,
+        key=None,
+        k=None,
+        visible=True,
+        justification=None,
+        element_justification=None,
+        vertical_alignment=None,
+        grab=None,
+        expand_x=None,
+        expand_y=None,
+        metadata=None,
+        sbar_trough_color=None,
+        sbar_background_color=None,
+        sbar_arrow_color=None,
+        sbar_width=None,
+        sbar_arrow_width=None,
+        sbar_frame_color=None,
+        sbar_relief=None,
+    ):
+        self.block_col: BlockColumn = None
+        self.block_col_num: int = None
+
+        super().__init__(
+            layout=layout,
+            background_color=background_color,
+            size=size,
+            s=s,
+            size_subsample_width=size_subsample_width,
+            size_subsample_height=size_subsample_height,
+            pad=pad,
+            p=p,
+            scrollable=scrollable,
+            vertical_scroll_only=vertical_scroll_only,
+            right_click_menu=right_click_menu,
+            key=key,
+            k=k,
+            visible=visible,
+            justification=justification,
+            element_justification=element_justification,
+            vertical_alignment=vertical_alignment,
+            grab=grab,
+            expand_x=expand_x,
+            expand_y=expand_y,
+            metadata=metadata,
+            sbar_trough_color=sbar_trough_color,
+            sbar_background_color=sbar_background_color,
+            sbar_arrow_color=sbar_arrow_color,
+            sbar_width=sbar_width,
+            sbar_arrow_width=sbar_arrow_width,
+            sbar_frame_color=sbar_frame_color,
+            sbar_relief=sbar_relief,
+        )
+
     @property
     def inner_element(self) -> sg.Element:
         return self.Rows[0][0]
