@@ -2430,8 +2430,8 @@ def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
 
 class PostInit:
     def __init__(self, *args, **kwargs) -> None:
-        self._post_init()
         super().__init__(*args, **kwargs)
+        self._post_init()
 
     def _post_init(self):
         ...
