@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import decimal
 from enum import Enum
 from functools import partial, partialmethod
+import inspect
 import io
 import multiprocessing
 import platform
@@ -1371,35 +1372,39 @@ def start_GUI() -> None:
 
 def function_details(func: Callable) -> Callable:
 
-    # Getting the argument names of the
-    # called function
-    argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
+    # # Getting the argument names of the
+    # # called function
+    # argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
 
-    # Getting the Function name of the
-    # called function
-    fname = func.__name__
+    # # Getting the Function name of the
+    # # called function
+    # fname = func.__name__
 
     def inner_func(*args, **kwargs):
+        # print(fname, "(", end="")
 
-        print(fname, "(", end="")
+        # # printing the function arguments
+        # print(
+        #     ", ".join(
+        #         "% s = % r" % entry for entry in zip(argnames, args[: len(argnames)])
+        #     ),
+        #     end=", ",
+        # )
 
-        # printing the function arguments
-        print(
-            ", ".join(
-                "% s = % r" % entry for entry in zip(argnames, args[: len(argnames)])
-            ),
-            end=", ",
-        )
+        # # Printing the variable length Arguments
+        # print("args =", list(args[len(argnames) :]), end=", ")
 
-        # Printing the variable length Arguments
-        print("args =", list(args[len(argnames) :]), end=", ")
+        # # Printing the variable length keyword
+        # # arguments
+        # print("kwargs =", kwargs, end="")
+        # print(")")
 
-        # Printing the variable length keyword
-        # arguments
-        print("kwargs =", kwargs, end="")
-        print(")")
+        # return func(*args, **kwargs)
 
-        func(*args, **kwargs)
+        func_args = inspect.signature(func).bind(*args, **kwargs).arguments
+        func_args_str = ", ".join(map("{0[0]} = {0[1]!r}".format, func_args.items()))
+        print(f"{func.__module__}.{func.__qualname__} ( {func_args_str} )")
+        return func(*args, **kwargs)
 
     return inner_func
 
