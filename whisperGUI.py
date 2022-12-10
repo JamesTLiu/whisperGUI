@@ -3094,8 +3094,24 @@ class Grid(sg.Column, SuperElement):
         except AttributeError:
             return
 
+        # Set up block col and block column number attributes for blocks
+        for block_col_num, block in enumerate(block_wrapped_elements):
+            block.block_col_num = block_col_num
+
+            block_col = self.block_col_num_to_block_col.setdefault(
+                block_col_num,
+                BlockColumn(blocks=[], width=0),
+            )
+            block_col.blocks.append(block)
+
+            block.block_col = block_col
+
+        # if block's inner element's width > block col's width
+        # block_col.width = new width
+
         # Update the layout and bind the resizing of the elements to update the layout
         if self._is_visible_with_layout():
+            # self._update_block_sizes()
             self._update_internals()
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
