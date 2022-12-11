@@ -3715,6 +3715,15 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
     )
 
 
+def refresh_window(element: sg.Element) -> None:
+    """Refresh the window of the given Element.
+
+    Args:
+        element (sg.Element): An element.
+    """
+    element.ParentForm.refresh()
+
+
 def convert_rows_to_columns_for_elements(
     rows: Sequence[Sequence[sg.Element]], fill_element_type: Type[sg.Element]
 ) -> List[List[sg.Column]]:
