@@ -2813,13 +2813,15 @@ class Grid(sg.Column, SuperElement):
             widget: tk.Widget = event.widget
             if isinstance(widget, tk.Toplevel):
                 print(f"Window resized. {repr(widget)}")
-            else:
-                # print(repr(widget))
-                ...
+                self.remove_all_block_paddings()
+                refresh_window(self)
+                self._update_layout()
 
-        self.ParentForm.TKroot.bind("<<Resize>>",
-                    handle_window_resize,
-                    add="+",)
+        self.ParentForm.TKroot.bind(
+            "<<Resize>>",
+            handle_window_resize,
+            add="+",
+        )
 
     def _bind_layout_element_resize_to_layout_update(self) -> None:
         # Bind the elements in the layout to update the layout on resize
