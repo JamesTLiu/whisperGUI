@@ -2909,7 +2909,7 @@ class Grid(sg.Column, SuperElement):
 
         self._update_all_block_sizes()
 
-    def _update_alignment_uniform_size_info(self):
+    def _update_alignment_uniform_size_info(self) -> None:
         # Update the block column widths and the uniform block size
 
         # The height to set all blocks to when uniform block sizes are used
