@@ -2834,21 +2834,26 @@ class Grid(sg.Column, SuperElement):
             #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
             # )
 
-            self.ParentForm.refresh()
+            try:
+                # self.ParentForm.refresh()
+                # self.remove_all_block_paddings()
 
-            # Only update the Grid if it's visible and has a layout
-            if not self._is_visible_with_layout():
+                # Only update the Grid if it's visible and has a layout
+                if not self._is_visible_with_layout():
+                    return
+
+                widget: tk.Widget = event.widget
+                lookup = widget_to_element_with_window(widget)
+                if not lookup or not lookup.element or not lookup.window:
+                    print("\tresized event widget is not tracked by an active window")
+                else:
+                    wrapper_element = lookup.element
+                    print(f"\tresized event element key: {wrapper_element.key}.")
+
+                # self._update_layout()
+            except Exception as e:
+                print(e)
                 return
-
-            widget: tk.Widget = event.widget
-            lookup = widget_to_element_with_window(widget)
-            if not lookup or not lookup.element or not lookup.window:
-                print("\tevent widget is not tracked by an active window")
-            else:
-                wrapper_element = lookup.element
-                print(f"\tevent element key: {wrapper_element.key}.")
-
-            self._update_layout()
 
         for block in blocks:
             if isinstance(block, Block):
