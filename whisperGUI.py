@@ -639,7 +639,7 @@ def start_GUI() -> None:
 
         # Set the window size relative to the screen
         resize_window_relative_to_screen(
-            window=window, width_factor=0.6, height_factor=0.85
+            window=window, width_factor=0.9, height_factor=0.85
         )
 
         # Load the FolderBrowse's selected folder from the settings file
