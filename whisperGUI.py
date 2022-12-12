@@ -2937,6 +2937,12 @@ class Grid(sg.Column, SuperElement):
             {block_col.width for block_col in self.block_columns}
         )
 
+        print(
+            f"updated uniform size: {self.uniform_block_width, self.uniform_block_height}"
+        )
+
+        ...
+
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
         """Return the block columns for the Grid's layout.
