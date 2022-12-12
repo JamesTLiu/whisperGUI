@@ -378,8 +378,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
-            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            # [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
+            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
             # *tab1_options_layout,
             [
                 sg.pin(
@@ -2808,6 +2808,18 @@ class Grid(sg.Column, SuperElement):
         # Update the layout when the widget is made visible. Needed for widgets that are not visible on window creation.
         # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
         self._bind_layout_element_resize_to_layout_update()
+
+        def handle_window_resize(event: tk.Event):
+            widget: tk.Widget = event.widget
+            if isinstance(widget, tk.Toplevel):
+                print(f"Window resized. {repr(widget)}")
+            else:
+                # print(repr(widget))
+                ...
+
+        self.ParentForm.TKroot.bind("<<Resize>>",
+                    handle_window_resize,
+                    add="+",)
 
     def _bind_layout_element_resize_to_layout_update(self) -> None:
         # Bind the elements in the layout to update the layout on resize
