@@ -2995,8 +2995,7 @@ class Grid(sg.Column, SuperElement):
                     pady=height_padding // 2,
                 )
             else:
-                block_col_num = block.block_col.number
-                block_col_width = self.block_col_num_to_block_col[block_col_num].width
+                block_col_width = block.block_col.width
                 right_padding = block_col_width - inner_element_width
                 block_widget.pack_configure(padx=(0, right_padding))
 
