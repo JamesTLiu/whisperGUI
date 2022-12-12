@@ -2870,6 +2870,11 @@ class Grid(sg.Column, SuperElement):
                     image=_random_error_emoji(),
                 )
 
+    def remove_all_block_paddings(self):
+        for block in self.blocks:
+            block_widget: tk.Widget = block.widget
+            block_widget.pack_configure(padx=0, pady=0)
+
     def _update_internals(self, **kwargs) -> None:
         self._update_layout(**kwargs)
 
