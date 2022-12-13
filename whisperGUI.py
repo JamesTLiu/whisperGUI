@@ -3160,7 +3160,7 @@ class Block(sg.Column):
         sbar_frame_color=None,
         sbar_relief=None,
     ):
-        self.block_col: BlockColumn = None
+        self.block_col: Optional[BlockColumn] = None
 
         super().__init__(
             layout=layout,
