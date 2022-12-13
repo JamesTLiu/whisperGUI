@@ -2864,6 +2864,9 @@ class Grid(sg.Column, SuperElement):
                     wrapper_element = lookup.element
                     print(f"\tresized event element key: {wrapper_element.key}.")
 
+                if self.equal_block_sizes:
+                    self.ParentForm.TKroot.geometry("")
+
                 self._update_layout()
             except Exception as e:
                 print(e)
@@ -2877,7 +2880,6 @@ class Grid(sg.Column, SuperElement):
                     update_grid_on_element_resize,
                     add="+",
                 )
-                # detect_all_widget_events(element.widget)
             else:
                 sg.PopupError(
                     "Error in layout",
