@@ -293,28 +293,35 @@ def start_GUI() -> None:
             ],
             [
                 sg.Text("Prompt Profile"),
-                sg.Text(
-                    "Initial Prompt",
-                    tooltip=(
-                        "Use this when a dialect/style of a language or punctuation is desired.\n"
-                        "Does NOT guarantee the result will follow the initial prompt.\n"
-                        "Initial prompt will NOT be included in the result.\n"
-                        "Try a larger model if the result does not follow the initial prompt.\n\n"
-                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                    ),
-                    key=initial_prompt_text_key,
-                ),
-                InfoImage(
-                    tooltip=(
-                        "Use this when a dialect/style of a language or punctuation is desired.\n"
-                        "Does NOT guarantee the result will follow the initial prompt.\n"
-                        "Initial prompt will NOT be included in the result.\n"
-                        "Try a larger model if the result does not follow the initial prompt.\n\n"
-                        "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                    ),
-                    key=initial_prompt_info_key,
-                    size_match=True,
-                    size_match_target=initial_prompt_text_key,
+                sg.Column(
+                    layout=[
+                        [
+                            sg.Text(
+                                "Initial Prompt",
+                                tooltip=(
+                                    "Use this when a dialect/style of a language or punctuation is desired.\n"
+                                    "Does NOT guarantee the result will follow the initial prompt.\n"
+                                    "Initial prompt will NOT be included in the result.\n"
+                                    "Try a larger model if the result does not follow the initial prompt.\n\n"
+                                    "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                                ),
+                                key=initial_prompt_text_key,
+                            ),
+                            InfoImage(
+                                tooltip=(
+                                    "Use this when a dialect/style of a language or punctuation is desired.\n"
+                                    "Does NOT guarantee the result will follow the initial prompt.\n"
+                                    "Initial prompt will NOT be included in the result.\n"
+                                    "Try a larger model if the result does not follow the initial prompt.\n\n"
+                                    "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+                                ),
+                                key=initial_prompt_info_key,
+                                size_match=True,
+                                size_match_target=initial_prompt_text_key,
+                            ),
+                        ]
+                    ],
+                    pad=0,
                 ),
             ],
             [
@@ -5006,6 +5013,7 @@ def bind_window_resize_to_print(window: sg.Window) -> None:
         add="+",
     )
 
+
 def add_print_for_widget_resizes(window: sg.Window) -> None:
     """Add the printing of callback details for the resizing of all widgets
     in the window (including the window).
@@ -5013,11 +5021,13 @@ def add_print_for_widget_resizes(window: sg.Window) -> None:
     Args:
         window (sg.Window): The window.
     """
+
     @function_details
     def resize_handler(e):
         ...
 
     window.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
+
 
 # import os
 
