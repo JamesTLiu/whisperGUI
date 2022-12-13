@@ -683,8 +683,17 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=prompt_profile_dropdown_key,
     )
 
-    def popup_prompt_manager() -> Window:
+    def popup_prompt_manager(
+        location: Tuple[Optional[int], Optional[int]] = (None, None),
+        alpha_channel: float = None,
+    ) -> Window:
         """Pop up the prompt manager window.
+
+        Args:
+            location (Tuple[Optional[int], Optional[int]], optional): The location for the prompt manager
+                window. Defaults to (None, None).
+            alpha_channel (float, optional): The alpha channel to set for the prompt manager window.
+                Defaults to None.
 
         Returns:
             sg.Window: The prompt manager window.
@@ -754,6 +763,8 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
+            location=location,
+            alpha_channel=alpha_channel,
         )
 
         return win
