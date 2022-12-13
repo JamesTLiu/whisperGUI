@@ -2786,7 +2786,7 @@ class Grid(sg.Column, SuperElement):
         # Lookup a block column by number. Block columns are numbered left to right starting from 0.
         self.block_col_num_to_block_col: Dict[int, BlockColumn] = {}
 
-        self.uniform_block_width = self.uniform_block_height = None
+        self.uniform_block_width = self.uniform_block_height = 1
 
         super().__init__(
             layout=layout,
