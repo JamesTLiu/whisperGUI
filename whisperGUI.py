@@ -179,8 +179,6 @@ def start_GUI() -> None:
     _ = Window("", layout=[[sg.Text()]], finalize=True, alpha_channel=0)
 
     # Setup up the <<Resize>> event for all widgets
-    # Window.hidden_master_root.event_add("<<Resize>>", "None")
-    # Window.hidden_master_root.bind_all("<Configure>", forward_resize_event, add="+")
     _.TKroot.event_add("<<Resize>>", "None")
     _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
 
@@ -2810,20 +2808,6 @@ class Grid(sg.Column, SuperElement):
         # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
         self._bind_layout_element_resize_to_layout_update()
 
-        # def handle_window_resize(event: tk.Event):
-        #     widget: tk.Widget = event.widget
-        #     if isinstance(widget, tk.Toplevel):
-        #         # print(f"Window resized. {repr(widget)}")
-        #         self.remove_all_block_paddings()
-        #         refresh_window(self)
-        #         self._update_layout()
-
-        # self.ParentForm.TKroot.bind(
-        #     "<<Resize>>",
-        #     handle_window_resize,
-        #     add="+",
-        # )
-
     def _bind_layout_element_resize_to_layout_update(self) -> None:
         # Bind the elements in the layout to update the layout on resize
         for row in self.Rows:
@@ -2850,9 +2834,6 @@ class Grid(sg.Column, SuperElement):
             # )
 
             try:
-                # self.ParentForm.refresh()
-                # self.remove_all_block_paddings()
-
                 # Only update the Grid if it's visible and has a layout
                 if not self._is_visible_with_layout():
                     return
