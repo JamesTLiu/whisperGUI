@@ -2236,11 +2236,12 @@ def detect_all_widget_events(
             Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
     """
 
+    @function_details
     def event_handler(event: tk.Event):
         widget: tk.Widget = event.widget
         lookup = widget_to_element_with_window(widget)
         if not lookup or not lookup.element or not lookup.window:
-            print("element/window not found for widget in event", end="\n\n")
+            # print("element/window not found for widget in event", end="\n\n")
             return
         element = lookup.element
         print(f"event_handler called for element with key: {element.key}", end="\n\n")
