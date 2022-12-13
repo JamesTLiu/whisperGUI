@@ -2897,7 +2897,7 @@ class Grid(sg.Column, SuperElement):
     def _update_internals(self, **kwargs) -> None:
         self._update_layout(**kwargs)
 
-    def _popup_update_error(self, element: sg.Element):
+    def _popup_get_size_error(self, element: sg.Element):
         sg.PopupError(
             "Error when updating the Grid layout",
             "Unable to get the size of an element",
@@ -2947,7 +2947,7 @@ class Grid(sg.Column, SuperElement):
                         block.inner_element
                     )
                 except GetWidgetSizeError:
-                    self._popup_update_error(block.inner_element)
+                    self._popup_get_size_error(block.inner_element)
                     continue
 
                 if inner_element_width > block_col.width:
@@ -3010,7 +3010,7 @@ class Grid(sg.Column, SuperElement):
                     block.inner_element
                 )
             except GetWidgetSizeError:
-                self._popup_update_error(block.inner_element)
+                self._popup_get_size_error(block.inner_element)
                 continue
 
             block_widget: tk.Widget = block.widget
