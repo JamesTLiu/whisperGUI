@@ -182,12 +182,6 @@ def start_GUI() -> None:
     _.TKroot.event_add("<<Resize>>", "None")
     _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
 
-    # @function_details
-    # def resize_handler(e):
-    #     ...
-
-    # _.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
-
     _.close()
 
     # number of rows for the table
@@ -5012,6 +5006,18 @@ def bind_window_resize_to_print(window: sg.Window) -> None:
         add="+",
     )
 
+def add_print_for_widget_resizes(window: sg.Window) -> None:
+    """Add the printing of callback details for the resizing of all widgets
+    in the window (including the window).
+
+    Args:
+        window (sg.Window): The window.
+    """
+    @function_details
+    def resize_handler(e):
+        ...
+
+    window.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
 
 # import os
 
