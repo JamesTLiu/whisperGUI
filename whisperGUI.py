@@ -2864,7 +2864,7 @@ class Grid(sg.Column, SuperElement):
                     wrapper_element = lookup.element
                     print(f"\tresized event element key: {wrapper_element.key}.")
 
-                # self._update_layout()
+                self._update_layout()
             except Exception as e:
                 print(e)
                 return
@@ -3004,6 +3004,16 @@ class Grid(sg.Column, SuperElement):
             )
             return
 
+        def _popup_alignment_error(block: Block) -> None:
+            sg.PopupError(
+                "Error when updating the Grid layout",
+                "The spacing element is larger than the needed alignment padding",
+                "The offensive block = ",
+                block,
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
+
         for block in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
@@ -3013,21 +3023,43 @@ class Grid(sg.Column, SuperElement):
                 self._popup_get_size_error(block.inner_element)
                 continue
 
-            block_widget: tk.Widget = block.widget
+            spacing_element = block.spacing_element
+
+            try:
+                spacing_widget_width, spacing_widget_height = get_element_size(
+                    spacing_element
+                )
+            except GetWidgetSizeError:
+                self._popup_get_size_error(spacing_element)
+                continue
+
+            spacing_widget: tk.Widget = spacing_element.widget
 
             # Set all blocks to the same size using padding
             if self.equal_block_sizes:
-                height_padding = self.uniform_block_height - inner_element_height
+                # Set the block's height to the uniform block height by making the
+                # spacing widget's height + padding = uniform_block_height
+                height_padding = self.uniform_block_height - spacing_widget_height
 
+                # Error: the spacing widget is taller than the uniform block height
+                if height_padding < 0:
+                    _popup_alignment_error(block)
+                    height_padding = 0
+
+                # Use horizontal padding to expand the block's width to the uniform block width
                 right_padding = self.uniform_block_width - inner_element_width
-                block_widget.pack_configure(
+
+                spacing_widget.pack_configure(
                     padx=(0, right_padding),
-                    pady=height_padding // 2,
+                    pady=(0, height_padding),
                 )
             else:
                 block_col_width = block.block_col.width
+
+                # Use horizontal padding to expand the block's width to the uniform block width
                 right_padding = block_col_width - inner_element_width
-                block_widget.pack_configure(padx=(0, right_padding))
+
+                spacing_widget.pack_configure(padx=(0, right_padding))
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
@@ -3042,9 +3074,10 @@ class Grid(sg.Column, SuperElement):
         return True if self.widget.winfo_ismapped() else False
 
     def add_row(self, *args: sg.Element) -> None:
-        # Process the elements in the list by wrapping them in Block elements.
+        # Wrap the elements in Block elements along with an element for spacing.
         block_wrapped_elements = tuple(
-            Block(layout=[[element]], pad=0) for element in args
+            Block(layout=[[element, sg.Image("", pad=0, size=(1, 1))]], pad=0)
+            for element in args
         )
 
         super().add_row(*block_wrapped_elements)
@@ -3069,9 +3102,6 @@ class Grid(sg.Column, SuperElement):
         # No window and therefore no Grid widget yet
         except AttributeError:
             return
-
-        # if block's inner element's width > block col's width
-        # block_col.width = new width
 
         # Update the layout and bind the resizing of the elements to update the layout
         if self._is_visible_with_layout():
@@ -3159,6 +3189,10 @@ class Block(sg.Column):
     @property
     def inner_element(self) -> sg.Element:
         return self.Rows[0][0]
+
+    @property
+    def spacing_element(self) -> sg.Element:
+        return self.Rows[0][1]
 
 
 # Blocks: TypeAlias = Sequence[Block]
