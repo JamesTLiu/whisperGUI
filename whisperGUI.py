@@ -803,9 +803,9 @@ def start_GUI() -> None:
                 )
                 return None
 
-            new_prompt_manager_window = popup_prompt_manager()
-            new_prompt_manager_window.refresh()
-            # prompt_manager_window.close()
+            new_prompt_manager_window = popup_prompt_manager(location=(x_pos, y_pos), alpha_channel=0)
+            new_prompt_manager_window.reappear()
+            prompt_manager_window.close()
 
             if window_tracker:
                 window_tracker.track_window(new_prompt_manager_window)
