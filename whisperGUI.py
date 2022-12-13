@@ -3061,7 +3061,19 @@ class Grid(sg.Column, SuperElement):
                     pady=(0, height_padding),
                 )
             else:
-                block_col_width = block.block_col.width
+                block_col = block.block_col
+                if block_col is None:
+                    sg.PopupError(
+                        "Error when updating the Grid layout's block sizes",
+                        "The Block's block column does not exist",
+                        "The offensive block = ",
+                        Block,
+                        keep_on_top=True,
+                        image=_random_error_emoji(),
+                    )
+                    continue
+
+                block_col_width = block_col.width
 
                 # Use horizontal padding to expand the block's width to the uniform block width
                 right_padding = block_col_width - inner_element_width
