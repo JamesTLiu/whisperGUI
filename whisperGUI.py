@@ -2865,8 +2865,8 @@ class Grid(sg.Column, SuperElement):
                     wrapper_element = lookup.element
                     print(f"\tresized event element key: {wrapper_element.key}.")
 
-                if self.uniform_block_sizes:
-                    self.ParentForm.TKroot.geometry("")
+                if self.uniform_block_sizes and self.ParentForm.Resizable:
+                    self._set_nonresizable_autosize_window()
 
                 self._update_layout()
             except Exception as e:
@@ -2898,7 +2898,14 @@ class Grid(sg.Column, SuperElement):
             block_widget.pack_configure(padx=0, pady=0)
 
     def _update_internals(self, **kwargs) -> None:
+        if self.uniform_block_sizes:
+            self._set_nonresizable_autosize_window()
+
         self._update_layout(**kwargs)
+
+    def _set_nonresizable_autosize_window(self):
+        set_resizable_axis(window=self.ParentForm, x_axis=False, y_axis=False)
+        set_window_autosize(self.ParentForm)
 
     def _popup_get_size_error(self, element: sg.Element):
         sg.PopupError(
@@ -3779,6 +3786,15 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
         toggle_element.key,
         toggle_element.is_toggled_on,
     )
+
+
+def set_resizable_axis(window: sg.Window, x_axis: bool, y_axis: bool) -> None:
+    window.Resizable = True if x_axis or y_axis else False
+    window.TKroot.resizable(x_axis, y_axis)
+
+
+def set_window_autosize(window: sg.Window) -> None:
+    window.TKroot.geometry("")
 
 
 def refresh_window(element: sg.Element) -> None:
