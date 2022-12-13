@@ -371,9 +371,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            [Grid(layout=tab1_options_layout, uniform_block_sizes=True)],
-            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
-            # *tab1_options_layout,
+            # [Grid(layout=tab1_options_layout, uniform_block_sizes=True)],
+            [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
             [
                 sg.pin(
                     sg.Table(
