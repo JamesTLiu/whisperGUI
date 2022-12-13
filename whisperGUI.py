@@ -683,7 +683,7 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=prompt_profile_dropdown_key,
     )
 
-    def popup_prompt_manager() -> sg.Window:
+    def popup_prompt_manager() -> Window:
         """Pop up the prompt manager window.
 
         Returns:
