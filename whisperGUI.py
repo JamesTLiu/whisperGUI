@@ -378,8 +378,8 @@ def start_GUI() -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            # [Grid(layout=tab1_options_layout, equal_block_sizes=True)],
-            [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
+            [Grid(layout=tab1_options_layout, uniform_block_sizes=True)],
+            # [Grid(layout=tab1_options_layout, equal_block_sizes=False)],
             # *tab1_options_layout,
             [
                 sg.pin(
@@ -2758,9 +2758,9 @@ class Grid(sg.Column, SuperElement):
         sbar_arrow_width=None,
         sbar_frame_color=None,
         sbar_relief=None,
-        equal_block_sizes=False,
+        uniform_block_sizes=False,
     ):
-        self.equal_block_sizes = equal_block_sizes
+        self.uniform_block_sizes = uniform_block_sizes
 
         ensure_valid_layout(layout)
 
@@ -2865,7 +2865,7 @@ class Grid(sg.Column, SuperElement):
                     wrapper_element = lookup.element
                     print(f"\tresized event element key: {wrapper_element.key}.")
 
-                if self.equal_block_sizes:
+                if self.uniform_block_sizes:
                     self.ParentForm.TKroot.geometry("")
 
                 self._update_layout()
@@ -3039,7 +3039,7 @@ class Grid(sg.Column, SuperElement):
             spacing_widget: tk.Widget = spacing_element.widget
 
             # Set all blocks to the same size using padding
-            if self.equal_block_sizes:
+            if self.uniform_block_sizes:
                 # Set the block's height to the uniform block height by making the
                 # spacing widget's height + padding = uniform_block_height
                 height_padding = self.uniform_block_height - spacing_widget_height
