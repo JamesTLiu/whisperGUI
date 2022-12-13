@@ -5000,7 +5000,7 @@ def element_with_size_matching_image(
     return [size_match_element, image_element]
 
 
-def bind_window_resize_to_print(window: sg.Window):
+def bind_window_resize_to_print(window: sg.Window) -> None:
     def handle_window_resize(event: tk.Event):
         widget: tk.Widget = event.widget
         if isinstance(widget, tk.Toplevel):
