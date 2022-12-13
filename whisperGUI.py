@@ -43,8 +43,6 @@ from typing import (
     Union,
 )
 
-from multipledispatch import dispatch
-
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
