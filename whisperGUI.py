@@ -2809,19 +2809,19 @@ class Grid(sg.Column, SuperElement):
         # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
         self._bind_layout_element_resize_to_layout_update()
 
-        def handle_window_resize(event: tk.Event):
-            widget: tk.Widget = event.widget
-            if isinstance(widget, tk.Toplevel):
-                print(f"Window resized. {repr(widget)}")
-                self.remove_all_block_paddings()
-                refresh_window(self)
-                self._update_layout()
+        # def handle_window_resize(event: tk.Event):
+        #     widget: tk.Widget = event.widget
+        #     if isinstance(widget, tk.Toplevel):
+        #         # print(f"Window resized. {repr(widget)}")
+        #         self.remove_all_block_paddings()
+        #         refresh_window(self)
+        #         self._update_layout()
 
-        self.ParentForm.TKroot.bind(
-            "<<Resize>>",
-            handle_window_resize,
-            add="+",
-        )
+        # self.ParentForm.TKroot.bind(
+        #     "<<Resize>>",
+        #     handle_window_resize,
+        #     add="+",
+        # )
 
     def _bind_layout_element_resize_to_layout_update(self) -> None:
         # Bind the elements in the layout to update the layout on resize
