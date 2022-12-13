@@ -777,8 +777,25 @@ def start_GUI() -> None:
         """
 
         if prompt_manager_window:
-            prompt_manager_window.close()
+            # prompt_manager_window.close()
+            # new_prompt_manager_window = popup_prompt_manager()
+            x_pos, y_pos = prompt_manager_window.current_location(more_accurate=True)
+
+            if x_pos is None or y_pos is None:
+                sg.PopupError(
+                    "Error reloading the prompt manager window",
+                    "Unable to get the current location of the current prompt manager window.",
+                    "The offensive prompt manager window = ",
+                    prompt_manager_window,
+                    keep_on_top=True,
+                    image=_random_error_emoji(),
+                )
+                return None
+
             new_prompt_manager_window = popup_prompt_manager()
+            new_prompt_manager_window.refresh()
+            # prompt_manager_window.close()
+
             if window_tracker:
                 window_tracker.track_window(new_prompt_manager_window)
             if modal_window_manager:
