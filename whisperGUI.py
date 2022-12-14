@@ -128,6 +128,10 @@ def start_GUI() -> None:
     save_output_dir_checkbox_key = checkbox_key_prefix + "SAVE-OUTPUT-DIR-"
     language_specifier_text_setting_key = "-LANGUAGE-SPECIFIER-TEXT-"
     language_specifier_setting_key = "-LANGUAGE-SPECIFIER-"
+    language_specifier_example_text_key = "-LANGUAGE-SPECIFIER-EXAMPLE-TEXT-"
+    language_specifier_output_format_text_key = (
+        "-LANGUAGE-SPECIFIER-OUTPUT-FORMAT-TEXT-"
+    )
 
     # Keys for tabs
     main_tab_key = "-MAIN-TAB-"
@@ -192,6 +196,16 @@ def start_GUI() -> None:
     # Options used in the language specifier setting
     LANGUAGE_SPECIFIER_AS_LANG = "Language"
     LANGUAGE_SPECIFIER_AS_CODE = "Language Code"
+
+    LANG_SPECIFIER_OPTIONS = (
+        LANGUAGE_SPECIFIER_AS_LANG,
+        LANGUAGE_SPECIFIER_AS_CODE,
+    )
+
+    LANG_SPECIFIER_EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
+    LANG_SPECIFIER_TO_EXAMPLE_TEXT = dict(
+        zip(LANG_SPECIFIER_OPTIONS, LANG_SPECIFIER_EXAMPLE_TEXTS)
+    )
 
     # tracker for possibly active windows
     window_tracker = WindowTracker()
@@ -420,64 +434,189 @@ def start_GUI() -> None:
             ],
         ]
 
-        language_specifier_options = (
-            LANGUAGE_SPECIFIER_AS_LANG,
-            LANGUAGE_SPECIFIER_AS_CODE,
+        default_padx, default_pady = sg.DEFAULT_ELEMENT_PADDING
+
+        language_specifier = sg.user_settings_get_entry(
+            language_specifier_setting_key,
+            LANG_SPECIFIER_OPTIONS[0],
         )
+
+        tab2_settings_layout = [
+            [
+                sg.Frame(
+                    title="Resize the Application",
+                    layout=[
+                        [
+                            sg.Text(
+                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                                key=scaling_text_setting_key,
+                                background_color="blue",
+                            ),
+                            sg.Column(
+                                layout=[
+                                    [
+                                        sg.Input(
+                                            sg.user_settings_get_entry(
+                                                scaling_input_setting_key,
+                                                DEFAULT_GLOBAL_SCALING,
+                                            ),
+                                            size=(5),
+                                            key=scaling_input_setting_key,
+                                        ),
+                                        sg.Button(
+                                            "Apply", key=apply_global_scaling_key
+                                        ),
+                                    ]
+                                ]
+                            ),
+                        ]
+                    ],
+                    expand_x=True,
+                )
+            ],
+            [
+                sg.Frame(
+                    title="Output Folder",
+                    layout=[
+                        [
+                            sg.Text(
+                                text="Remember Output Folder",
+                                key=save_output_dir_text_key,
+                                background_color="blue",
+                            ),
+                            FancyCheckbox(
+                                start_toggled_on=save_output_dir,
+                                key=save_output_dir_checkbox_key,
+                                enable_events=True,
+                                size_match=True,
+                                size_match_target=save_output_dir_text_key,
+                            ),
+                        ]
+                    ],
+                    expand_x=True,
+                )
+            ],
+            [
+                sg.Frame(
+                    title="Language Specifier",
+                    layout=[
+                        [
+                            sg.Column(
+                                layout=[
+                                    [sg.Text("Specifier")],
+                                    [
+                                        sg.Text(
+                                            "Output File Name Format:",
+                                            key=language_specifier_output_format_text_key,
+                                            background_color="blue",
+                                        )
+                                    ],
+                                ],
+                                pad=0,
+                            ),
+                            sg.Column(
+                                layout=[
+                                    [
+                                        sg.Combo(
+                                            values=LANG_SPECIFIER_OPTIONS,
+                                            key=language_specifier_setting_key,
+                                            default_value=language_specifier,
+                                            auto_size_text=True,
+                                            readonly=True,
+                                            enable_events=True,
+                                            pad=(0, default_pady),
+                                        ),
+                                    ],
+                                    [
+                                        sg.Text(
+                                            LANG_SPECIFIER_TO_EXAMPLE_TEXT[
+                                                language_specifier
+                                            ],
+                                            pad=0,
+                                            text_color="black",
+                                            key=language_specifier_example_text_key,
+                                        )
+                                    ],
+                                ],
+                                pad=0,
+                            ),
+                        ]
+                    ],
+                    expand_x=True,
+                )
+            ],
+            # [
+            #     sg.Column(
+            #         [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
+            #         pad=0,
+            #     ),
+            #     sg.Column(
+            #         [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
+            #     ),
+            # ],
+            [
+                sg.Frame(
+                    title="Settings File Path",
+                    layout=[
+                        [
+                            sg.Input(
+                                f"{config_file_path}",
+                                size=len(config_file_path) - 6,
+                                disabled=True,
+                            )
+                        ]
+                    ],
+                    expand_x=True,
+                )
+            ],
+        ]
+
+        # settings tab
+        tab2_layout = [
+            [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
+            [sg.Column(layout=tab2_settings_layout, pad=0)],
+        ]
 
         # # settings tab
         # tab2_layout = [
         #     [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
+        #     # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+        #     [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
         #     [
-        #         sg.Frame(
-        #             title="Resize the Application",
+        #         sg.Text(
+        #             f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+        #             key=scaling_text_setting_key,
+        #         ),
+        #         sg.Column(
         #             layout=[
         #                 [
-        #                     sg.Text(
-        #                         f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-        #                         key=scaling_text_setting_key,
+        #                     sg.Input(
+        #                         sg.user_settings_get_entry(
+        #                             scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
+        #                         ),
+        #                         size=(5),
+        #                         key=scaling_input_setting_key,
         #                     ),
-        #                     sg.Column(
-        #                         layout=[
-        #                             [
-        #                                 sg.Input(
-        #                                     sg.user_settings_get_entry(
-        #                                         scaling_input_setting_key,
-        #                                         DEFAULT_GLOBAL_SCALING,
-        #                                     ),
-        #                                     size=(5),
-        #                                     key=scaling_input_setting_key,
-        #                                 ),
-        #                                 sg.Button(
-        #                                     "Apply", key=apply_global_scaling_key
-        #                                 ),
-        #                             ]
-        #                         ]
-        #                     ),
+        #                     sg.Button("Apply", key=apply_global_scaling_key),
         #                 ]
         #             ],
-        #         )
+        #             pad=0,
+        #         ),
         #     ],
         #     [
-        #         sg.Frame(
-        #             title="Output Folder",
-        #             layout=[
-        #                 size_matched_image_element(
-        #                     size_match_element=sg.Text(
-        #                         text="Remember Output Folder",
-        #                         key=save_output_dir_text_key,
-        #                     ),
-        #                     image_element=FancyCheckbox(
-        #                         start_toggled_on=save_output_dir,
-        #                         key=save_output_dir_checkbox_key,
-        #                         enable_events=True,
-        #                         size_match=True,
-        #                     ),
-        #                 )
-        #             ],
-        #         )
+        #         sg.Text(
+        #             text="Remember Output Folder",
+        #             key=save_output_dir_text_key,
+        #         ),
+        #         FancyCheckbox(
+        #             start_toggled_on=save_output_dir,
+        #             key=save_output_dir_checkbox_key,
+        #             enable_events=True,
+        #             size_match=True,
+        #             size_match_target=save_output_dir_text_key,
+        #         ),
         #     ],
-        #     [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+        #     # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
         #     [
         #         sg.Text(
         #             "Language Specifier in Output File Names",
@@ -494,97 +633,16 @@ def start_GUI() -> None:
         #             enable_events=True,
         #         ),
         #     ],
+        #     [sg.Text("      Language:"), sg.Text("video.english.txt")],
+        #     [sg.Text("      Language Code:"), sg.Text("video.en.txt")],
+        #     # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
+        #     [sg.Text(f"Location of the Settings File:")],
         #     [
-        #         sg.Column(
-        #             [[sg.Text("      Language:")], [sg.Text("      Language Code:")]],
-        #             pad=0,
-        #         ),
-        #         sg.Column(
-        #             [[sg.Text("video.english.txt")], [sg.Text("video.en.txt")]], pad=0
-        #         ),
-        #     ],
-        #     [
-        #         sg.Frame(
-        #             title="Settings File Path",
-        #             layout=[
-        #                 [
-        #                     sg.Input(
-        #                         f"{config_file_path}",
-        #                         size=len(config_file_path) - 6,
-        #                         disabled=True,
-        #                     )
-        #                 ]
-        #             ],
+        #         sg.Input(
+        #             f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
         #         )
         #     ],
         # ]
-
-        # settings tab
-        tab2_layout = [
-            [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
-            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            [sg.Text("Resize the Application", font=(GUI_FONT[0], 22))],
-            [
-                sg.Text(
-                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                    key=scaling_text_setting_key,
-                ),
-                sg.Column(
-                    layout=[
-                        [
-                            sg.Input(
-                                sg.user_settings_get_entry(
-                                    scaling_input_setting_key, DEFAULT_GLOBAL_SCALING
-                                ),
-                                size=(5),
-                                key=scaling_input_setting_key,
-                            ),
-                            sg.Button("Apply", key=apply_global_scaling_key),
-                        ]
-                    ],
-                    pad=0,
-                ),
-            ],
-            [
-                sg.Text(
-                    text="Remember Output Folder",
-                    key=save_output_dir_text_key,
-                ),
-                FancyCheckbox(
-                    start_toggled_on=save_output_dir,
-                    key=save_output_dir_checkbox_key,
-                    enable_events=True,
-                    size_match=True,
-                    size_match_target=save_output_dir_text_key,
-                ),
-            ],
-            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            [
-                sg.Text(
-                    "Language Specifier in Output File Names",
-                    key=language_specifier_text_setting_key,
-                ),
-                sg.Combo(
-                    values=language_specifier_options,
-                    key=language_specifier_setting_key,
-                    default_value=sg.user_settings_get_entry(
-                        language_specifier_setting_key, language_specifier_options[0]
-                    ),
-                    auto_size_text=True,
-                    readonly=True,
-                    enable_events=True,
-                ),
-            ],
-            [sg.Text("      Language:"), sg.Text("video.english.txt")],
-            [sg.Text("      Language Code:"), sg.Text("video.en.txt")],
-            # [sg.HorizontalSeparator(), sg.HorizontalSeparator()],
-            [sg.Text(f"Location of the Settings File:")],
-            [
-                sg.Input(
-                    f"{config_file_path}", size=len(config_file_path) - 6, disabled=True
-                )
-            ],
-        ]
 
         # Define the window's contents
         layout = [
@@ -1165,9 +1223,10 @@ def start_GUI() -> None:
         # User selected a language specifier for the result files
         elif event == language_specifier_setting_key:
             # Update the language specifier option setting
-            sg.user_settings_set_entry(
-                language_specifier_setting_key, values[language_specifier_setting_key]
-            )
+            sg.user_settings_set_entry(event, values[event])
+            current_language_specifier = values[event]
+            example_text = LANG_SPECIFIER_TO_EXAMPLE_TEXT[current_language_specifier]
+            window[language_specifier_example_text_key].update(value=example_text)
         # User saved settings
         elif event == apply_global_scaling_key:
 
