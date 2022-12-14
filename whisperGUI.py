@@ -1520,13 +1520,13 @@ def forward_resize_event(event: tk.Event) -> None:
     try:
         has_widget_resized = widget_resized(widget)
     except GetWidgetSizeError:
-        sg.PopupError(
-            f"Warning: Error while determining if the event's widget resized.",
-            f"The offensive widget = ",
-            widget,
-            keep_on_top=True,
-            image=_random_error_emoji(),
-        )
+        # sg.PopupError(
+        #     f"Warning: Error while determining if the event's widget resized.",
+        #     f"The offensive widget = ",
+        #     widget,
+        #     keep_on_top=True,
+        #     image=_random_error_emoji(),
+        # )
         return
 
     if has_widget_resized:
