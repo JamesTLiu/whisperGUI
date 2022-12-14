@@ -447,10 +447,22 @@ def start_GUI() -> None:
                     title="Resize the Application",
                     layout=[
                         [
-                            sg.Text(
-                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                                key=scaling_text_setting_key,
-                                background_color="blue",
+                            # sg.Text(
+                            #     f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                            #     key=scaling_text_setting_key,
+                            #     background_color="blue",
+                            # ),
+                            sg.Column(
+                                layout=[
+                                    [
+                                        sg.Text(
+                                            f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                                            key=scaling_text_setting_key,
+                                            background_color="blue",
+                                        ),
+                                    ]
+                                ],
+                                background_color="red",
                             ),
                             sg.Column(
                                 layout=[
@@ -462,6 +474,7 @@ def start_GUI() -> None:
                                             ),
                                             size=(5),
                                             key=scaling_input_setting_key,
+                                            pad=0,
                                         ),
                                         sg.Button(
                                             "Apply", key=apply_global_scaling_key
@@ -479,11 +492,23 @@ def start_GUI() -> None:
                     title="Output Folder",
                     layout=[
                         [
-                            sg.Text(
-                                text="Remember Output Folder",
-                                key=save_output_dir_text_key,
-                                background_color="blue",
+                            sg.Column(
+                                layout=[
+                                    [
+                                        sg.Text(
+                                            text="Remember Output Folder",
+                                            key=save_output_dir_text_key,
+                                            background_color="blue",
+                                        ),
+                                    ]
+                                ],
+                                background_color="red",
                             ),
+                            # sg.Text(
+                            #     text="Remember Output Folder",
+                            #     key=save_output_dir_text_key,
+                            #     background_color="blue",
+                            # ),
                             FancyCheckbox(
                                 start_toggled_on=save_output_dir,
                                 key=save_output_dir_checkbox_key,
@@ -501,6 +526,19 @@ def start_GUI() -> None:
                     title="Language Specifier",
                     layout=[
                         [
+                            # sg.Column(
+                            #     layout=[
+                            #         [sg.Text("Specifier")],
+                            #         [
+                            #             sg.Text(
+                            #                 "Output File Name Format:",
+                            #                 key=language_specifier_output_format_text_key,
+                            #                 background_color="blue",
+                            #             )
+                            #         ],
+                            #     ],
+                            #     pad=0,
+                            # ),
                             sg.Column(
                                 layout=[
                                     [sg.Text("Specifier")],
@@ -512,7 +550,7 @@ def start_GUI() -> None:
                                         )
                                     ],
                                 ],
-                                pad=0,
+                                background_color="red",
                             ),
                             sg.Column(
                                 layout=[
@@ -538,7 +576,6 @@ def start_GUI() -> None:
                                         )
                                     ],
                                 ],
-                                pad=0,
                             ),
                         ]
                     ],
@@ -704,12 +741,13 @@ def start_GUI() -> None:
         # Switch to the settings tab to load it and then switch back to the main tab
         window[settings_tab_key].select()
         window.refresh()
+
         vertically_align_elements(
             window=window,
             keys=(
                 scaling_text_setting_key,
                 save_output_dir_text_key,
-                language_specifier_output_format_text_key
+                language_specifier_output_format_text_key,
             ),
         )
         window[main_tab_key].select()
@@ -1626,26 +1664,148 @@ def vertically_align_elements(window, keys: Iterable[str]) -> None:
             image=_random_error_emoji(),
         )
 
-    elements: Iterator[sg.Element] = (window[key] for key in keys)
+    # elements: Iterator[sg.Element] = (window[key] for key in keys)
+    elements: Iterable[sg.Element] = tuple(window[key] for key in keys)
 
-    # Get a list with each element paired with its width
+    # Get a list with each element paired with its width and pad
     try:
-        elements_with_widths = tuple(
-            (element, get_element_size(element)[0]) for element in elements
+        elements_with_width_and_pad = tuple(
+            (element, get_element_size(element)[0], get_original_pad(element))
+            for element in elements
         )
     except GetWidgetSizeError:
         popup_get_size_error()
         return
 
-    # Get the longest width among all the elements
-    longest_width = max(
-        (element_and_width[1] for element_and_width in elements_with_widths)
-    )
+    def get_true_width(info: Tuple[sg.Element, int, Pad]) -> int:
+        # Get the true width of an element by adding its internal width and the external padx
+        return info[1] + info[2].left + info[2].right
+
+    longest_width_element_info = max(elements_with_width_and_pad, key=get_true_width)
+    longest_width = longest_width_element_info[1]
 
     # Vertically align using right padding
-    for element, width in elements_with_widths:
-        right_padding = longest_width - width
-        element.widget.pack_configure(ipadx=right_padding)
+    for element, width, pad in elements_with_width_and_pad:
+        # New right padding = original right padding + difference needed for alignment
+        extra_right_padding = longest_width - width
+        right_padding = extra_right_padding + pad.right
+
+        element.widget.pack_configure(padx=(pad.left, right_padding))
+
+
+def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
+    """Return the placement information for an Element or tkinter widget as a dict.
+
+    Args:
+        target (Union[sg.Element, tk.Widget]): An Element or tkinter widget.
+
+    Raises:
+        TypeError: target parameter is not an Element or tkinter widget.
+
+    Returns:
+        Dict[str, Any]: The placement information in a dict.
+    """
+    if isinstance(target, sg.Element):
+        widget = target.widget
+    elif isinstance(target, tk.Widget):
+        widget = target
+    else:
+        raise TypeError("target must be an Element or a tkinter widget")
+
+    return widget.info()
+
+
+def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
+    """Get the pad of the element/widget.
+
+    Args:
+        target (Union[sg.Element, tk.Widget]): The element/widget to get pad for.
+
+    Returns:
+        Pad: The pad.
+    """
+    info = get_placement_info(target)
+    padx = info["padx"]
+    pady = info["pady"]
+    return Pad(*process_pad_into_tuple(padx), *process_pad_into_tuple(pady))
+
+
+def get_original_pad(element: sg.Element) -> Pad:
+    """Return the original pad for the Element as set by PySimpleGUI. If no pad exists,
+    the original pad will be set to the current pad.
+
+    Args:
+        element (sg.Element): The element.
+
+    Returns:
+        Pad: The original pad.
+    """
+    return process_pad(element.Pad)
+
+
+@dataclass
+class Pad:
+    """The pad of an element."""
+
+    left: int
+    right: int
+    top: int
+    bottom: int
+
+    def as_tuple(self) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+        """Return the pad as a tuple ((left, right), (top, bottom)).
+
+        Returns:
+            Tuple[Tuple[int, int], Tuple[int, int]]: The pad.
+        """
+        return (self.left, self.right), (self.top, self.bottom)
+
+
+def process_pad_into_tuple(pad) -> Tuple:
+    """Return the padx or pady as a tuple.
+
+    Args:
+        pad (Union[int, Tuple[int, int]]): Padx as an int or (int, int).
+
+    Raises:
+        TypeError: Parameter must be a 2-tuple or a number
+
+    Returns:
+        Tuple: The padx/pady.
+    """
+    # It's a tuple
+    with suppress(TypeError):
+        _, __ = pad
+        return pad
+
+    # It's a number
+    try:
+        pad + 1
+        return pad, pad
+    except TypeError:
+        raise TypeError("parameter must be a 2-tuple or a number") from None
+
+
+def process_pad(pad) -> Pad:
+    """Return the pad as a tuple ((left, right), (top, bottom)).
+
+    Args:
+        pad (Union[None, int, Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int]]]): The pad.
+
+    Returns:
+        Pad: The pad as an object.
+    """
+    # Return the pad as ((left, right), (top, bottom)).
+
+    # No pad set when creating the Element. Use the default element padding.
+    if pad is None:
+        pad = sg.DEFAULT_ELEMENT_PADDING
+
+    # Turn pad into a 2-tuple
+    pad = process_pad_into_tuple(pad)
+
+    # Turn padx and pady each into a 2-tuple and make a Pad out of them
+    return Pad(*process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1]))
 
 
 def find_closest_element(
