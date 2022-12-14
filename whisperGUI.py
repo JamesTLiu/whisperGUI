@@ -704,6 +704,14 @@ def start_GUI() -> None:
         # Switch to the settings tab to load it and then switch back to the main tab
         window[settings_tab_key].select()
         window.refresh()
+        vertically_align_elements(
+            window=window,
+            keys=(
+                scaling_text_setting_key,
+                save_output_dir_text_key,
+                language_specifier_output_format_text_key
+            ),
+        )
         window[main_tab_key].select()
 
         # Show the window
@@ -861,7 +869,9 @@ def start_GUI() -> None:
                 )
                 return None
 
-            new_prompt_manager_window = popup_prompt_manager(location=(x_pos, y_pos), alpha_channel=0)
+            new_prompt_manager_window = popup_prompt_manager(
+                location=(x_pos, y_pos), alpha_channel=0
+            )
             new_prompt_manager_window.reappear()
             prompt_manager_window.close()
 
@@ -1598,8 +1608,8 @@ def resize_window_relative_to_screen(
     window.move_to_center()
 
 
-def set_same_width(text_elements: Sequence[sg.Text]) -> None:
-    """Set the width of the text elements to the longest text value among the elements.
+def vertically_align_elements(window, keys: Iterable[str]) -> None:
+    """Vertically align the elements.
 
     Only works properly with monospaced fonts. Non-monospaced fonts cause the textbox to not
     properly fit the text.
@@ -1607,10 +1617,35 @@ def set_same_width(text_elements: Sequence[sg.Text]) -> None:
     Args:
         text_elements (Sequence[sg.Text]): A Sequence with the text elements to set to the same width.
     """
-    longest_width = max([len(element.get()) for element in text_elements])
 
-    for element in text_elements:
-        element.set_size((longest_width, None))
+    def popup_get_size_error() -> None:
+        sg.PopupError(
+            "Error when vertically aligning elements",
+            "Unable to get the size of an element",
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+
+    elements: Iterator[sg.Element] = (window[key] for key in keys)
+
+    # Get a list with each element paired with its width
+    try:
+        elements_with_widths = tuple(
+            (element, get_element_size(element)[0]) for element in elements
+        )
+    except GetWidgetSizeError:
+        popup_get_size_error()
+        return
+
+    # Get the longest width among all the elements
+    longest_width = max(
+        (element_and_width[1] for element_and_width in elements_with_widths)
+    )
+
+    # Vertically align using right padding
+    for element, width in elements_with_widths:
+        right_padding = longest_width - width
+        element.widget.pack_configure(ipadx=right_padding)
 
 
 def find_closest_element(
