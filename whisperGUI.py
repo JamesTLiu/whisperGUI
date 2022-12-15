@@ -1803,6 +1803,27 @@ def process_pad(pad) -> Pad:
     return Pad(*process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1]))
 
 
+def popup_get_size_error(*lines: str, element: sg.Element = None) -> None:
+    """Pop up an error window due to failure when getting the size of an element.
+
+    Args:
+        *lines (str): Variable length list of strings to print first.
+        element (sg.Element, optional): An Element. Defaults to None.
+    """
+    if element is not None:
+        offending_element_text = f"The offensive Element = \n{element}"
+    else:
+        offending_element_text = ""
+
+    sg.PopupError(
+        *lines,
+        "Unable to get the size of an element",
+        offending_element_text,
+        keep_on_top=True,
+        image=_random_error_emoji(),
+    )
+
+
 def find_closest_element(
     index: int,
     element_list: List[sg.Element],
