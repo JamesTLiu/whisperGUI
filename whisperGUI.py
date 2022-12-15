@@ -1650,7 +1650,8 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
     """Vertically align the elements.
 
     Args:
-        text_elements (Sequence[sg.Text]): The text elements to set to the same width.
+        window (sg.Window): The window the elements are in.
+        keys (Iterable[str]): The keys for the elements to set to the same width.
     """
     elements: Iterator[sg.Element] = (window[key] for key in keys)
     # elements: Iterable[sg.Element] = tuple(window[key] for key in keys)
