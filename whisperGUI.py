@@ -1690,10 +1690,10 @@ def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
         target (Union[sg.Element, tk.Widget]): An Element or tkinter widget.
 
     Raises:
-        TypeError: target parameter is not an Element or tkinter widget.
+        TypeError: target argument is not an Element or tkinter widget.
 
     Returns:
-        Dict[str, Any]: The placement information in a dict.
+        Dict[str, Any]: The placement information.
     """
     if isinstance(target, sg.Element):
         widget = target.widget
@@ -1706,13 +1706,14 @@ def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
 
 
 def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
-    """Get the pad of the element/widget.
+    """Get the padding of the element/widget.
 
     Args:
-        target (Union[sg.Element, tk.Widget]): The element/widget to get pad for.
+        target (Union[sg.Element, tk.Widget]): The element/widget to get
+            the padding for.
 
     Returns:
-        Pad: The pad.
+        Pad: The padding.
     """
     info = get_placement_info(target)
     padx = info["padx"]
@@ -1721,20 +1722,20 @@ def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
 
 
 def get_original_pad(element: sg.Element) -> Pad:
-    """Return the original pad for the Element as set by PySimpleGUI.
+    """Return the original padding for the Element as set by PySimpleGUI.
 
     Args:
         element (sg.Element): The element.
 
     Returns:
-        Pad: The original pad.
+        Pad: The original padding.
     """
     return process_pad(element.Pad)
 
 
 @dataclass
 class Pad:
-    """The pad of an element."""
+    """The padding of an element."""
 
     left: int
     right: int
@@ -1751,7 +1752,7 @@ class Pad:
 
 
 def process_pad_into_tuple(pad) -> Tuple:
-    """Return the padx or pady as a tuple.
+    """Return the padding (x or y) as a tuple.
 
     Args:
         pad (Union[int, Tuple[int, int]]): Padx as an int or (int, int).
@@ -1760,7 +1761,7 @@ def process_pad_into_tuple(pad) -> Tuple:
         TypeError: Parameter must be a 2-tuple or a number
 
     Returns:
-        Tuple: The padx/pady.
+        Tuple: The padding.
     """
     # It's a 2-tuple
     with suppress(TypeError):
@@ -1776,8 +1777,8 @@ def process_pad_into_tuple(pad) -> Tuple:
 
 
 def process_pad(pad) -> Pad:
-    """Return the pad as a tuple ((left, right), (top, bottom)). If no pad exists,
-    the default Element pad will be returned.
+    """Return the padding as a tuple ((left, right), (top, bottom)). If no padding exists,
+    the default Element padding will be returned.
 
     Args:
         pad (Union[None, int, Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int]]]): The pad.
@@ -1802,7 +1803,8 @@ def get_element_true_size(element: sg.Element, init_pad=False) -> Tuple[int, int
     Args:
         element (sg.Element): The element.
         init_pad (bool, optional): If True, the size will be calculated using the
-            initial pad for the element instead of the current pad. Defaults to False.
+            initial padding for the element instead of the current padding.
+            Defaults to False.
 
     Returns:
         Tuple[int, int]: The element's true size.
