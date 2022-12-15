@@ -1803,6 +1803,28 @@ def process_pad(pad) -> Pad:
     return Pad(*process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1]))
 
 
+def get_element_true_size(element: sg.Element, init_pad=False) -> Tuple[int, int]:
+    """Return the true element's size which includes the external padding.
+
+    Args:
+        element (sg.Element): The element.
+        init_pad (bool, optional): If True, the size will be calculated using the
+            initial pad for the element instead of the current pad. Defaults to False.
+
+    Returns:
+        Tuple[int, int]: The element's true size.
+    """
+    try:
+        width, height = get_element_size(element)
+    except GetWidgetSizeError:
+        popup_get_size_error(element=element)
+        raise
+
+    pad = get_original_pad(element) if init_pad else get_pad(element)
+
+    return (width + pad.left + pad.right, height + pad.top + pad.bottom)
+
+
 def popup_get_size_error(*lines: str, element: sg.Element = None) -> None:
     """Pop up an error window due to failure when getting the size of an element.
 
