@@ -1646,7 +1646,7 @@ def resize_window_relative_to_screen(
     window.move_to_center()
 
 
-def vertically_align_elements(window, keys: Iterable[str]) -> None:
+def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
     """Vertically align the elements.
 
     Args:
