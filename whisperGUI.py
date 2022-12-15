@@ -185,6 +185,9 @@ def start_GUI() -> None:
     _.TKroot.event_add("<<Resize>>", "None")
     _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
 
+    # Read the 1st finalized window once before closing it or else future
+    # windows won't use the global icon in the taskbar
+    _.read(0)
     _.close()
 
     # number of rows for the table
@@ -686,7 +689,7 @@ def start_GUI() -> None:
             resizable=True,
             auto_size_buttons=True,
             auto_size_text=True,
-            # alpha_channel=0,
+            alpha_channel=0,
         )
 
         # Set the window size relative to the screen
