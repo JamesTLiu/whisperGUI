@@ -434,8 +434,6 @@ def start_GUI() -> None:
             ],
         ]
 
-        default_padx, default_pady = sg.DEFAULT_ELEMENT_PADDING
-
         language_specifier = sg.user_settings_get_entry(
             language_specifier_setting_key,
             LANG_SPECIFIER_OPTIONS[0],
@@ -447,22 +445,10 @@ def start_GUI() -> None:
                     title="Resize the Application",
                     layout=[
                         [
-                            # sg.Text(
-                            #     f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                            #     key=scaling_text_setting_key,
-                            #     background_color="blue",
-                            # ),
-                            sg.Column(
-                                layout=[
-                                    [
-                                        sg.Text(
-                                            f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                                            key=scaling_text_setting_key,
-                                            background_color="blue",
-                                        ),
-                                    ]
-                                ],
-                                background_color="red",
+                            sg.Text(
+                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                                key=scaling_text_setting_key,
+                                background_color="blue",
                             ),
                             sg.Column(
                                 layout=[
@@ -474,13 +460,13 @@ def start_GUI() -> None:
                                             ),
                                             size=(5),
                                             key=scaling_input_setting_key,
-                                            pad=0,
                                         ),
                                         sg.Button(
                                             "Apply", key=apply_global_scaling_key
                                         ),
                                     ]
-                                ]
+                                ],
+                                pad=0,
                             ),
                         ]
                     ],
@@ -492,23 +478,11 @@ def start_GUI() -> None:
                     title="Output Folder",
                     layout=[
                         [
-                            sg.Column(
-                                layout=[
-                                    [
-                                        sg.Text(
-                                            text="Remember Output Folder",
-                                            key=save_output_dir_text_key,
-                                            background_color="blue",
-                                        ),
-                                    ]
-                                ],
-                                background_color="red",
+                            sg.Text(
+                                text="Remember Output Folder",
+                                key=save_output_dir_text_key,
+                                background_color="blue",
                             ),
-                            # sg.Text(
-                            #     text="Remember Output Folder",
-                            #     key=save_output_dir_text_key,
-                            #     background_color="blue",
-                            # ),
                             FancyCheckbox(
                                 start_toggled_on=save_output_dir,
                                 key=save_output_dir_checkbox_key,
@@ -526,19 +500,6 @@ def start_GUI() -> None:
                     title="Language Specifier",
                     layout=[
                         [
-                            # sg.Column(
-                            #     layout=[
-                            #         [sg.Text("Specifier")],
-                            #         [
-                            #             sg.Text(
-                            #                 "Output File Name Format:",
-                            #                 key=language_specifier_output_format_text_key,
-                            #                 background_color="blue",
-                            #             )
-                            #         ],
-                            #     ],
-                            #     pad=0,
-                            # ),
                             sg.Column(
                                 layout=[
                                     [sg.Text("Specifier")],
@@ -550,7 +511,7 @@ def start_GUI() -> None:
                                         )
                                     ],
                                 ],
-                                background_color="red",
+                                pad=0,
                             ),
                             sg.Column(
                                 layout=[
@@ -562,7 +523,6 @@ def start_GUI() -> None:
                                             auto_size_text=True,
                                             readonly=True,
                                             enable_events=True,
-                                            pad=(0, default_pady),
                                         ),
                                     ],
                                     [
@@ -570,12 +530,12 @@ def start_GUI() -> None:
                                             LANG_SPECIFIER_TO_EXAMPLE_TEXT[
                                                 language_specifier
                                             ],
-                                            pad=0,
                                             text_color="black",
                                             key=language_specifier_example_text_key,
                                         )
                                     ],
                                 ],
+                                pad=0,
                             ),
                         ]
                     ],
