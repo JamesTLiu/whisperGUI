@@ -1649,11 +1649,8 @@ def resize_window_relative_to_screen(
 def vertically_align_elements(window, keys: Iterable[str]) -> None:
     """Vertically align the elements.
 
-    Only works properly with monospaced fonts. Non-monospaced fonts cause the textbox to not
-    properly fit the text.
-
     Args:
-        text_elements (Sequence[sg.Text]): A Sequence with the text elements to set to the same width.
+        text_elements (Sequence[sg.Text]): The text elements to set to the same width.
     """
 
     def popup_get_size_error() -> None:
@@ -1731,8 +1728,7 @@ def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
 
 
 def get_original_pad(element: sg.Element) -> Pad:
-    """Return the original pad for the Element as set by PySimpleGUI. If no pad exists,
-    the original pad will be set to the current pad.
+    """Return the original pad for the Element as set by PySimpleGUI.
 
     Args:
         element (sg.Element): The element.
@@ -1773,7 +1769,7 @@ def process_pad_into_tuple(pad) -> Tuple:
     Returns:
         Tuple: The padx/pady.
     """
-    # It's a tuple
+    # It's a 2-tuple
     with suppress(TypeError):
         _, __ = pad
         return pad
@@ -1787,16 +1783,15 @@ def process_pad_into_tuple(pad) -> Tuple:
 
 
 def process_pad(pad) -> Pad:
-    """Return the pad as a tuple ((left, right), (top, bottom)).
+    """Return the pad as a tuple ((left, right), (top, bottom)). If no pad exists,
+    the default Element pad will be returned.
 
     Args:
         pad (Union[None, int, Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int]]]): The pad.
 
     Returns:
-        Pad: The pad as an object.
+        Pad: The processed pad.
     """
-    # Return the pad as ((left, right), (top, bottom)).
-
     # No pad set when creating the Element. Use the default element padding.
     if pad is None:
         pad = sg.DEFAULT_ELEMENT_PADDING
