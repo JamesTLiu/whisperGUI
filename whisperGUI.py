@@ -3112,13 +3112,13 @@ class Grid(sg.Column, SuperElement):
                 if not self._is_visible_with_layout():
                     return
 
-                widget: tk.Widget = event.widget
-                lookup = widget_to_element_with_window(widget)
-                if not lookup or not lookup.element or not lookup.window:
-                    print("\tresized event widget is not tracked by an active window")
-                else:
-                    wrapper_element = lookup.element
-                    print(f"\tresized event element key: {wrapper_element.key}.")
+                # widget: tk.Widget = event.widget
+                # lookup = widget_to_element_with_window(widget)
+                # if not lookup or not lookup.element or not lookup.window:
+                #     print("\tresized event widget is not tracked by an active window")
+                # else:
+                #     wrapper_element = lookup.element
+                #     print(f"\tresized event element key: {wrapper_element.key}.")
 
                 if self.uniform_block_sizes and self.ParentForm.Resizable:
                     self._set_nonresizable_autosize_window()
@@ -3172,7 +3172,7 @@ class Grid(sg.Column, SuperElement):
             image=_random_error_emoji(),
         )
 
-    @function_details
+    # @function_details
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows.
 
@@ -3226,9 +3226,9 @@ class Grid(sg.Column, SuperElement):
             {block_col.width for block_col in self.block_columns}
         )
 
-        print(
-            f"updated uniform size: {self.uniform_block_width, self.uniform_block_height}"
-        )
+        # print(
+        #     f"updated uniform size: {self.uniform_block_width, self.uniform_block_height}"
+        # )
 
         ...
 
