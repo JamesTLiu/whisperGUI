@@ -1652,41 +1652,33 @@ def vertically_align_elements(window, keys: Iterable[str]) -> None:
     Args:
         text_elements (Sequence[sg.Text]): The text elements to set to the same width.
     """
+    elements: Iterator[sg.Element] = (window[key] for key in keys)
+    # elements: Iterable[sg.Element] = tuple(window[key] for key in keys)
 
-    def popup_get_size_error() -> None:
-        sg.PopupError(
-            "Error when vertically aligning elements",
-            "Unable to get the size of an element",
-            keep_on_top=True,
-            image=_random_error_emoji(),
-        )
+    elements_with_width_pad: List[Tuple[sg.Element, int, Pad]] = []
 
-    # elements: Iterator[sg.Element] = (window[key] for key in keys)
-    elements: Iterable[sg.Element] = tuple(window[key] for key in keys)
-
-    # Get a list with each element paired with its width and pad
+    # Get a list with each element paired with its width(including padx) and pad
     try:
-        elements_with_width_and_pad = tuple(
-            (element, get_element_size(element)[0], get_original_pad(element))
-            for element in elements
-        )
+        for element in elements:
+            true_element_size_init_pad = get_element_true_size(element, init_pad=True)[
+                0
+            ]
+            original_pad = get_original_pad(element)
+            elements_with_width_pad.append(
+                (element, true_element_size_init_pad, original_pad)
+            )
     except GetWidgetSizeError:
-        popup_get_size_error()
+        popup_get_size_error("Error when vertically aligning elements", element=element)
         return
 
-    def get_true_width(info: Tuple[sg.Element, int, Pad]) -> int:
-        # Get the true width of an element by adding its internal width and the external padx
-        return info[1] + info[2].left + info[2].right
-
-    longest_width_element_info = max(elements_with_width_and_pad, key=get_true_width)
+    longest_width_element_info = max(elements_with_width_pad, key=itemgetter(1))
     longest_width = longest_width_element_info[1]
 
     # Vertically align using right padding
-    for element, width, pad in elements_with_width_and_pad:
+    for element, width, pad in elements_with_width_pad:
         # New right padding = original right padding + difference needed for alignment
         extra_right_padding = longest_width - width
         right_padding = extra_right_padding + pad.right
-
         element.widget.pack_configure(padx=(pad.left, right_padding))
 
 
