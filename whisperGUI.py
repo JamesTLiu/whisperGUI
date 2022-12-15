@@ -1390,36 +1390,15 @@ def start_GUI(theme: str) -> None:
 
 
 def function_details(func: Callable) -> Callable:
+    """Decorate a function to also prints the function and its arguments when it's called.
 
-    # # Getting the argument names of the
-    # # called function
-    # argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
+    Args:
+        func (Callable): A function.
 
-    # # Getting the Function name of the
-    # # called function
-    # fname = func.__name__
-
+    Returns:
+        Callable: The decorated function.
+    """
     def inner_func(*args, **kwargs):
-        # print(fname, "(", end="")
-
-        # # printing the function arguments
-        # print(
-        #     ", ".join(
-        #         "% s = % r" % entry for entry in zip(argnames, args[: len(argnames)])
-        #     ),
-        #     end=", ",
-        # )
-
-        # # Printing the variable length Arguments
-        # print("args =", list(args[len(argnames) :]), end=", ")
-
-        # # Printing the variable length keyword
-        # # arguments
-        # print("kwargs =", kwargs, end="")
-        # print(")")
-
-        # return func(*args, **kwargs)
-
         func_args = inspect.signature(func).bind(*args, **kwargs).arguments
         func_args_str = ", ".join(map("{0[0]} = {0[1]!r}".format, func_args.items()))
         print(f"{func.__module__}.{func.__qualname__} ( {func_args_str} )")
@@ -5406,6 +5385,38 @@ def add_print_for_widget_resizes(window: sg.Window) -> None:
         ...
 
     window.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
+
+
+# def function_details_legacy(func: Callable) -> Callable:
+#     # Issue: It uses up iterators when printing function details.
+
+#     # Getting the argument names of the called function
+#     argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
+
+#     # Getting the Function name of the called function
+#     fname = func.__name__
+
+#     def inner_func(*args, **kwargs):
+#         print(fname, "(", end="")
+
+#         # printing the function arguments
+#         print(
+#             ", ".join(
+#                 "% s = % r" % entry for entry in zip(argnames, args[: len(argnames)])
+#             ),
+#             end=", ",
+#         )
+
+#         # Printing the variable length Arguments
+#         print("args =", list(args[len(argnames) :]), end=", ")
+
+#         # Printing the variable length keyword arguments
+#         print("kwargs =", kwargs, end="")
+#         print(")")
+
+#         return func(*args, **kwargs)
+
+#     return inner_func
 
 
 # import os
