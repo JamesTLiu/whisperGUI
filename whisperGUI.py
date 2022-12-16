@@ -270,11 +270,11 @@ def start_GUI(theme: str) -> None:
         show_model_info_at_start = False
 
         info_image_tooltip = "\n".join(
-            "Use this when a dialect/style of a language or punctuation is desired."
-            "Does NOT guarantee the result will follow the initial prompt."
-            "Initial prompt will NOT be included in the result."
-            "Try a larger model if the result does not follow the initial prompt."
-            "\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+            "Use this when a dialect/style of a language or punctuation is"
+            " desired.Does NOT guarantee the result will follow the initial"
+            " prompt.Initial prompt will NOT be included in the result.Try a"
+            " larger model if the result does not follow the initial"
+            " prompt.\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。"
         )
 
         tab1_options_layout = [
@@ -450,7 +450,10 @@ def start_GUI(theme: str) -> None:
                     layout=[
                         [
                             sg.Text(
-                                f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                                (
+                                    f"Size Multiplier ({MIN_SCALING} to"
+                                    f" {MAX_SCALING}):"
+                                ),
                                 key=scaling_text_setting_key,
                                 background_color="blue",
                             ),
@@ -795,7 +798,10 @@ def start_GUI(theme: str) -> None:
             if x_pos is None or y_pos is None:
                 sg.PopupError(
                     "Error reloading the prompt manager window",
-                    "Unable to get the current location of the current prompt manager window.",
+                    (
+                        "Unable to get the current location of the current"
+                        " prompt manager window."
+                    ),
                     "The offensive prompt manager window = ",
                     prompt_manager_window,
                     keep_on_top=True,
@@ -1188,7 +1194,8 @@ def start_GUI(theme: str) -> None:
                 new_initial_prompt_input = ""
             else:
                 raise NonExistentPromptProfileName(
-                    f"{chosen_prompt_profile} is not a saved prompt profile name or the unsaved prompt profile"
+                    f"{chosen_prompt_profile} is not a saved prompt profile"
+                    " name or the unsaved prompt profile"
                 )
 
             window[initial_prompt_input_key].update(
@@ -1214,9 +1221,13 @@ def start_GUI(theme: str) -> None:
         elif event == apply_global_scaling_key:
 
             def popup_tracked_scaling_invalid() -> None:
-                """Pop up a tracked modal message window indicating an invalid scaling input."""
+                """Pop up a tracked modal message window indicating an invalid scaling input.
+                """
                 popup_window = popup_tracked(
-                    f"Please enter a number for the scaling factor between {MIN_SCALING} and {MAX_SCALING}.",
+                    (
+                        "Please enter a number for the scaling factor between"
+                        f" {MIN_SCALING} and {MAX_SCALING}."
+                    ),
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid scaling factor",
@@ -1367,7 +1378,11 @@ def start_GUI(theme: str) -> None:
             output_paths = values[TRANSCRIBE_SUCCESS]
             output_paths_formatted = "\n".join(output_paths)
             popup_window = popup_tracked(
-                f"Status: COMPLETE\n\nTime taken: {transcription_time:.4f} secs\n\nOutput locations: \n\n{output_paths_formatted}",
+                (
+                    "Status: COMPLETE\n\nTime taken:"
+                    f" {transcription_time:.4f} secs\n\nOutput locations:"
+                    f" \n\n{output_paths_formatted}"
+                ),
                 popup_fn=popup_scrolled,
                 window_tracker=window_tracker,
                 title="Complete",
@@ -1383,7 +1398,10 @@ def start_GUI(theme: str) -> None:
 
             error_msg = values[TRANSCRIBE_ERROR]
             popup_window = popup_tracked(
-                f"Status: FAILED\n\n{error_msg}\n\nPlease see the console output for details.",
+                (
+                    f"Status: FAILED\n\n{error_msg}\n\nPlease see the console"
+                    " output for details."
+                ),
                 popup_fn=popup,
                 window_tracker=window_tracker,
                 title="ERROR",
@@ -1485,7 +1503,10 @@ def forward_resize_event(event: tk.Event) -> None:
 
     if event.type != valid_event_type:
         sg.PopupError(
-            f"Warning: forward_resize_event() was passed an event of the wrong type.",
+            (
+                f"Warning: forward_resize_event() was passed an event of the"
+                f" wrong type."
+            ),
             f"The event's type must be <{valid_event_type.name}>.",
             f"The offensive event = ",
             event,
@@ -1968,7 +1989,9 @@ def setup_height_matched_images(
                 size_matched_pairs[element] = element_to_size_match
             else:
                 raise ClosestElementOfSpecifiedTypeNotFoundInWindow(
-                    f"Unable to find closest {closest_element_type} element to the Image element with the key={element.key} in the main window."
+                    f"Unable to find closest {closest_element_type} element to"
+                    f" the Image element with the key={element.key} in the"
+                    " main window."
                 )
 
             # Stop after updating only the specified Image
@@ -2029,7 +2052,9 @@ def update_size_matched_image(
         )
     else:
         raise InvalidElementSize(
-            f"Unusable size for closest element (key={element_to_size_match.key}). width={width}, height={height}."
+            "Unusable size for closest element"
+            f" (key={element_to_size_match.key}). width={width},"
+            f" height={height}."
         )
 
 
@@ -2206,12 +2231,14 @@ class PromptManager:
 
     @property
     def unsaved_prompt_profile_name(self) -> str:
-        """Name of the Prompt profile for when the user is not using a saved prompt profile."""
+        """Name of the Prompt profile for when the user is not using a saved prompt profile.
+        """
         return self._unsaved_prompt_profile_name
 
     @property
     def saved_prompt_profiles(self) -> Dict[str, str]:
-        """A dict with the saved prompt profiles names and their prompt values."""
+        """A dict with the saved prompt profiles names and their prompt values.
+        """
         self._saved_prompt_profiles: Dict[
             str, str
         ] = sg.user_settings_get_entry(
@@ -2229,7 +2256,8 @@ class PromptManager:
 
     @property
     def prompt_profile_names(self) -> List[str]:
-        """The unsaved prompt profile name and the sorted ascending names of the saved prompt profiles."""
+        """The unsaved prompt profile name and the sorted ascending names of the saved prompt profiles.
+        """
         return [
             self.unsaved_prompt_profile_name,
             *sorted(self.saved_prompt_profiles.keys()),
@@ -2265,7 +2293,7 @@ class PromptManager:
         if not profile_name.strip():
             error_msg = (
                 f"Invalid prompt name: name can't be empty or whitespace only."
-                "\n\nPlease enter a new prompt name."
+                f"\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2273,7 +2301,7 @@ class PromptManager:
         if profile_name in self.prompt_profile_names:
             error_msg = (
                 f"Invalid prompt name: name already in use."
-                "\n\nPlease enter a new prompt name."
+                f"\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2307,7 +2335,7 @@ class PromptManager:
         if not profile_name.strip():
             error_msg = (
                 f"Invalid prompt name: name can't be empty or whitespace only."
-                "\n\nPlease enter a new prompt name."
+                f"\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2317,7 +2345,7 @@ class PromptManager:
         if profile_name in self.prompt_profile_names and profile_name_changed:
             error_msg = (
                 f"Invalid prompt name: name already in use."
-                "\n\nPlease enter a new prompt name."
+                f"\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2983,7 +3011,10 @@ class SuperElement(PostInit, sg.Element):
             sg.PopupError(
                 "Error during element setup.",
                 "The widget for this element does not exist.",
-                "You MUST only call this method after the widget is created via calling window.refresh() or window.read()",
+                (
+                    "You MUST only call this method after the widget is"
+                    " created via calling window.refresh() or window.read()"
+                ),
                 "The offensive Element = ",
                 self,
                 "and has a key = ",
@@ -2994,11 +3025,13 @@ class SuperElement(PostInit, sg.Element):
             )
 
     def _setup_binds(self) -> None:
-        """Set up tkinter bind events. Automatically called when self._setup() is called."""
+        """Set up tkinter bind events. Automatically called when self._setup() is called.
+        """
         ...
 
     def _update_internals(self) -> None:
-        """Update internal components. Automatically called when self._setup() is called."""
+        """Update internal components. Automatically called when self._setup() is called.
+        """
         ...
 
     def _unbind_all(self) -> None:
@@ -3156,7 +3189,10 @@ class Grid(sg.Column, SuperElement):
             else:
                 sg.PopupError(
                     "Error in layout",
-                    "The processed layout should contain rows whose original elements are wrapped in Block elements.",
+                    (
+                        "The processed layout should contain rows whose"
+                        " original elements are wrapped in Block elements."
+                    ),
                     f"Instead of a {Block}, the type found was {type(block)}",
                     "The offensive layout = ",
                     self.Rows,
@@ -3290,7 +3326,10 @@ class Grid(sg.Column, SuperElement):
         def _popup_alignment_error(block: Block) -> None:
             sg.PopupError(
                 "Error when updating the Grid layout",
-                "The spacing element is larger than the needed alignment padding",
+                (
+                    "The spacing element is larger than the needed alignment"
+                    " padding"
+                ),
                 "The offensive block = ",
                 block,
                 keep_on_top=True,
@@ -3497,7 +3536,8 @@ Blocks: TypeAlias = List[Block]
 
 
 class ImageBase(sg.Image, SuperElement):
-    """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only."""
+    """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only.
+    """
 
     def __init__(
         self,
@@ -3579,7 +3619,9 @@ class ImageBase(sg.Image, SuperElement):
                 self.size_match_element = None
             else:
                 raise TypeError(
-                    f"Invalid type for parameter size_match_element. Passed type: {type(size_match_target)}. Only an Element or str is allowed."
+                    "Invalid type for parameter size_match_element. Passed"
+                    f" type: {type(size_match_target)}. Only an Element or str"
+                    " is allowed."
                 )
 
         self.size_match_element_type = size_match_element_type
@@ -3635,7 +3677,10 @@ class ImageBase(sg.Image, SuperElement):
                 except KeyError:
                     sg.PopupError(
                         "Invalid key for size match element of this Image.",
-                        f"The window with this Image does not contain an element with the key {self._size_match_target}.",
+                        (
+                            "The window with this Image does not contain an"
+                            f" element with the key {self._size_match_target}."
+                        ),
                         "The closest element will be used instead.",
                         keep_on_top=True,
                         image=_random_error_emoji(),
@@ -3720,7 +3765,8 @@ class ImageBase(sg.Image, SuperElement):
 
 
 class Image(ImageBase):
-    """Image Element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only."""
+    """Image Element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only.
+    """
 
     _source_default: Union[str, bytes, None] = None
 
@@ -4196,19 +4242,29 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                 continue
             if element.ParentContainer is not None:
                 sg.warnings.warn(
-                    "*** AN ELEMENT IN YOUR LAYOUT IS ALREADY IN USE! Once placed in a layout, an element cannot be used in another layout. ***",
+                    (
+                        "*** AN ELEMENT IN YOUR LAYOUT IS ALREADY IN USE! Once"
+                        " placed in a layout, an element cannot be used in"
+                        " another layout. ***"
+                    ),
                     UserWarning,
                 )
                 sg.PopupError(
                     "Error in layout",
                     "The layout specified has already been used",
-                    'You MUST start with a "clean", unused layout every time you create a window',
+                    (
+                        'You MUST start with a "clean", unused layout every'
+                        " time you create a window"
+                    ),
                     "The offensive Element = ",
                     element,
                     "and has a key = ",
                     element.Key,
                     "This item will be stripped from your layout",
-                    'Hint - try printing your layout and matching the IDs "print(layout)"',
+                    (
+                        "Hint - try printing your layout and matching the IDs"
+                        ' "print(layout)"'
+                    ),
                     keep_on_top=True,
                     image=_random_error_emoji(),
                 )
@@ -4240,7 +4296,8 @@ def popup_tracked(
 
 
 class CustomTimer(Timer):
-    """codetiming.Timer with a stop() that optionally prints the elapsed time."""
+    """codetiming.Timer with a stop() that optionally prints the elapsed time.
+    """
 
     def stop(self, log_time: bool = True) -> float:
         """Stop the timer, and optionally report the elapsed time.
@@ -5163,13 +5220,15 @@ class OutputRedirector(io.StringIO):
         sys.stderr = self
 
     def restore_stdout(self) -> None:
-        """Restore a previously re-reouted stdout back to the original destination."""
+        """Restore a previously re-reouted stdout back to the original destination.
+        """
         if self._previous_stdout:
             sys.stdout = self._previous_stdout
             self.previous_stdout = None  # indicate no longer routed here
 
     def restore_stderr(self) -> None:
-        """Restore a previously re-reouted stderr back to the original destination."""
+        """Restore a previously re-reouted stderr back to the original destination.
+        """
         if self._previous_stderr:
             sys.stderr = self._previous_stderr
             self.previous_stderr = None  # indicate no longer routed here
