@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 import decimal
 from enum import Enum
-from functools import partial, partialmethod
 import inspect
 import io
 import multiprocessing
@@ -28,7 +27,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Generator,
     Iterable,
     Iterator,
     List,
@@ -39,7 +37,6 @@ from typing import (
     Tuple,
     Type,
     TypeAlias,
-    TypeVar,
     Union,
 )
 
@@ -52,7 +49,6 @@ if TYPE_CHECKING:
     from types import FrameType
 
 import tkinter as tk
-from collections import namedtuple
 
 import PySimpleGUI as sg
 import whisper
