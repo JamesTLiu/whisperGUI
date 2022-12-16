@@ -316,13 +316,6 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Text(
                                 "Initial Prompt",
-                                tooltip=(
-                                    "Use this when a dialect/style of a language or punctuation is desired.\n"
-                                    "Does NOT guarantee the result will follow the initial prompt.\n"
-                                    "Initial prompt will NOT be included in the result.\n"
-                                    "Try a larger model if the result does not follow the initial prompt.\n\n"
-                                    "Ex. Chinese (simplified) with punctuation: 以下是普通话的句子。"
-                                ),
                                 key=initial_prompt_text_key,
                             ),
                             InfoImage(
