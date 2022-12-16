@@ -43,7 +43,9 @@ from typing import (
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
 else:
-    from multiprocessing.connection import Connection as PipeConnection  # type: ignore
+    from multiprocessing.connection import (  # type: ignore
+        Connection as PipeConnection,
+    )
 
 if TYPE_CHECKING:
     from types import FrameType
