@@ -122,7 +122,6 @@ def start_GUI(theme: str) -> None:
     scaling_input_setting_key = "-GLOBAL-SCALING-"
     save_output_dir_text_key = "-SAVE-OUTPUT-DIR-TEXT-"
     save_output_dir_checkbox_key = checkbox_key_prefix + "SAVE-OUTPUT-DIR-"
-    language_specifier_text_setting_key = "-LANGUAGE-SPECIFIER-TEXT-"
     language_specifier_setting_key = "-LANGUAGE-SPECIFIER-"
     language_specifier_example_text_key = "-LANGUAGE-SPECIFIER-EXAMPLE-TEXT-"
     language_specifier_output_format_text_key = (
