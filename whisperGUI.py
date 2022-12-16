@@ -71,7 +71,8 @@ def start_GUI(theme: str) -> None:
     """Start the GUI.
 
     Raises:
-        NonExistentPromptProfileName: A non-existent prompt profile name was used.
+        NonExistentPromptProfileName: A non-existent prompt profile name
+            was used.
     """
 
     sg.theme(theme)
@@ -186,15 +187,16 @@ def start_GUI(theme: str) -> None:
     _.TKroot.event_add("<<Resize>>", "None")
     _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
 
-    # Read the 1st finalized window once before closing it or else future
-    # windows won't use the global icon in the taskbar
+    # Read the 1st finalized window once before closing it or else
+    # future windows won't use the global icon in the taskbar
     _.read(0)
     _.close()
 
     # number of rows for the table
     num_table_rows = 5
 
-    # whether multiline element strips whitespaces from the end of the new text to append
+    # whether multiline element strips whitespaces from the end of the
+    # new text to append
     is_multiline_rstripping_on_update = False
 
     # Options used in the language specifier setting
@@ -253,12 +255,14 @@ def start_GUI(theme: str) -> None:
             for x in range(len(model_data_table[0]))
         ]
 
-        # Load whether to translating to English or not from the settings file
+        # Load whether to translating to English or not from the
+        # settings file
         translate_to_english_last_choice = sg.user_settings_get_entry(
             translate_to_english_checkbox_key, False
         )
 
-        # Load whether to save the output directory or not from the settings file
+        # Load whether to save the output directory or not from the
+        # settings file
         save_output_dir = sg.user_settings_get_entry(
             save_output_dir_checkbox_key, False
         )
