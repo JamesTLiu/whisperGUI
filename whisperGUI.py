@@ -142,7 +142,11 @@ def start_GUI(theme: str) -> None:
     PRINT_ME = "-PRINT-ME-"
 
     # Events that indicate that transcription has ended
-    TRANSCRIBE_DONE_EVENTS = (TRANSCRIBE_SUCCESS, TRANSCRIBE_ERROR, TRANSCRIBE_STOPPED)
+    TRANSCRIBE_DONE_EVENTS = (
+        TRANSCRIBE_SUCCESS,
+        TRANSCRIBE_ERROR,
+        TRANSCRIBE_STOPPED,
+    )
 
     # Key for saved prompts in the settings file
     SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
@@ -170,7 +174,7 @@ def start_GUI(theme: str) -> None:
     )
 
     # App icon
-    icon_data = b"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" # noqa
+    icon_data = b"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"  # noqa
     sg.set_global_icon(icon_data)
 
     # Make a temporary window so that tkroot exists
@@ -243,7 +247,8 @@ def start_GUI(theme: str) -> None:
 
         # Append whitespace to each table header string to avoid cutoffs
         table_headings = [
-            str(model_data_table[0][x]) + "  " for x in range(len(model_data_table[0]))
+            str(model_data_table[0][x]) + "  "
+            for x in range(len(model_data_table[0]))
         ]
 
         # Load whether to translating to English or not from the settings file
@@ -258,7 +263,8 @@ def start_GUI(theme: str) -> None:
 
         # Startup prompt profile
         startup_prompt_profile = sg.user_settings_get_entry(
-            prompt_profile_dropdown_key, prompt_manager.unsaved_prompt_profile_name
+            prompt_profile_dropdown_key,
+            prompt_manager.unsaved_prompt_profile_name,
         )
 
         show_model_info_at_start = False
@@ -282,7 +288,9 @@ def start_GUI(theme: str) -> None:
                 sg.Combo(
                     values=models,
                     key=model_key,
-                    default_value=sg.user_settings_get_entry(model_key, DEFAULT_MODEL),
+                    default_value=sg.user_settings_get_entry(
+                        model_key, DEFAULT_MODEL
+                    ),
                     auto_size_text=True,
                     readonly=True,
                     enable_events=True,
@@ -372,7 +380,10 @@ def start_GUI(theme: str) -> None:
         # main tab
         tab1_layout = [
             [sg.Text("Select Audio/Video File(s)")],
-            [sg.Input(disabled=True, expand_x=True), sg.FilesBrowse(key=in_file_key)],
+            [
+                sg.Input(disabled=True, expand_x=True),
+                sg.FilesBrowse(key=in_file_key),
+            ],
             [sg.Text("Output Folder:")],
             [
                 sg.Input(
@@ -460,7 +471,8 @@ def start_GUI(theme: str) -> None:
                                             key=scaling_input_setting_key,
                                         ),
                                         sg.Button(
-                                            "Apply", key=apply_global_scaling_key
+                                            "Apply",
+                                            key=apply_global_scaling_key,
                                         ),
                                     ]
                                 ],
@@ -617,7 +629,9 @@ def start_GUI(theme: str) -> None:
 
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
-        window[out_dir_key].TKStringVar.set(sg.user_settings_get_entry(out_dir_key, ""))
+        window[out_dir_key].TKStringVar.set(
+            sg.user_settings_get_entry(out_dir_key, "")
+        )
 
         # Switch to the settings tab to load it and then switch back to the main tab
         window[settings_tab_key].select()
@@ -659,7 +673,9 @@ def start_GUI(theme: str) -> None:
         window = window_tracker.track_window(make_main_window())
 
         # give the prompt manager the prompt profile dropdown so that it's updated on profile changes
-        prompt_manager.set_prompt_profile_dropdown(window, prompt_profile_dropdown_key)
+        prompt_manager.set_prompt_profile_dropdown(
+            window, prompt_profile_dropdown_key
+        )
         return window
 
     main_window = make_tracked_main_window_with_synced_profiles(
@@ -717,7 +733,9 @@ def start_GUI(theme: str) -> None:
                         ],
                         [
                             sg.Button(
-                                "Delete Profile", key=delete_prompt_key, expand_x=True
+                                "Delete Profile",
+                                key=delete_prompt_key,
+                                expand_x=True,
                             )
                         ],
                         [sg.Text("")],
@@ -775,7 +793,9 @@ def start_GUI(theme: str) -> None:
         if prompt_manager_window:
             # prompt_manager_window.close()
             # new_prompt_manager_window = popup_prompt_manager()
-            x_pos, y_pos = prompt_manager_window.current_location(more_accurate=True)
+            x_pos, y_pos = prompt_manager_window.current_location(
+                more_accurate=True
+            )
 
             if x_pos is None or y_pos is None:
                 sg.PopupError(
@@ -808,7 +828,10 @@ def start_GUI(theme: str) -> None:
     prompt_manager_window = None
 
     def popup_add_edit_prompt_profile(
-        title: str, submit_event: str, profile_name: str = "", profile_prompt: str = ""
+        title: str,
+        submit_event: str,
+        profile_name: str = "",
+        profile_prompt: str = "",
     ) -> sg.Window:
         """Pop up either the add or edit prompt profile window.
 
@@ -884,10 +907,15 @@ def start_GUI(theme: str) -> None:
         Returns:
             sg.Window: The add prompt profile window.
         """
-        return popup_add_edit_prompt_profile(title=title, submit_event=submit_event)
+        return popup_add_edit_prompt_profile(
+            title=title, submit_event=submit_event
+        )
 
     def popup_edit_prompt_profile(
-        title: str, submit_event: str, profile_name: str = "", profile_prompt: str = ""
+        title: str,
+        submit_event: str,
+        profile_name: str = "",
+        profile_prompt: str = "",
     ) -> sg.Window:
         """Pop up either the edit prompt profile window.
 
@@ -1007,18 +1035,24 @@ def start_GUI(theme: str) -> None:
                 save_toggle_state(window[event])
 
             # Delete the saved output directory from the settings file when the option is off
-            if event == save_output_dir_checkbox_key and not window[event].checked:
+            if (
+                event == save_output_dir_checkbox_key
+                and not window[event].checked
+            ):
                 if sg.user_settings_get_entry(out_dir_key):
                     sg.user_settings_delete_entry(out_dir_key)
         # Popup prompt manager window
         elif event == start_prompt_manager_key:
-            prompt_manager_window = window_tracker.track_window(popup_prompt_manager())
+            prompt_manager_window = window_tracker.track_window(
+                popup_prompt_manager()
+            )
             modal_window_manager.track_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
         elif event == open_add_prompt_window_key:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_prompt_profile(
-                title="Add new prompt profile", submit_event=add_prompt_profile_key
+                title="Add new prompt profile",
+                submit_event=add_prompt_profile_key,
             )
             modal_window_manager.track_modal_window(add_new_prompt_window)
         # User wants to edit a saved prompt profile
@@ -1031,7 +1065,10 @@ def start_GUI(theme: str) -> None:
                 selected_profile = prompt_manager.saved_prompt_profiles_list[
                     selected_table_row_indices[0]
                 ]
-                selected_profile_name, selected_profile_prompt = selected_profile
+                (
+                    selected_profile_name,
+                    selected_profile_prompt,
+                ) = selected_profile
 
                 # Pop up a window to edit the prompt name and prompt
                 edit_prompt_window = popup_edit_prompt_profile(
@@ -1061,12 +1098,18 @@ def start_GUI(theme: str) -> None:
             original_profile_name = window[new_profile_name_key].metadata
 
             if event == add_prompt_profile_key:
-                (add_edit_success, error_msg,) = prompt_manager.add_prompt_profile(
+                (
+                    add_edit_success,
+                    error_msg,
+                ) = prompt_manager.add_prompt_profile(
                     profile_name=new_profile_name,
                     profile_prompt=new_profile_prompt,
                 )
             elif event == edit_prompt_profile_key:
-                (add_edit_success, error_msg,) = prompt_manager.edit_prompt_profile(
+                (
+                    add_edit_success,
+                    error_msg,
+                ) = prompt_manager.edit_prompt_profile(
                     profile_name=new_profile_name,
                     profile_prompt=new_profile_prompt,
                     original_profile_name=original_profile_name,
@@ -1100,11 +1143,15 @@ def start_GUI(theme: str) -> None:
 
             # Ensure user has selected a row in the prompt profile table
             if selected_table_row_indices:
-                prompt_profile_names = prompt_manager.saved_prompt_profile_names
+                prompt_profile_names = (
+                    prompt_manager.saved_prompt_profile_names
+                )
                 prompt_profile_name_to_delete = prompt_profile_names[
                     selected_table_row_indices[0]
                 ]
-                prompt_manager.delete_prompt_profile(prompt_profile_name_to_delete)
+                prompt_manager.delete_prompt_profile(
+                    prompt_profile_name_to_delete
+                )
 
                 prompt_manager_window = reload_prompt_manager_window(
                     prompt_manager_window=prompt_manager_window,
@@ -1132,18 +1179,26 @@ def start_GUI(theme: str) -> None:
             # Update the initial prompt input with the prompt profile's prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
-            if chosen_prompt_profile in prompt_manager.saved_prompt_profile_names:
-                new_initial_prompt_input = prompt_manager.saved_prompt_profiles[
-                    chosen_prompt_profile
-                ]
-            elif chosen_prompt_profile == prompt_manager.unsaved_prompt_profile_name:
+            if (
+                chosen_prompt_profile
+                in prompt_manager.saved_prompt_profile_names
+            ):
+                new_initial_prompt_input = (
+                    prompt_manager.saved_prompt_profiles[chosen_prompt_profile]
+                )
+            elif (
+                chosen_prompt_profile
+                == prompt_manager.unsaved_prompt_profile_name
+            ):
                 new_initial_prompt_input = ""
             else:
                 raise NonExistentPromptProfileName(
                     f"{chosen_prompt_profile} is not a saved prompt profile name or the unsaved prompt profile"
                 )
 
-            window[initial_prompt_input_key].update(value=new_initial_prompt_input)
+            window[initial_prompt_input_key].update(
+                value=new_initial_prompt_input
+            )
 
             # Save the user's selected prompt profile to the settings file
             sg.user_settings_set_entry(
@@ -1154,8 +1209,12 @@ def start_GUI(theme: str) -> None:
             # Update the language specifier option setting
             sg.user_settings_set_entry(event, values[event])
             current_language_specifier = values[event]
-            example_text = LANG_SPECIFIER_TO_EXAMPLE_TEXT[current_language_specifier]
-            window[language_specifier_example_text_key].update(value=example_text)
+            example_text = LANG_SPECIFIER_TO_EXAMPLE_TEXT[
+                current_language_specifier
+            ]
+            window[language_specifier_example_text_key].update(
+                value=example_text
+            )
         # User saved settings
         elif event == apply_global_scaling_key:
 
@@ -1181,7 +1240,8 @@ def start_GUI(theme: str) -> None:
             if Decimal(MIN_SCALING) <= scaling_input <= Decimal(MAX_SCALING):
                 # Save the settings to the config file
                 sg.user_settings_set_entry(
-                    scaling_input_setting_key, values[scaling_input_setting_key]
+                    scaling_input_setting_key,
+                    values[scaling_input_setting_key],
                 )
 
                 # Use the new scaling globally
@@ -1201,7 +1261,9 @@ def start_GUI(theme: str) -> None:
             del window_tracker.windows
 
             # Remake the main window and go back to the settings tab
-            window = main_window = make_tracked_main_window_with_synced_profiles(
+            window = (
+                main_window
+            ) = make_tracked_main_window_with_synced_profiles(
                 window_tracker=window_tracker,
                 prompt_manager=prompt_manager,
                 prompt_profile_dropdown_key=prompt_profile_dropdown_key,
@@ -1230,13 +1292,18 @@ def start_GUI(theme: str) -> None:
                 model_selected = values[model_key]
 
                 # Get the user's choice of whether to translate the results into english
-                translate_to_english = window[translate_to_english_checkbox_key].checked
+                translate_to_english = window[
+                    translate_to_english_checkbox_key
+                ].checked
 
                 # Get the user's choice of whether to use a language code as the language specifier in output files
-                language_specifier_selection = values[language_specifier_setting_key]
+                language_specifier_selection = values[
+                    language_specifier_setting_key
+                ]
                 use_language_code = (
                     True
-                    if language_specifier_selection == LANGUAGE_SPECIFIER_AS_CODE
+                    if language_specifier_selection
+                    == LANGUAGE_SPECIFIER_AS_CODE
                     else False
                 )
 
@@ -1335,7 +1402,11 @@ def start_GUI(theme: str) -> None:
             print("\nTranscription cancelled by user.")
 
         # Clear selection highlighting if a dropdown option was selected
-        if window and event in window.key_dict and isinstance(window[event], sg.Combo):
+        if (
+            window
+            and event in window.key_dict
+            and isinstance(window[event], sg.Combo)
+        ):
             window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
@@ -1368,7 +1439,9 @@ def start_GUI(theme: str) -> None:
                 if meter_updated:
                     # Track the meter window as a modal window if it's still active
                     if progress_key in sg.QuickMeter.active_meters:
-                        meter_window = sg.QuickMeter.active_meters[progress_key].window
+                        meter_window = sg.QuickMeter.active_meters[
+                            progress_key
+                        ].window
                         modal_window_manager.track_modal_window(meter_window)
                 # User clicked the Cancel button
                 else:
@@ -1393,9 +1466,12 @@ def function_details(func: Callable) -> Callable:
     Returns:
         Callable: The decorated function.
     """
+
     def inner_func(*args, **kwargs):
         func_args = inspect.signature(func).bind(*args, **kwargs).arguments
-        func_args_str = ", ".join(map("{0[0]} = {0[1]!r}".format, func_args.items()))
+        func_args_str = ", ".join(
+            map("{0[0]} = {0[1]!r}".format, func_args.items())
+        )
         print(f"{func.__module__}.{func.__qualname__} ( {func_args_str} )")
         return func(*args, **kwargs)
 
@@ -1521,18 +1597,22 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
     # Get a list with each element paired with its width(including padx) and pad
     try:
         for element in elements:
-            true_element_size_init_pad = get_element_true_size(element, init_pad=True)[
-                0
-            ]
+            true_element_size_init_pad = get_element_true_size(
+                element, init_pad=True
+            )[0]
             original_pad = get_original_pad(element)
             elements_with_width_pad.append(
                 (element, true_element_size_init_pad, original_pad)
             )
     except GetWidgetSizeError:
-        popup_get_size_error("Error when vertically aligning elements", element=element)
+        popup_get_size_error(
+            "Error when vertically aligning elements", element=element
+        )
         return
 
-    longest_width_element_info = max(elements_with_width_pad, key=itemgetter(1))
+    longest_width_element_info = max(
+        elements_with_width_pad, key=itemgetter(1)
+    )
     longest_width = longest_width_element_info[1]
 
     # Vertically align using right padding
@@ -1654,10 +1734,14 @@ def process_pad(pad) -> Pad:
     pad = process_pad_into_tuple(pad)
 
     # Turn padx and pady each into a 2-tuple and make a Pad out of them
-    return Pad(*process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1]))
+    return Pad(
+        *process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1])
+    )
 
 
-def get_element_true_size(element: sg.Element, init_pad=False) -> Tuple[int, int]:
+def get_element_true_size(
+    element: sg.Element, init_pad=False
+) -> Tuple[int, int]:
     """Return the true element's size which includes the external padding.
 
     Args:
@@ -1731,7 +1815,9 @@ def find_closest_element(
 
     # iterator for the elements before the target element
     prev_index = index - 1 if index > 0 else 0
-    it_before = islice(reversed(element_list), num_elements - 1 - prev_index, None)
+    it_before = islice(
+        reversed(element_list), num_elements - 1 - prev_index, None
+    )
 
     # iterator for the elements after the target element
     next_index = index + 1 if index < num_elements - 1 else index
@@ -1773,7 +1859,9 @@ def find_closest_element(
             return TestResult(element=None, more_values_to_test=False)
         else:
             if isinstance(next_element, element_class):
-                return TestResult(element=next_element, more_values_to_test=True)
+                return TestResult(
+                    element=next_element, more_values_to_test=True
+                )
             return TestResult(element=None, more_values_to_test=True)
 
     search_expanding_left = True
@@ -1781,14 +1869,20 @@ def find_closest_element(
 
     while search_expanding_left or search_expanding_right:
         if search_expanding_left:
-            text_element_before, search_expanding_left = is_next_element_of_class(
+            (
+                text_element_before,
+                search_expanding_left,
+            ) = is_next_element_of_class(
                 it=it_before, element_class=element_class
             )
             if text_element_before:
                 return text_element_before
 
         if search_expanding_right:
-            text_element_after, search_expanding_right = is_next_element_of_class(
+            (
+                text_element_after,
+                search_expanding_right,
+            ) = is_next_element_of_class(
                 it=it_after, element_class=element_class
             )
             if text_element_after:
@@ -2057,7 +2151,10 @@ class ModalWindowManager:
         stack_changed = False
 
         # Clear closed modal windows from the top of the modal window tracking stack
-        while self._modal_window_stack and self._modal_window_stack[-1].was_closed():
+        while (
+            self._modal_window_stack
+            and self._modal_window_stack[-1].was_closed()
+        ):
             self._modal_window_stack.pop()
             stack_changed = True
 
@@ -2120,7 +2217,9 @@ class PromptManager:
     @property
     def saved_prompt_profiles(self) -> Dict[str, str]:
         """A dict with the saved prompt profiles names and their prompt values."""
-        self._saved_prompt_profiles: Dict[str, str] = sg.user_settings_get_entry(
+        self._saved_prompt_profiles: Dict[
+            str, str
+        ] = sg.user_settings_get_entry(
             self._saved_prompts_settings_key, self._saved_prompt_profiles
         )
         return self._saved_prompt_profiles
@@ -2183,7 +2282,9 @@ class PromptManager:
             )
             return False, error_msg
 
-        self._save_profile(profile_name=profile_name, profile_prompt=profile_prompt)
+        self._save_profile(
+            profile_name=profile_name, profile_prompt=profile_prompt
+        )
 
         return True, error_msg
 
@@ -2234,7 +2335,10 @@ class PromptManager:
         return True, error_msg
 
     def _save_profile(
-        self, profile_name: str, profile_prompt: str, original_profile_name: str = None
+        self,
+        profile_name: str,
+        profile_prompt: str,
+        original_profile_name: str = None,
     ) -> None:
         """Save the prompt profile while overwriting the original profile if it is given.
 
@@ -2264,7 +2368,9 @@ class PromptManager:
                 original_profile_name is not None
                 and original_profile_name == selected_dropdown_profile_name
             ):
-                self._update_prompt_profile_dropdown(new_selected_profile=profile_name)
+                self._update_prompt_profile_dropdown(
+                    new_selected_profile=profile_name
+                )
             # Added a profile or did not edit the currently selected profile in the dropdown
             else:
                 self._update_prompt_profile_dropdown()
@@ -2378,7 +2484,9 @@ class ElementWindow:
         return False
 
 
-def widget_to_element_with_window(widget: tk.Widget) -> Optional[ElementWindow]:
+def widget_to_element_with_window(
+    widget: tk.Widget,
+) -> Optional[ElementWindow]:
     """Return the element that matches a supplied tkinter widget and its window.
     If no matching element is found, then None is returned.
 
@@ -2416,7 +2524,10 @@ def detect_all_widget_events(
             # print("element/window not found for widget in event", end="\n\n")
             return
         element = lookup.element
-        print(f"event_handler called for element with key: {element.key}", end="\n\n")
+        print(
+            f"event_handler called for element with key: {element.key}",
+            end="\n\n",
+        )
 
     undocumented_events = (
         "Keymap",
@@ -2433,7 +2544,10 @@ def detect_all_widget_events(
 
     for event in tk.EventType:
         # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
-        if event.name not in undocumented_events and event.name not in ignored_events:
+        if (
+            event.name not in undocumented_events
+            and event.name not in ignored_events
+        ):
             widget.bind(
                 f"<{event.name}>",
                 event_handler,
@@ -2442,7 +2556,9 @@ def detect_all_widget_events(
 
 
 def set_row_size_of_element(
-    element: sg.Element, width: Optional[int] = None, height: Optional[int] = None
+    element: sg.Element,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
 ):
     """Forcefully set the size of the row that the element is in. The row will no longer
     fit to its children.
@@ -2462,7 +2578,9 @@ def set_row_size_of_element(
     new_width = width if width is not None else current_width
     new_height = height if height is not None else current_height
 
-    row_frame.config(bg="skyblue3")  # set a background color to see the row size
+    row_frame.config(
+        bg="skyblue3"
+    )  # set a background color to see the row size
     row_frame.config(width=new_width, height=new_height)
     row_frame.pack_propagate(flag=False)
 
@@ -2483,7 +2601,9 @@ def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
         w = widget.winfo_width()
         h = widget.winfo_height()
     except Exception as e:
-        raise GetWidgetSizeError(f"Error getting size of widget: {widget}") from e
+        raise GetWidgetSizeError(
+            f"Error getting size of widget: {widget}"
+        ) from e
     return w, h
 
 
@@ -2987,7 +3107,9 @@ class Grid(sg.Column, SuperElement):
         for row in self.Rows:
             self._bind_elements_resize_to_layout_update(row)
 
-    def _bind_elements_resize_to_layout_update(self, blocks: Iterable[Block]) -> None:
+    def _bind_elements_resize_to_layout_update(
+        self, blocks: Iterable[Block]
+    ) -> None:
         # Bind the elements to update the layout on resize
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
@@ -3108,9 +3230,10 @@ class Grid(sg.Column, SuperElement):
             block_col.width = 1
             for block in block_col.blocks:
                 try:
-                    inner_element_width, inner_element_height = get_element_size(
-                        block.inner_element
-                    )
+                    (
+                        inner_element_width,
+                        inner_element_height,
+                    ) = get_element_size(block.inner_element)
                 except GetWidgetSizeError:
                     self._popup_get_size_error(block.inner_element)
                     continue
@@ -3204,7 +3327,9 @@ class Grid(sg.Column, SuperElement):
             if self.uniform_block_sizes:
                 # Set the block's height to the uniform block height by making the
                 # spacing widget's height + padding = uniform_block_height
-                height_padding = self.uniform_block_height - spacing_widget_height
+                height_padding = (
+                    self.uniform_block_height - spacing_widget_height
+                )
 
                 # Error: the spacing widget is taller than the uniform block height
                 if height_padding < 0:
@@ -3492,7 +3617,9 @@ class ImageBase(sg.Image, SuperElement):
         self._update_image()
 
     # @function_details
-    def _update_image(self, source: Union[str, bytes, None, ellipsis] = ...) -> None:
+    def _update_image(
+        self, source: Union[str, bytes, None, ellipsis] = ...
+    ) -> None:
         """Update the image with the given source. If size matching is on, a size-matched version of
         the source will be used.
 
@@ -3529,7 +3656,10 @@ class ImageBase(sg.Image, SuperElement):
             if self.size_match_element is None:
                 self.size_match_element = size_matched_pairs.get(self, None)
 
-            if not self._auto_size_match_set_up and self.size_match_element is not None:
+            if (
+                not self._auto_size_match_set_up
+                and self.size_match_element is not None
+            ):
                 self._set_up_auto_size_match_element(self.size_match_element)
                 self._auto_size_match_set_up = True
         else:
@@ -3576,7 +3706,9 @@ class ImageBase(sg.Image, SuperElement):
                 self._update_internals()
 
         # Make the Image update size matching whenever its element to size match resizes
-        element.widget.bind("<<Resize>>", update_image_on_element_resize, add="+")
+        element.widget.bind(
+            "<<Resize>>", update_image_on_element_resize, add="+"
+        )
 
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
@@ -3827,7 +3959,9 @@ class ToggleImage(ImageBase):
         )
 
         current_source = (
-            self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+            self.toggle_on_source
+            if self.is_toggled_on
+            else self.toggle_off_source
         )
 
         super().__init__(
@@ -3910,7 +4044,9 @@ class ToggleImage(ImageBase):
         else:
             # Return the appropriate source for the current toggle state.
             return (
-                self.toggle_on_source if self.is_toggled_on else self.toggle_off_source
+                self.toggle_on_source
+                if self.is_toggled_on
+                else self.toggle_off_source
             )
 
 
@@ -4657,7 +4793,9 @@ def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     lines_used = []
     for L in lines:
         # fancy math to round up
-        lines_used.append(len(L) // max_line_width + (len(L) % max_line_width > 0))
+        lines_used.append(
+            len(L) // max_line_width + (len(L) % max_line_width > 0)
+        )
     total_lines_needed = sum(lines_used)
     return total_lines_needed
 
@@ -4774,7 +4912,9 @@ def DummyButton(
     )
 
 
-def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[str, ...]:
+def str_to_file_paths(
+    file_paths_string: str, delimiter: str = r";"
+) -> Tuple[str, ...]:
     """Split a string with file paths based on a delimiter.
 
     Args:
@@ -4785,7 +4925,9 @@ def str_to_file_paths(file_paths_string: str, delimiter: str = r";") -> Tuple[st
         Tuple[str, ...]: A tuple of file paths (str).
     """
     audio_video_paths_list = re.split(delimiter, file_paths_string)
-    return tuple(str(Path(file_path).resolve()) for file_path in audio_video_paths_list)
+    return tuple(
+        str(Path(file_path).resolve()) for file_path in audio_video_paths_list
+    )
 
 
 def transcribe_audio_video_files(
@@ -4877,7 +5019,8 @@ def transcribe_audio_video_files(
                 close_connections((read_connection, write_connection))
                 process.join()
                 window.write_event_value(
-                    process_stopped_event, "Transcription stopped due to stop flag."
+                    process_stopped_event,
+                    "Transcription stopped due to stop flag.",
                 )
                 return
 
@@ -5074,7 +5217,9 @@ class OutputRedirector(io.StringIO):
             pass
 
 
-def close_connections(connections: Iterable[Union[Connection, PipeConnection]]) -> None:
+def close_connections(
+    connections: Iterable[Union[Connection, PipeConnection]]
+) -> None:
     """Close all given connections.
 
     Args:
@@ -5158,9 +5303,15 @@ def write_transcript_to_files(
             return file.name
 
     transcript: Iterator[dict] = transcribe_result["segments"]  # type: ignore
-    srt_path = write_transcript(write_srt, transcript, language_specifier, ".srt")
-    txt_path = write_transcript(write_txt, transcript, language_specifier, ".txt")
-    vtt_path = write_transcript(write_vtt, transcript, language_specifier, ".vtt")
+    srt_path = write_transcript(
+        write_srt, transcript, language_specifier, ".srt"
+    )
+    txt_path = write_transcript(
+        write_txt, transcript, language_specifier, ".txt"
+    )
+    vtt_path = write_transcript(
+        write_vtt, transcript, language_specifier, ".vtt"
+    )
     return (srt_path, txt_path, vtt_path)
 
 
