@@ -1781,7 +1781,9 @@ def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
     info = get_placement_info(target)
     padx = info["padx"]
     pady = info["pady"]
-    return Pad(*process_pad_into_2_tuple(padx), *process_pad_into_2_tuple(pady))
+    return Pad(
+        *process_pad_into_2_tuple(padx), *process_pad_into_2_tuple(pady)
+    )
 
 
 def get_original_pad(element: sg.Element) -> Pad:
@@ -1838,20 +1840,24 @@ def process_pad_into_2_tuple(pad) -> Tuple:
         pad + 1
         return pad, pad
     except TypeError:
-        raise TypeError("parameter must be a 2-tuple of numbers or a number") from None
+        raise TypeError(
+            "parameter must be a 2-tuple of numbers or a number"
+        ) from None
 
 
 def process_pad(pad) -> Pad:
-    """Return the padding as a tuple ((left, right), (top, bottom)). If no padding exists,
-    the default Element padding will be returned.
+    """Return the padding as a tuple ((left, right), (top, bottom)). If
+    no padding exists, the default Element padding will be returned.
 
     Args:
-        pad (Union[None, int, Tuple[int, int], Tuple[Tuple[int, int], Tuple[int, int]]]): The pad.
+        pad (Union[None, int, Tuple[int, int], Tuple[Tuple[int, int],
+            Tuple[int, int]]]): The pad.
 
     Returns:
         Pad: The processed pad.
     """
-    # No pad set when creating the Element. Use the default element padding.
+    # No padding set when creating the Element. Use the default element
+    # padding.
     if pad is None:
         pad = sg.DEFAULT_ELEMENT_PADDING
 
@@ -1867,13 +1873,14 @@ def process_pad(pad) -> Pad:
 def get_element_true_size(
     element: sg.Element, init_pad=False
 ) -> Tuple[int, int]:
-    """Return the true element's size which includes the external padding.
+    """Return the true element's size which includes the external
+    padding.
 
     Args:
         element (sg.Element): The element.
-        init_pad (bool, optional): If True, the size will be calculated using the
-            initial padding for the element instead of the current padding.
-            Defaults to False.
+        init_pad (bool, optional): If True, the size will be calculated
+            using the initial padding for the element instead of the
+            current padding. Defaults to False.
 
     Returns:
         Tuple[int, int]: The element's true size.
@@ -1890,7 +1897,8 @@ def get_element_true_size(
 
 
 def popup_get_size_error(*lines: str, element: sg.Element = None) -> None:
-    """Pop up an error window due to failure when getting the size of an element.
+    """Pop up an error window due to failure when getting the size of an
+    element.
 
     Args:
         *lines (str): Variable length list of strings to print first.
@@ -1915,12 +1923,15 @@ def find_closest_element(
     element_list: List[sg.Element],
     element_class: Type[sg.Element] = sg.Element,
 ) -> Optional[sg.Text]:
-    """Find the closest element to a target element based on the target element's position in a list of elements.
+    """Find the closest element to a target element based on the target
+    element's position in a list of elements.
 
     Args:
-        index (int): The index in the list for the target element which the expanding search starts from.
+        index (int): The index in the list for the target element which
+            the expanding search starts from.
         element_list (List[sg.Element]): A list of elements.
-        element_class (Type[sg.Element]): The class requirement for the closest element. Defaults to sg.Element.
+        element_class (Type[sg.Element]): The class requirement for the
+            closest element. Defaults to sg.Element.
 
     Raises:
         IndexError: Invalid index for the given list.
@@ -1953,8 +1964,10 @@ def find_closest_element(
         """The result from testing an element in a list.
 
         Attributes:
-            element (Optional[sg.Element]): The element if it passes the test. Else, None.
-            more_values_to_test (bool): True if there are more values to test in the list.
+            element (Optional[sg.Element]): The element if it passes the
+                test. Else, None.
+            more_values_to_test (bool): True if there are more values to
+                test in the list.
         """
 
         element: Optional[sg.Element]
@@ -1966,16 +1979,19 @@ def find_closest_element(
     def is_next_element_of_class(
         it: Iterator[sg.Element], element_class: Type[sg.Element]
     ) -> TestResult:
-        """Test if the next element returned by the iterator is of the specified class.
+        """Test if the next element returned by the iterator is of the
+        specified class.
 
         Args:
             it (Iterator): The iterator for the elements to test.
-            element_class (Type[sg.Element]): The class to test the next element returned by
-                the iterator for. Defaults to sg.Element.
+            element_class (Type[sg.Element]): The class to test the next
+                element returned by the iterator for. Defaults to
+                sg.Element.
 
         Returns:
-            TestResult: Contains the element if it's of the specified class or None, and a
-                bool that's True if the iterator can keep iterating.
+            TestResult: Contains the element if it's of the specified
+                class or None, and a bool that's True if the iterator
+                can keep iterating.
         """
 
         try:
@@ -2022,7 +2038,9 @@ class InvalidElementSize(Exception):
 
 
 class ClosestElementOfSpecifiedTypeNotFoundInWindow(Warning):
-    """Unable to find closest element of the specified type in the window."""
+    """Unable to find closest element of the specified type in the
+    window.
+    """
 
 
 def setup_height_matched_images(
@@ -2033,32 +2051,39 @@ def setup_height_matched_images(
     size_match_element: sg.Element = None,
     closest_element_type: Type[sg.Element] = sg.Element,
 ) -> Dict[sg.Image, sg.Element]:
-    """Assign the same image to all Image elements in the window with a height that matches
-    the target element if given or the closest element of the specified type.
+    """Assign the same image to all Image elements in the window with a
+    height that matches the target element if given or the closest
+    element of the specified type.
 
     Usage:
-        Put an Image element next to a Text element in a layout. (Optionally) Assign a key that
-        contains a unique string to the Image (Ex. key='-CHECKBOX-10' where image_subkey='-CHECKBOX-' will be
-        passed to this f(x) when you intend to only update Image's whose key contains '-CHECKBOX-').
-        Call this f(x).
+        Put an Image element next to a Text element in a layout.
+        (Optional) Assign a key that contains a unique string to the
+        Image (Ex. key='-CHECKBOX-10' where image_subkey='-CHECKBOX-'
+        will be passed to this f(x) when you intend to only update
+        Image's whose key contains '-CHECKBOX-'). Call this f(x).
 
     Args:
-        image_file_or_bytes (Union[str, bytes]): Either a string filename for an image file or a bytes
-            base64 image object.
+        image_file_or_bytes (Union[str, bytes]): Either a string
+            filename for an image file or a bytes base64 image object.
         window (sg.Window): The window to update images in.
-        image_subkey (str, optional): Only update Image elements whose key contains this string.
-            Defaults to "".
-        image_element (sg.Image, optional): The Image element to update. image_subkey parameter will be ignored
-            if this parameter is given. Defaults to None.
-        size_match_element (sg.Element, optional): The element to size match. If not given, the closest element will be used.
+        image_subkey (str, optional): Only update Image elements whose
+            key contains this string. Defaults to "".
+        image_element (sg.Image, optional): The Image element to update.
+            image_subkey parameter will be ignored if this parameter is
+            given. Defaults to None.
+        size_match_element (sg.Element, optional): The element to size
+            match. If not given, the closest element will be used.
             Defaults to None.
-        closest_element_type (Type[sg.Element]): The type of the closest Element to size match. Defaults to sg.Element.
+        closest_element_type (Type[sg.Element]): The type of the closest
+            Element to size match. Defaults to sg.Element.
 
     Raises:
-        ClosestElementOfSpecifiedTypeNotFoundInWindow: Unable to find closest element of the specified type in the window.
+        ClosestElementOfSpecifiedTypeNotFoundInWindow: Unable to find
+            closest element of the specified type in the window.
 
     Returns:
-        Dict[sg.Image, sg.Element]: A dict with each handled Image whose value is its size matched element.
+        Dict[sg.Image, sg.Element]: A dict with each handled Image whose
+            value is its size matched element.
     """
     element_list = window.element_list()
 
@@ -2068,7 +2093,8 @@ def setup_height_matched_images(
         # Image element given and found in list.
         given_image_found = image_element and image_element is element
 
-        # Image element not given. Image element found with a key that contains the required subkey.
+        # Image element not given. Image element found with a key that
+        # contains the required subkey.
         valid_image_key = (
             image_element is None
             and isinstance(element, sg.Image)
@@ -2087,7 +2113,8 @@ def setup_height_matched_images(
                     element_class=closest_element_type,
                 )
 
-            # Update the Image element with an image whose size matches the closest element of the specified type.
+            # Update the Image element with an image whose size matches
+            # the closest element of the specified type.
             if element_to_size_match:
                 update_size_matched_image(
                     image_file_or_bytes=image_file_or_bytes,
@@ -2119,20 +2146,26 @@ def update_size_matched_image(
     element_to_size_match: sg.Element,
     size_match_mode: SizeMatchMode = SizeMatchMode.BOTH,
 ) -> None:
-    """Update the Image element with an image that size matches a target element as much as possible while
-    maintaining the image's aspect ratio.
+    """Update the Image element with an image that size matches a target
+    element as much as possible while maintaining the image's aspect
+    ratio.
 
     Args:
-        image_file_or_bytes (Union[str, bytes, None]): Either a string filename for an image file or a bytes
-            base64 image object.
-        image_element (sg.Image): The Image element whose image is to be updated.
-        element_to_size_match (sg.Element): The element that the image needs to size match.
-        size_match_mode (SizeMatchMode, optional): Size match the width, height, or both width and height of
-            the target element. If both width and height are to be size matched, the image will be resized
-            as much as possible while maintaining the image's aspect ratio.. Defaults to SizeMatchMode.BOTH.
+        image_file_or_bytes (Union[str, bytes, None]): Either a string
+            filename for an image file or a bytes base64 image object.
+        image_element (sg.Image): The Image element whose image is to be
+            updated.
+        element_to_size_match (sg.Element): The element that the image
+            needs to size match.
+        size_match_mode (SizeMatchMode, optional): Size match the width,
+            height, or both width and height of the target element. If
+            both width and height are to be size matched, the image will
+            be resized as much as possible while maintaining the image's
+            aspect ratio. Defaults to SizeMatchMode.BOTH.
 
     Raises:
-        InvalidElementSize: The width and/or height of the element to size match is None or not greater than 0.
+        InvalidElementSize: The width and/or height of the element to
+            size match is None or not greater than 0.
     """
     if image_file_or_bytes is None:
         image_element.update(source=None)
