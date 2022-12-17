@@ -1834,7 +1834,7 @@ def process_pad_into_2_tuple(pad) -> Tuple:
         pad + 1
         return pad, pad
     except TypeError:
-        raise TypeError("parameter must be a 2-tuple or a number") from None
+        raise TypeError("parameter must be a 2-tuple of numbers or a number") from None
 
 
 def process_pad(pad) -> Pad:
