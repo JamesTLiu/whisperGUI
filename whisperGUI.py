@@ -3094,9 +3094,9 @@ class Window(PostInit, sg.Window):
             right_click_menu=right_click_menu,
             transparent_color=transparent_color,
             debugger_enabled=debugger_enabled,
-            right_click_menu_background_color=right_click_menu_background_color,
-            right_click_menu_text_color=right_click_menu_text_color,
-            right_click_menu_disabled_text_color=right_click_menu_disabled_text_color,
+            right_click_menu_background_color=right_click_menu_background_color,  # noqa
+            right_click_menu_text_color=right_click_menu_text_color,  # noqa
+            right_click_menu_disabled_text_color=right_click_menu_disabled_text_color,  # noqa
             right_click_menu_selected_colors=right_click_menu_selected_colors,
             right_click_menu_font=right_click_menu_font,
             right_click_menu_tearoff=right_click_menu_tearoff,
@@ -3186,9 +3186,10 @@ class SuperElement(PostInit, sg.Element):
         )
 
     def _setup(self) -> None:
-        """Set up internal tkinter event binds and update internal components. Only call
-        this after the widget is created via calling window.refresh() or window.read()
-        on the window with this element.
+        """Set up internal tkinter event binds and update internal
+        components. Only call this after the widget is created via
+        calling window.refresh() or window.read() on the window with
+        this element.
         """
 
         # Update internal components now that a widget exists
@@ -3213,12 +3214,14 @@ class SuperElement(PostInit, sg.Element):
             )
 
     def _setup_binds(self) -> None:
-        """Set up tkinter bind events. Automatically called when self._setup() is called.
+        """Set up tkinter bind events. Automatically called when
+        self._setup() is called.
         """
         ...
 
     def _update_internals(self) -> None:
-        """Update internal components. Automatically called when self._setup() is called.
+        """Update internal components. Automatically called when
+        self._setup() is called.
         """
         ...
 
@@ -3229,11 +3232,13 @@ class SuperElement(PostInit, sg.Element):
 
 
 class Grid(sg.Column, SuperElement):
-    """Grid element - a container element that is used to create a horizontally and vertically aligned
-    layout within your window's layout.
+    """Grid element - a container element that is used to create a
+    horizontally and vertically aligned layout within your window's
+    layout.
 
-    Note: The Elements in each row of the passed in layout will be wrapped non-recursively in a Column which acts as a
-    block in the grid.
+    Note: The Elements in each row of the passed in layout will be
+    wrapped non-recursively in a Column which acts as a block in the
+    grid.
     """
 
     def __init__(
@@ -3277,7 +3282,8 @@ class Grid(sg.Column, SuperElement):
         # Lookup the block that a widget is in
         self._widget_to_block: Dict[tk.Widget, Block] = {}
 
-        # Lookup a block column by number. Block columns are numbered left to right starting from 0.
+        # Lookup a block column by number. Block columns are numbered
+        # left to right starting from 0.
         self.block_col_num_to_block_col: Dict[int, BlockColumn] = {}
 
         self.uniform_block_width = self.uniform_block_height = 1
@@ -3314,8 +3320,8 @@ class Grid(sg.Column, SuperElement):
         )
 
     def _setup_binds(self) -> None:
-        # Update the layout when the widget is made visible. Needed for widgets that are not visible on window creation.
-        # self.widget.bind("<Create>", lambda e: self._update_layout(), add="+")
+        # Update the layout when the widget is made visible. Needed for
+        # widgets that are not visible on window creation.
         self._bind_layout_element_resize_to_layout_update()
 
     def _bind_layout_element_resize_to_layout_update(self) -> None:
@@ -3329,11 +3335,13 @@ class Grid(sg.Column, SuperElement):
         # Bind the elements to update the layout on resize
         # @function_details
         def update_grid_on_element_resize(event: tk.Event) -> None:
-            """Update the Grid's layout when the element of a block resizes. Used as an
-            event handler function for a tkinter widget binding.
+            """Update the Grid's layout when the element of a block
+            resizes. Use as an event handler function for a tkinter
+            widget binding.
 
             Args:
-                event (tk.Event): The event that triggered this event handler function.
+                event (tk.Event): The event that triggered this event
+                    handler function.
             """
             # widget: tk.Widget = event.widget
             # lookup = widget_to_element_with_window(widget)
@@ -3342,7 +3350,8 @@ class Grid(sg.Column, SuperElement):
             #     return
             # wrapper_element = lookup.element
             # print(
-            #     f"\tupdate_grid_on_element_resize called for element with key: {wrapper_element.key}"
+            #     "\tupdate_grid_on_element_resize called for element "
+            #     f"with key: {wrapper_element.key}"
             # )
 
             try:
@@ -3352,11 +3361,17 @@ class Grid(sg.Column, SuperElement):
 
                 # widget: tk.Widget = event.widget
                 # lookup = widget_to_element_with_window(widget)
-                # if not lookup or not lookup.element or not lookup.window:
-                #     print("\tresized event widget is not tracked by an active window")
+                # if not lookup or not lookup.element:
+                #     print(
+                #         "\tresized event widget is not tracked by "
+                #         "an active window"
+                #     )
                 # else:
                 #     wrapper_element = lookup.element
-                #     print(f"\tresized event element key: {wrapper_element.key}.")
+                #     print(
+                #         "\tresized event element key: "
+                #         f"{wrapper_element.key}."
+                #     )
 
                 if self.uniform_block_sizes and self.ParentForm.Resizable:
                     self._set_nonresizable_autosize_window()
@@ -3417,18 +3432,6 @@ class Grid(sg.Column, SuperElement):
     def _update_layout(self, **kwargs) -> None:
         # Update the layout and vertically align the rows.
 
-        # print("_update_layout() called")
-
-        # _rows: Iterable[sg.Element] = self.Rows
-        # _widget: tk.Widget = self.widget
-        # _sg_widgets = [row[0].ParentRowFrame for row in _rows]
-
-        # _tk_subwidgets = [widget for widget in _widget.children.values()]
-
-        # paired_widgets = zip(_sg_widgets, _tk_subwidgets)
-        # same_widgets = all(
-        #     [_sg_widget is _tk_widget for _sg_widget, _tk_widget in paired_widgets]
-        # )
         self.ParentForm.refresh()
 
         # Only update the Grid if it's visible and has a layout
@@ -3469,7 +3472,8 @@ class Grid(sg.Column, SuperElement):
         )
 
         # print(
-        #     f"updated uniform size: {self.uniform_block_width, self.uniform_block_height}"
+        #     "updated uniform size:"
+        #     f" {self.uniform_block_width, self.uniform_block_height}"
         # )
 
         ...
@@ -3498,8 +3502,8 @@ class Grid(sg.Column, SuperElement):
         self._update_block_sizes(self.blocks)
 
     def _update_block_sizes(self, blocks: Iterable[Block]) -> None:
-        # Update the given block's sizes based on the current Grid state. Only call this method
-        # after alignment info exists.
+        # Update the given block's sizes based on the current Grid
+        # state. Only call this method after alignment info exists.
 
         # The alignment info for block columns doesn't exist
         if not self.block_col_num_to_block_col:
@@ -3547,18 +3551,21 @@ class Grid(sg.Column, SuperElement):
 
             # Set all blocks to the same size using padding
             if self.uniform_block_sizes:
-                # Set the block's height to the uniform block height by making the
-                # spacing widget's height + padding = uniform_block_height
+                # Set the block's height to the uniform block height by
+                # making the spacing widget's
+                # height + padding = uniform_block_height
                 height_padding = (
                     self.uniform_block_height - spacing_widget_height
                 )
 
-                # Error: the spacing widget is taller than the uniform block height
+                # Error: the spacing widget is taller than the uniform
+                # block height
                 if height_padding < 0:
                     _popup_alignment_error(block)
                     height_padding = 0
 
-                # Use horizontal padding to expand the block's width to the uniform block width
+                # Use horizontal padding to expand the block's width to
+                # the uniform block width
                 right_padding = self.uniform_block_width - inner_element_width
 
                 spacing_widget.pack_configure(
@@ -3580,7 +3587,8 @@ class Grid(sg.Column, SuperElement):
 
                 block_col_width = block_col.width
 
-                # Use horizontal padding to expand the block's width to the uniform block width
+                # Use horizontal padding to expand the block's width to
+                # the uniform block width
                 right_padding = block_col_width - inner_element_width
 
                 spacing_widget.pack_configure(padx=(0, right_padding))
@@ -3598,7 +3606,8 @@ class Grid(sg.Column, SuperElement):
         return True if self.widget.winfo_ismapped() else False
 
     def add_row(self, *args: sg.Element) -> None:
-        # Wrap the elements in Block elements along with an element for spacing.
+        # Wrap the elements in Block elements along with an element for
+        # spacing.
         block_wrapped_elements = tuple(
             Block(layout=[[element, sg.Image("", pad=0, size=(1, 1))]], pad=0)
             for element in args
@@ -3608,7 +3617,8 @@ class Grid(sg.Column, SuperElement):
 
         # Set the block column for each block
         for block_col_num, block in enumerate(block_wrapped_elements):
-            # Get the block column for this block col number or create it if it doesn't exist
+            # Get the block column for this block col number or create
+            # it if it doesn't exist
             block_col = self.block_col_num_to_block_col.setdefault(
                 block_col_num,
                 BlockColumn(blocks=[], width=0, number=block_col_num),
@@ -3627,9 +3637,9 @@ class Grid(sg.Column, SuperElement):
         except AttributeError:
             return
 
-        # Update the layout and bind the resizing of the elements to update the layout
+        # Update the layout and bind the resizing of the elements to
+        # update the layout
         if self._is_visible_with_layout():
-            # self._update_block_sizes()
             self._update_internals()
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
 
@@ -3719,12 +3729,12 @@ class Block(sg.Column):
         return self.Rows[0][1]
 
 
-# Blocks: TypeAlias = Sequence[Block]
 Blocks: TypeAlias = List[Block]
 
 
 class ImageBase(sg.Image, SuperElement):
-    """ImageBase Element - Image Element with extra capabilities. Show an image in the window. Should be a GIF or a PNG only.
+    """ImageBase Element - Image Element with extra capabilities. Show
+    an image in the window. Should be a GIF or a PNG only.
     """
 
     def __init__(
@@ -3794,7 +3804,7 @@ class ImageBase(sg.Image, SuperElement):
         :type size_match_target:        (sg.Element | str)
         :param size_match_element_type: The type of the closest Element to size match will be this type.
         :type size_match_element_type:  (Type[sg.Element])
-        """
+        """  # noqa
 
         self.size_match = size_match
 
@@ -3845,18 +3855,20 @@ class ImageBase(sg.Image, SuperElement):
     def _update_image(
         self, source: Union[str, bytes, None, ellipsis] = ...
     ) -> None:
-        """Update the image with the given source. If size matching is on, a size-matched version of
-        the source will be used.
+        """Update the image with the given source. If size matching is
+        on, a size-matched version of the source will be used.
 
         Args:
-            source (Union[str, bytes, None], optional): A filename or a base64 bytes. Defaults to ... .
+            source (Union[str, bytes, None], optional): A filename or a
+            base64 bytes. Defaults to ... .
         """
         window = self.ParentForm
 
         new_source = self._determine_new_source(source)
 
         if window and self.size_match:
-            # Look up the element with the given key for the size match target
+            # Look up the element with the given key for the size match
+            # target
             if self.size_match_element is None and isinstance(
                 self._size_match_target, str
             ):
@@ -3897,43 +3909,17 @@ class ImageBase(sg.Image, SuperElement):
         # widget.event_generate("<Configure>")
 
     def _set_up_auto_size_match_element(self, element: sg.Element) -> None:
-        # Set up a binding so that this element updates when the size match element resizes
+        # Set up a binding so that this element updates when the size
+        # match element resizes
 
         # @function_details
         def update_image_on_element_resize(event: tk.Event) -> None:
             # Only handle resizes if the Image's widget is mapped
             if self.widget.winfo_ismapped():
-                # widget: tk.Widget = event.widget
-
-                # lookup = widget_to_element_with_window(widget)
-                # if not lookup or not lookup.element or not lookup.window:
-                #     print("\tevent widget is not tracked by an active window")
-                # else:
-                #     wrapper_element = lookup.element
-                #     print(f"\tevent element key: {wrapper_element.key}")
-
-                # # Target element resized so update the image
-                # last_size = get_widget_last_size(widget)
-                # last_size_output = ""
-                # if last_size:
-                #     last_size_output = f"last size: {last_size.width, last_size.height}. "
-                # try:
-                #     widget_width, widget_height = get_widget_size(widget)
-                # except GetWidgetSizeError:
-                #     current_size_output = ""
-                # else:
-                #     current_size_output = f"current size: {widget_width, widget_height}. "
-
-                # print(
-                #     f"\t" +
-                #     current_size_output +
-                #     f"event size: {event.width, event.height}." +
-                #     last_size_output
-                # )
-
                 self._update_internals()
 
-        # Make the Image update size matching whenever its element to size match resizes
+        # Make the Image update size matching whenever its element to
+        # size match resizes
         element.widget.bind(
             "<<Resize>>", update_image_on_element_resize, add="+"
         )
@@ -3941,10 +3927,12 @@ class ImageBase(sg.Image, SuperElement):
     def _determine_new_source(
         self, source: Union[str, bytes, None, ellipsis]
     ) -> Union[str, bytes, None]:
-        """Return the new source based on the argument and any default(s).
+        """Return the new source based on the argument and any
+        default(s).
 
         Args:
-            source (Union[str, bytes, None, ellipsis]): A filename, a base64 bytes, None, or ... (no given source).
+            source (Union[str, bytes, None, ellipsis]): A filename, a
+                base64 bytes, None, or ... (no given source).
 
         Returns:
             Union[str, bytes, None]:  The new source.
@@ -3953,7 +3941,8 @@ class ImageBase(sg.Image, SuperElement):
 
 
 class Image(ImageBase):
-    """Image Element with size-matching functionality - show an image in the window. Should be a GIF or a PNG only.
+    """Image Element with size-matching functionality - show an image in
+    the window. Should be a GIF or a PNG only.
     """
 
     _source_default: Union[str, bytes, None] = None
@@ -4025,7 +4014,7 @@ class Image(ImageBase):
         :type size_match_target:        (sg.Element | str)
         :param size_match_element_type: The type of the closest Element to size match will be this type.
         :type size_match_element_type:  (Type[sg.Element])
-        """
+        """  # noqa
         no_source_given = all(arg is ... for arg in (source, filename, data))
 
         if no_source_given:
@@ -4064,7 +4053,8 @@ class Image(ImageBase):
         self._original_source = self.Source
 
     def _setup_binds(self) -> None:
-        # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
+        # Update the image when the widget is made visible. Needed for
+        # widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self._update_image(), add="+")
 
     update_image = ImageBase._update_image
@@ -4076,29 +4066,31 @@ class Image(ImageBase):
 
 
 class InfoImage(Image):
-    """InfoImage Element with size-matching functionality. Displays an image with
-    an info icon as the default image. Image should be a GIF or a PNG only.
+    """InfoImage Element with size-matching functionality. Displays an
+    image with an info icon as the default image. Image should be a GIF
+    or a PNG only.
     """
 
     _source_default: Union[
         str, bytes, None
-    ] = b"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"
+    ] = b"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"  # noqa
 
 
 class EmptyImage(Image):
-    """EmptyImage Element with size-matching functionality. Displays an empty (transparent)
-    image as the default image. An empty image can be used to horizontally align rows in
-    multiple columns that don't have the same number of rows. Image should be a GIF or a PNG only.
+    """EmptyImage Element with size-matching functionality. Displays an
+    transparent image as the default image. Image should be a GIF or a
+    PNG only.
     """
 
     _source_default: Union[
         str, bytes, None
-    ] = b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC"
+    ] = b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC"  # noqa
 
 
 class ToggleImage(ImageBase):
-    """ToggleImage Element with size-matching functionality - show an image that can be toggled in the window.
-    Toggle On and Off images should be a GIF or a PNG only.
+    """ToggleImage Element with size-matching functionality - show an
+    image that can be toggled in the window. Toggle On and Off images
+    should be a GIF or a PNG only.
     """
 
     _toggle_on_source_default: Union[str, bytes, None] = None
@@ -4173,7 +4165,7 @@ class ToggleImage(ImageBase):
         :type size_match_target:               (sg.Element | str)
         :param size_match_element_type:        The type of the closest Element to size match will be this type.
         :type size_match_element_type:         (Type[sg.Element])
-        """
+        """  # noqa
 
         self.is_toggled_on = start_toggled_on
         self.toggle_on_source = (
@@ -4219,14 +4211,16 @@ class ToggleImage(ImageBase):
         # Remove existing event bindings
         self._unbind_all()
 
-        # Set up PySimpleGUI events on left click release if they're enabled for this element
+        # Set up PySimpleGUI events on left click release if they're
+        # enabled for this element
         if self.EnableEvents:
             self.bind("<ButtonRelease-1>", "")
 
         # Toggle the element on left click release
         self.widget.bind("<ButtonRelease-1>", lambda e: self.toggle(), add="+")
 
-        # Update the image when the widget is made visible. Needed for widgets that are not visible on window creation.
+        # Update the image when the widget is made visible. Needed for
+        # widgets that are not visible on window creation.
         self.widget.bind("<Map>", lambda e: self.update_toggle_images())
 
     def toggle(self) -> None:
@@ -4238,7 +4232,8 @@ class ToggleImage(ImageBase):
         """Set the toggle state of the element.
 
         Args:
-            state (bool): If True, the element will be toggled on. Else, it will be toggled off.
+            state (bool): If True, the element will be toggled on. Else,
+                it will be toggled off.
         """
         self.is_toggled_on = state
         self.update_toggle_images()
@@ -4248,13 +4243,20 @@ class ToggleImage(ImageBase):
         toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
         toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
     ) -> None:
-        """Update the sources for the toggle images and update the image with a new source based on the
-        current toggle state. If size matching is on, a size-matched version of the new source will
+        """Update the sources for the toggle images and update the image
+        with a new source based on the current toggle state. If size
+        matching is on, a size-matched version of the new source will
         be used.
 
         Args:
-            toggle_on_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type. Defaults to ... .
-            toggle_off_source (Union[str, bytes, None], optional): A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type. Defaults to ... .
+            toggle_on_source (Union[str, bytes, None], optional): A
+                filename or a base64 bytes for the toggle on image. Will
+                automatically detect and handle the type. Defaults to
+                ... .
+            toggle_off_source (Union[str, bytes, None], optional): A
+                filename or a base64 bytes for the toggle off image.
+                Will automatically detect and handle the type. Defaults
+                to ... .
         """
 
         if toggle_on_source is not ...:
@@ -4280,17 +4282,18 @@ class ToggleImage(ImageBase):
 
 
 class FancyCheckbox(ToggleImage):
-    """FancyCheckbox Element with size-matching functionality. Displays a checkbox
-    with fancy checked/unchecked default images. Checked and unchecked images should
-    be a GIF or a PNG only.
+    """FancyCheckbox Element with size-matching functionality. Displays
+    a checkbox with fancy checked/unchecked default images. Checked and
+    unchecked images should be a GIF or a PNG only.
     """
 
-    _toggle_on_source_default = b"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"
-    _toggle_off_source_default = b"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"
+    _toggle_on_source_default = b"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"  # noqa
+    _toggle_off_source_default = b"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"  # noqa
 
     @property
     def checked(self) -> bool:
-        """Toggle state of the checkbox. True if the checkbox is checked."""
+        """The toggle state of the checkbox. True if the checkbox is
+        checked."""
         return self.is_toggled_on
 
     @checked.setter
@@ -4299,9 +4302,9 @@ class FancyCheckbox(ToggleImage):
 
 
 class FancyToggle(ToggleImage):
-    """FancyToggle Element with size-matching functionality. Displays a toggle button
-    with fancy on/off default images. Toggle On and Off images should be a GIF or a
-    PNG only.
+    """FancyToggle Element with size-matching functionality. Displays a
+    toggle button with fancy on/off default images. Toggle On and Off
+    images should be a GIF or a PNG only.
     """
 
     _toggle_off_source_default = b"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"
@@ -4906,7 +4909,7 @@ def popup_scrolled(
     :return:                    Returns the window for the popup and text of the button that was pressed.  None will be returned in place of the button text if user closed window with X.
                                 (None, None) will be returned if no positional arguments are given.
     :rtype:                     (sg.Window | None, str | None | TIMEOUT_KEY)
-    """
+    """  # noqa
     if not args:
         return (None, None)
     width, height = size
@@ -5123,7 +5126,7 @@ def DummyButton(
     :type expand_y:          (bool)
     :return:                 returns a button
     :rtype:                  (Button)
-    """
+    """  # noqa
     return sg.Button(
         button_text=button_text,
         button_type=sg.BUTTON_TYPE_CLOSES_WIN_ONLY,
