@@ -2909,7 +2909,7 @@ class Multiline(sg.Multiline):
             self.update(_txt, append=True)
             if self.echo_stdout_stderr:
                 self.previous_stdout.write(_txt)
-        except:
+        except Exception:
             pass
 
     def _format_text(self, text: str) -> str:
