@@ -459,125 +459,130 @@ def start_GUI(theme: str) -> None:
             LANG_SPECIFIER_OPTIONS[0],
         )
 
+        app_size_frame_layout = [
+            [
+                sg.Text(
+                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
+                    key=scaling_text_setting_key,
+                    background_color="blue",
+                ),
+                sg.Column(
+                    layout=[
+                        [
+                            sg.Input(
+                                sg.user_settings_get_entry(
+                                    scaling_input_setting_key,
+                                    DEFAULT_GLOBAL_SCALING,
+                                ),
+                                size=(5),
+                                key=scaling_input_setting_key,
+                            ),
+                            sg.Button(
+                                "Apply",
+                                key=apply_global_scaling_key,
+                            ),
+                        ]
+                    ],
+                    pad=0,
+                ),
+            ]
+        ]
+
+        output_folder_frame_layout = [
+            [
+                sg.Text(
+                    text="Remember Output Folder",
+                    key=save_output_dir_text_key,
+                    background_color="blue",
+                ),
+                FancyCheckbox(
+                    start_toggled_on=save_output_dir,
+                    key=save_output_dir_checkbox_key,
+                    enable_events=True,
+                    size_match=True,
+                    size_match_target=save_output_dir_text_key,
+                ),
+            ]
+        ]
+
+        language_specifier_frame_layout = [
+            [
+                sg.Column(
+                    layout=[
+                        [sg.Text("Specifier")],
+                        [
+                            sg.Text(
+                                "Output File Name Format:",
+                                key=language_specifier_output_format_text_key,
+                                background_color="blue",
+                            )
+                        ],
+                    ],
+                    pad=0,
+                ),
+                sg.Column(
+                    layout=[
+                        [
+                            sg.Combo(
+                                values=LANG_SPECIFIER_OPTIONS,
+                                key=language_specifier_setting_key,
+                                default_value=language_specifier,
+                                auto_size_text=True,
+                                readonly=True,
+                                enable_events=True,
+                            ),
+                        ],
+                        [
+                            sg.Text(
+                                LANG_SPECIFIER_TO_EXAMPLE_TEXT[
+                                    language_specifier
+                                ],
+                                text_color="black",
+                                key=language_specifier_example_text_key,
+                            )
+                        ],
+                    ],
+                    pad=0,
+                ),
+            ]
+        ]
+
+        file_path_frame_layout = [
+            [
+                sg.Input(
+                    f"{config_file_path}",
+                    size=len(config_file_path) - 6,
+                    disabled=True,
+                )
+            ]
+        ]
+
         tab2_settings_layout = [
             [
                 sg.Frame(
                     title="Resize the Application",
-                    layout=[
-                        [
-                            sg.Text(
-                                (
-                                    f"Size Multiplier ({MIN_SCALING} to"
-                                    f" {MAX_SCALING}):"
-                                ),
-                                key=scaling_text_setting_key,
-                                background_color="blue",
-                            ),
-                            sg.Column(
-                                layout=[
-                                    [
-                                        sg.Input(
-                                            sg.user_settings_get_entry(
-                                                scaling_input_setting_key,
-                                                DEFAULT_GLOBAL_SCALING,
-                                            ),
-                                            size=(5),
-                                            key=scaling_input_setting_key,
-                                        ),
-                                        sg.Button(
-                                            "Apply",
-                                            key=apply_global_scaling_key,
-                                        ),
-                                    ]
-                                ],
-                                pad=0,
-                            ),
-                        ]
-                    ],
+                    layout=app_size_frame_layout,
                     expand_x=True,
                 )
             ],
             [
                 sg.Frame(
                     title="Output Folder",
-                    layout=[
-                        [
-                            sg.Text(
-                                text="Remember Output Folder",
-                                key=save_output_dir_text_key,
-                                background_color="blue",
-                            ),
-                            FancyCheckbox(
-                                start_toggled_on=save_output_dir,
-                                key=save_output_dir_checkbox_key,
-                                enable_events=True,
-                                size_match=True,
-                                size_match_target=save_output_dir_text_key,
-                            ),
-                        ]
-                    ],
+                    layout=output_folder_frame_layout,
                     expand_x=True,
                 )
             ],
             [
                 sg.Frame(
                     title="Language Specifier",
-                    layout=[
-                        [
-                            sg.Column(
-                                layout=[
-                                    [sg.Text("Specifier")],
-                                    [
-                                        sg.Text(
-                                            "Output File Name Format:",
-                                            key=language_specifier_output_format_text_key,
-                                            background_color="blue",
-                                        )
-                                    ],
-                                ],
-                                pad=0,
-                            ),
-                            sg.Column(
-                                layout=[
-                                    [
-                                        sg.Combo(
-                                            values=LANG_SPECIFIER_OPTIONS,
-                                            key=language_specifier_setting_key,
-                                            default_value=language_specifier,
-                                            auto_size_text=True,
-                                            readonly=True,
-                                            enable_events=True,
-                                        ),
-                                    ],
-                                    [
-                                        sg.Text(
-                                            LANG_SPECIFIER_TO_EXAMPLE_TEXT[
-                                                language_specifier
-                                            ],
-                                            text_color="black",
-                                            key=language_specifier_example_text_key,
-                                        )
-                                    ],
-                                ],
-                                pad=0,
-                            ),
-                        ]
-                    ],
+                    layout=language_specifier_frame_layout,
                     expand_x=True,
                 )
             ],
             [
                 sg.Frame(
                     title="Settings File Path",
-                    layout=[
-                        [
-                            sg.Input(
-                                f"{config_file_path}",
-                                size=len(config_file_path) - 6,
-                                disabled=True,
-                            )
-                        ]
-                    ],
+                    layout=file_path_frame_layout,
                     expand_x=True,
                 )
             ],
@@ -647,7 +652,8 @@ def start_GUI(theme: str) -> None:
             sg.user_settings_get_entry(out_dir_key, "")
         )
 
-        # Switch to the settings tab to load it and then switch back to the main tab
+        # Switch to the settings tab to load it and then switch back to
+        # the main tab
         window[settings_tab_key].select()
         window.refresh()
 
@@ -671,14 +677,17 @@ def start_GUI(theme: str) -> None:
         prompt_manager: PromptManager,
         prompt_profile_dropdown_key: str,
     ) -> sg.Window:
-        """Create a tracked main window whose prompt profile dropdown is updated by the
-        prompt manager when needed.
+        """Create a tracked main window whose prompt profile dropdown is
+        updated by the prompt manager when needed.
 
         Args:
-            window_tracker (WindowTracker): The window tracker to add the created window to.
-            prompt_manager (PromptManager): The prompt manager for the application.
-            prompt_profile_dropdown_key (str): The key of the prompt profile dropdown that's updated by the
-                prompt manager when needed.
+            window_tracker (WindowTracker): The window tracker to add
+                the created window to.
+            prompt_manager (PromptManager): The prompt manager for the
+                application.
+            prompt_profile_dropdown_key (str): The key of the prompt
+                profile dropdown that's updated by the prompt manager
+                when needed.
 
         Returns:
             sg.Window: The created main window.
@@ -686,7 +695,8 @@ def start_GUI(theme: str) -> None:
 
         window = window_tracker.track_window(make_main_window())
 
-        # give the prompt manager the prompt profile dropdown so that it's updated on profile changes
+        # give the prompt manager the prompt profile dropdown so that
+        # it's updated on profile changes
         prompt_manager.set_prompt_profile_dropdown(
             window, prompt_profile_dropdown_key
         )
@@ -705,10 +715,11 @@ def start_GUI(theme: str) -> None:
         """Pop up the prompt manager window.
 
         Args:
-            location (Tuple[Optional[int], Optional[int]], optional): The location for the prompt manager
-                window. Defaults to (None, None).
-            alpha_channel (float, optional): The alpha channel to set for the prompt manager window.
-                Defaults to None.
+            location (Tuple[Optional[int], Optional[int]], optional):
+                The location for the prompt manager window. Defaults to
+                (None, None).
+            alpha_channel (float, optional): The alpha channel to set
+                for the prompt manager window. Defaults to None.
 
         Returns:
             sg.Window: The prompt manager window.
@@ -794,11 +805,15 @@ def start_GUI(theme: str) -> None:
         """Reload the prompt manager window and track the new window.
 
         Args:
-            prompt_manager_window (sg.Window): The prompt manager window to reload.
-            modal_window_manager (ModalWindowManager, optional): The new prompt manager window
-                will be tracked and made modal by a modal window manager if given. Defaults to None.
-            window_tracker (WindowTracker, optional): The new prompt manager window
-                will be tracked by a window tracker if given. Defaults to None.
+            prompt_manager_window (sg.Window): The prompt manager window
+                to reload.
+            modal_window_manager (ModalWindowManager, optional): The new
+                prompt manager window
+                will be tracked and made modal by a modal window manager
+                if given. Defaults to None.
+            window_tracker (WindowTracker, optional): The new prompt
+                manager window will be tracked by a window tracker if
+                given. Defaults to None.
 
         Returns:
             Optional[sg.Window]: The new prompt manager window or None.
@@ -854,11 +869,14 @@ def start_GUI(theme: str) -> None:
 
         Args:
             title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile values are submitted.
-            profile_name (str, optional): The editted profile's name which prefills the profile name field in the window.
+            submit_event (str): The event that occurs when new profile
+                values are submitted.
+            profile_name (str, optional): The editted profile's name
+                which prefills the profile name field in the window.
                 ONLY FOR PROFILE EDITS. Defaults to "".
-            prompt (str, optional): The editted profile's prompt which prefills the profile prompt field in the window.
-                ONLY FOR PROFILE EDITS. Defaults to "".
+            prompt (str, optional): The editted profile's prompt which
+                prefills the profile prompt field in the window. ONLY
+                FOR PROFILE EDITS. Defaults to "".
 
         Returns:
             sg.Window: The add/edit prompt profile window.
@@ -919,7 +937,8 @@ def start_GUI(theme: str) -> None:
 
         Args:
             title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile values are submitted.
+            submit_event (str): The event that occurs when new profile
+                values are submitted.
 
         Returns:
             sg.Window: The add prompt profile window.
@@ -938,11 +957,14 @@ def start_GUI(theme: str) -> None:
 
         Args:
             title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile values are submitted.
-            profile_name (str, optional): The editted profile's name which prefills the profile name field in the window.
+            submit_event (str): The event that occurs when new profile
+                values are submitted.
+            profile_name (str, optional): The editted profile's name
+                which prefills the profile name field in the window.
                 ONLY FOR PROFILE EDITS. Defaults to "".
-            prompt (str, optional): The editted profile's prompt which prefills the profile prompt field in the window.
-                ONLY FOR PROFILE EDITS. Defaults to "".
+            prompt (str, optional): The editted profile's prompt which
+                prefills the profile prompt field in the window. ONLY
+                FOR PROFILE EDITS. Defaults to "".
 
         Returns:
             sg.Window: The edit prompt profile window.
@@ -1025,7 +1047,8 @@ def start_GUI(theme: str) -> None:
             print(values[PRINT_ME], end="")
         # User selected an output directory
         elif event == output_dir_field_key:
-            # Save the output directory to the settings file when the corresponding option is on
+            # Save the output directory to the settings file when the
+            # corresponding option is on
             if sg.user_settings_get_entry(save_output_dir_checkbox_key):
                 sg.user_settings_set_entry(out_dir_key, values[out_dir_key])
         # User selected a language
@@ -1042,7 +1065,8 @@ def start_GUI(theme: str) -> None:
             and event in window.key_dict
             and isinstance(window[event], FancyCheckbox)
         ):
-            # Save the checkbox state to the config file for save-on-click checkboxes
+            # Save the checkbox state to the config file for
+            # save-on-click checkboxes
             save_on_click_checkboxes = (
                 translate_to_english_checkbox_key,
                 save_output_dir_checkbox_key,
@@ -1051,7 +1075,8 @@ def start_GUI(theme: str) -> None:
             if event in save_on_click_checkboxes:
                 save_toggle_state(window[event])
 
-            # Delete the saved output directory from the settings file when the option is off
+            # Delete the saved output directory from the settings file
+            # when the option is off
             if (
                 event == save_output_dir_checkbox_key
                 and not window[event].checked
@@ -1078,7 +1103,8 @@ def start_GUI(theme: str) -> None:
 
             # Ensure user has selected a row in the prompt profile table
             if selected_table_row_indices:
-                # Look up the profile using the index of the first selected table row
+                # Look up the profile using the index of the first
+                # selected table row
                 selected_profile = prompt_manager.saved_prompt_profiles_list[
                     selected_table_row_indices[0]
                 ]
@@ -1111,7 +1137,8 @@ def start_GUI(theme: str) -> None:
             new_profile_name = values[new_profile_name_key]
             new_profile_prompt = values[new_profile_prompt_key]
 
-            # Get the original profile name of the add/edit profile window before user changes.
+            # Get the original profile name of the add/edit profile
+            # window before user changes.
             original_profile_name = window[new_profile_name_key].metadata
 
             if event == add_prompt_profile_key:
@@ -1237,7 +1264,8 @@ def start_GUI(theme: str) -> None:
         elif event == apply_global_scaling_key:
 
             def popup_tracked_scaling_invalid() -> None:
-                """Pop up a tracked modal message window indicating an invalid scaling input.
+                """Pop up a tracked modal message window indicating an
+                invalid scaling input.
                 """
                 popup_window = popup_tracked(
                     (
@@ -1300,7 +1328,8 @@ def start_GUI(theme: str) -> None:
             window[model_info_table_key].update(visible=model_info_toggled_on)
         # User wants to start transcription
         elif event == start_key:
-            # Get user provided paths for the video file and output directory
+            # Get user provided paths for the video file and output
+            # directory
             audio_video_file_paths_str = str(values[in_file_key]).strip()
             output_dir_path = str(values[out_dir_key]).strip()
 
@@ -1313,12 +1342,14 @@ def start_GUI(theme: str) -> None:
 
                 model_selected = values[model_key]
 
-                # Get the user's choice of whether to translate the results into english
+                # Get the user's choice of whether to translate the
+                # results into english
                 translate_to_english = window[
                     translate_to_english_checkbox_key
                 ].checked
 
-                # Get the user's choice of whether to use a language code as the language specifier in output files
+                # Get the user's choice of whether to use a language
+                # code as the language specifier in output files
                 language_specifier_selection = values[
                     language_specifier_setting_key
                 ]
@@ -1329,7 +1360,8 @@ def start_GUI(theme: str) -> None:
                     else False
                 )
 
-                #  Get the user's initial prompt for all transcriptions in this task
+                #  Get the user's initial prompt for all transcriptions
+                # in this task
                 initial_prompt = values[initial_prompt_input_key]
 
                 # Ensure timer is not running
@@ -1445,7 +1477,8 @@ def start_GUI(theme: str) -> None:
 
         # Transcriptions in progress
         if is_transcribing:
-            # Update the progress meter unless the user has clicked the cancel button already
+            # Update the progress meter unless the user has clicked the
+            # cancel button already
             if not stop_flag.is_set():
                 # Get the current file being worked on
                 if num_tasks_done < num_tasks:
@@ -1464,9 +1497,11 @@ def start_GUI(theme: str) -> None:
                     orientation="h",
                 )
 
-                # Track the meter window in case it was remade to ensure it's modal
+                # Track the meter window in case it was remade to ensure
+                # it's modal
                 if meter_updated:
-                    # Track the meter window as a modal window if it's still active
+                    # Track the meter window as a modal window if it's
+                    # still active
                     if progress_key in sg.QuickMeter.active_meters:
                         meter_window = sg.QuickMeter.active_meters[
                             progress_key
@@ -1487,7 +1522,8 @@ def start_GUI(theme: str) -> None:
 
 
 def function_details(func: Callable) -> Callable:
-    """Decorate a function to also prints the function and its arguments when it's called.
+    """Decorate a function to also prints the function and its arguments
+    when it's called.
 
     Args:
         func (Callable): A function.
