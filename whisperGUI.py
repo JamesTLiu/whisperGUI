@@ -1779,7 +1779,7 @@ def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
     info = get_placement_info(target)
     padx = info["padx"]
     pady = info["pady"]
-    return Pad(*process_pad_into_tuple(padx), *process_pad_into_tuple(pady))
+    return Pad(*process_pad_into_2_tuple(padx), *process_pad_into_2_tuple(pady))
 
 
 def get_original_pad(element: sg.Element) -> Pad:
@@ -1812,7 +1812,7 @@ class Pad:
         return (self.left, self.right), (self.top, self.bottom)
 
 
-def process_pad_into_tuple(pad) -> Tuple:
+def process_pad_into_2_tuple(pad) -> Tuple:
     """Return the padding (x or y) as a tuple.
 
     Args:
@@ -1852,11 +1852,11 @@ def process_pad(pad) -> Pad:
         pad = sg.DEFAULT_ELEMENT_PADDING
 
     # Turn pad into a 2-tuple
-    pad = process_pad_into_tuple(pad)
+    pad = process_pad_into_2_tuple(pad)
 
     # Turn padx and pady each into a 2-tuple and make a Pad out of them
     return Pad(
-        *process_pad_into_tuple(pad[0]), *process_pad_into_tuple(pad[1])
+        *process_pad_into_2_tuple(pad[0]), *process_pad_into_2_tuple(pad[1])
     )
 
 
