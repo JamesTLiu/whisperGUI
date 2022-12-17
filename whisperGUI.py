@@ -1597,6 +1597,45 @@ def forward_resize_event(event: tk.Event) -> None:
         )
 
 
+def get_event_widget(event: tk.Event) -> Optional[tk.Widget]:
+    """Return the event's widget.
+
+    Args:
+        event (tk.Event): An event.
+
+    Returns:
+        Optional[tk.Widget]: The event's widget or None if it's not
+            found.
+    """
+    # widget = event.widget
+    widget = event.widget
+
+    # Ensure a widget
+    try:
+        widget.winfo_ismapped()
+    # A widget name was found
+    except AttributeError:
+        widget = widget_name_to_widget(widget)
+    return widget
+
+
+def widget_name_to_widget(widget_name: str) -> Optional[tk.Widget]:
+    """Return the widget in an active window based on a widget's Tcl
+    name.
+
+    Args:
+        widget_name (str): The Tcl name of a widget.
+
+    Returns:
+        Optional[tk.Widget]: A widget or None if it's not found.
+    """
+    for window in sg.Window._active_windows:
+        with suppress(KeyError):
+            widget = window.TKroot.nametowidget(widget_name)
+            return widget
+    return None
+
+
 def refresh_idletasks(window: sg.Window) -> sg.Window:
     """Refreshes the window by calling tkroot.update_idletasks().
     Call this when you want all tkinter idle callbacks to be processed. This
