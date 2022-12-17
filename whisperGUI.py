@@ -1586,15 +1586,17 @@ def forward_resize_event(event: tk.Event) -> None:
         return
 
     if has_widget_resized:
+        # print(f"forwarding resize event.")
         # lookup = widget_to_element_with_window(widget)
         # if not lookup or not lookup.element or not lookup.window:
-        #     # print(f"forwarding resize event.")
-        #     # print("\tevent widget is not tracked by an active window")
+        #     print("\tevent widget is not tracked by an active window")
         #     ...
         # else:
         #     wrapper_element = lookup.element
-        #     print(f"forwarding resize event.")
-        #     print(f"\tevent element key: {wrapper_element.key}. size: {event.width, event.height}.")
+        #     print(
+        #         f"\tevent element key: {wrapper_element.key}. size:"
+        #         f" {event.width, event.height}."
+        #     )
 
         widget.event_generate(
             "<<Resize>>",
