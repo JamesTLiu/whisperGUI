@@ -2929,7 +2929,7 @@ class Multiline(sg.Multiline):
         processed_text = re.sub(r"\r", "\n", _text)
 
         def replace_with_progress_bars(m: re.Match) -> str:
-            # Replace all characters in the match with a block character.
+            # Replace all chars in the match with a █.
             return "█" * len(m.group())
 
         processed_text = re.sub(
