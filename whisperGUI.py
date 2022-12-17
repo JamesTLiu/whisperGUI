@@ -1567,18 +1567,22 @@ def forward_resize_event(event: tk.Event) -> None:
         )
         return
 
-    widget: tk.Widget = event.widget
+    widget = get_event_widget(event)
+
+    # The widget for the event cannot be retrieved. Ignore this event.
+    if widget is None:
+        return
 
     try:
         has_widget_resized = widget_resized(widget)
     except GetWidgetSizeError:
-        # sg.PopupError(
-        #     f"Warning: Error while determining if the event's widget resized.",
-        #     f"The offensive widget = ",
-        #     widget,
-        #     keep_on_top=True,
-        #     image=_random_error_emoji(),
-        # )
+        sg.PopupError(
+            "Warning: Error while determining if the event's widget resized.",
+            "The offensive widget = ",
+            widget,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
         return
 
     if has_widget_resized:
