@@ -2873,14 +2873,12 @@ def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
     if last_size is None:
         widget_width, widget_height = get_widget_size(widget)
 
-        # last_size = WidgetSize(width=widget_width, height=widget_height)
-        last_size_val = WidgetSize(width=widget_width, height=widget_height)
+        last_size = WidgetSize(width=widget_width, height=widget_height)
         setattr(
             widget,
             last_size_attr,
-            last_size_val,
+            last_size,
         )
-        # print("last size attr added to widget")
 
     return last_size
 
