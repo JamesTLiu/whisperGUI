@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-from dataclasses import dataclass
 
+import base64
 import decimal
-from enum import Enum
 import inspect
 import io
 import multiprocessing
@@ -15,8 +14,11 @@ import signal
 import sys
 import threading
 import time
+import tkinter as tk
 from contextlib import suppress
+from dataclasses import dataclass
 from decimal import Decimal
+from enum import Enum
 from itertools import islice, zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
@@ -40,18 +42,7 @@ from typing import (
     Union,
 )
 
-if platform.system() == "Windows":
-    from multiprocessing.connection import PipeConnection  # type: ignore
-else:
-    from multiprocessing.connection import (  # type: ignore
-        Connection as PipeConnection,
-    )
-
-if TYPE_CHECKING:
-    from types import FrameType
-
-import tkinter as tk
-
+import PIL.Image
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
@@ -60,6 +51,17 @@ from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
 import set_env
+
+if platform.system() == "Windows":
+    from multiprocessing.connection import PipeConnection  # type: ignore
+else:
+    from multiprocessing.connection import (  # type: ignore
+        Connection as PipeConnection,
+    )  
+
+
+if TYPE_CHECKING:
+    from types import FrameType
 
 
 def main():
@@ -2163,12 +2165,6 @@ def update_size_matched_image(
             f" (key={element_to_size_match.key}). width={width},"
             f" height={height}."
         )
-
-
-import base64
-import io
-
-import PIL.Image
 
 
 def convert_to_bytes(
