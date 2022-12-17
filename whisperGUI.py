@@ -411,7 +411,6 @@ def start_GUI(theme: str) -> None:
                     initial_folder=sg.user_settings_get_entry(out_dir_key),
                 ),
             ],
-            # [Grid(layout=tab1_options_layout, uniform_block_sizes=True)],
             [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
             [
                 sg.pin(
