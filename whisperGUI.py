@@ -57,7 +57,7 @@ if platform.system() == "Windows":
 else:
     from multiprocessing.connection import (  # type: ignore
         Connection as PipeConnection,
-    )  
+    )
 
 
 if TYPE_CHECKING:
@@ -2206,19 +2206,24 @@ def convert_to_bytes(
     height: Optional[int] = None,
     fill: bool = False,
 ) -> bytes:
-    """Will convert into bytes and optionally resize an image that is a file or a base64 bytes object.
-    Turns into PNG format in the process so that it can be displayed by tkinter.
-    :param file_or_bytes: Either a string filename or a bytes base64 image object.
+    """Will convert into bytes and optionally resize an image that is a
+    file or a base64 bytes object. Turns into PNG format in the process
+    so that it can be displayed by tkinter.
+    :param file_or_bytes: Either a string filename or a bytes base64
+        image object.
     :type file_or_bytes:  (Union[str, bytes])
-    :param width:  Optional new width. The image's aspect ratio will be maintained while resizing. If
-        width and height are both given, the image will be resized to meet the requested size as much
-        as possible while maintaining the aspect ratio.
+    :param width:  Optional new width. The image's aspect ratio will be
+        maintained while resizing. If width and height are both given,
+        the image will be resized to meet the requested size as much as
+        possible while maintaining the aspect ratio.
     :type width: (int or None)
-    :param height:  Optional new height. The image's aspect ratio will be maintained while resizing. If
-        width and height are both given, the image will be resized to meet the requested size as much
-        as possible while maintaining the aspect ratio.
+    :param height:  Optional new height. The image's aspect ratio will
+        be maintained while resizing. If width and height are both
+        given, the image will be resized to meet the requested size as
+        much as possible while maintaining the aspect ratio.
     :type height: (int or None)
-    :param fill: If True, then the image is filled/padded into a square so that the image is not distorted.
+    :param fill: If True, then the image is filled/padded into a square
+        so that the image is not distorted.
     :type fill: (bool)
     :return: (bytes) A byte-string object.
     :rtype: (bytes)
@@ -2269,8 +2274,8 @@ class NonExistentPromptProfileName(Exception):
 
 
 class ModalWindowManager:
-    """A manager for tracking modal windows in order to remodal a previous window
-    when a more recent one is closed.
+    """A manager for tracking modal windows in order to remodal a
+    previous window when a more recent one is closed.
     """
 
     def __init__(self) -> None:
@@ -2282,15 +2287,16 @@ class ModalWindowManager:
         The given window will be ignored if it's a closed window.
 
         Args:
-            window (sg.Window): A modal window. If a non-modal window is added,
-                it will be changed into a modal window.
+            window (sg.Window): A modal window. If a non-modal window is
+                added, it will be changed into a modal window.
 
         Returns:
             Tuple[sg.Window, bool]: A tuple with the window and True if
                 tracking succeeded, False otherwise.
         """
 
-        # Ignore the window if it's already the most recent tracked modal window
+        # Ignore the window if it's already the most recent tracked
+        # modal window
         if self._modal_window_stack and window is self._modal_window_stack[-1]:
             return (window, True)
 
@@ -2306,7 +2312,8 @@ class ModalWindowManager:
 
         stack_changed = False
 
-        # Clear closed modal windows from the top of the modal window tracking stack
+        # Clear closed modal windows from the top of the modal window
+        # tracking stack
         while (
             self._modal_window_stack
             and self._modal_window_stack[-1].was_closed()
@@ -2356,7 +2363,8 @@ class PromptManager:
     def __init__(self, saved_prompts_settings_key: str) -> None:
         """
         Args:
-            saved_prompts_settings_key (str): Key for the saved prompts in the settings file.
+            saved_prompts_settings_key (str): Key for the saved prompts
+                in the settings file.
         """
         self._saved_prompts_settings_key = saved_prompts_settings_key
         self.saved_prompt_profiles = sg.user_settings_get_entry(
@@ -2367,13 +2375,15 @@ class PromptManager:
 
     @property
     def unsaved_prompt_profile_name(self) -> str:
-        """Name of the Prompt profile for when the user is not using a saved prompt profile.
+        """Name of the Prompt profile for when the user is not using a
+        saved prompt profile.
         """
         return self._unsaved_prompt_profile_name
 
     @property
     def saved_prompt_profiles(self) -> Dict[str, str]:
-        """A dict with the saved prompt profiles names and their prompt values.
+        """A dict with the saved prompt profiles names and their prompt
+        values.
         """
         self._saved_prompt_profiles: Dict[
             str, str
@@ -2392,7 +2402,8 @@ class PromptManager:
 
     @property
     def prompt_profile_names(self) -> List[str]:
-        """The unsaved prompt profile name and the sorted ascending names of the saved prompt profiles.
+        """The unsaved prompt profile name and the sorted ascending
+        names of the saved prompt profiles.
         """
         return [
             self.unsaved_prompt_profile_name,
@@ -2401,7 +2412,9 @@ class PromptManager:
 
     @property
     def saved_prompt_profiles_list(self) -> List[Tuple[str, str]]:
-        """The saved prompt profiles as a list of tuples sorted ascending."""
+        """The saved prompt profiles as a list of tuples sorted
+        ascending.
+        """
         return sorted(self.saved_prompt_profiles.items(), key=itemgetter(0))
 
     @property
@@ -2419,9 +2432,11 @@ class PromptManager:
             profile_prompt (str): The prompt for the new prompt profile.
 
         Returns:
-            Tuple[bool, str]: Tuple with the success state and an error message.
-                The success state will be True if the prompt profile was successfully added.
-                False, otherwise. The error message will be an empty string if no error occurred.
+            Tuple[bool, str]: Tuple with the success state and an error
+                message. The success state will be True if the prompt
+                profile was successfully added. False, otherwise. The
+                error message will be an empty string if no error
+                occurred.
         """
         error_msg = ""
 
@@ -2458,16 +2473,20 @@ class PromptManager:
         Args:
             profile_name (str): The new name for the prompt profile.
             profile_prompt (str): The new prompt for the prompt profile.
-            original_profile_name (str): The original name of the prompt profile being edited.
+            original_profile_name (str): The original name of the prompt
+                profile being edited.
 
         Returns:
-            Tuple[bool, str]: Tuple with the success state and an error message.
-                The success state will be True if the prompt profile was successfully editted.
-                False, otherwise. The error message will be an empty string if no error occurred.
+            Tuple[bool, str]: Tuple with the success state and an error
+                message. The success state will be True if the prompt
+                profile was successfully editted. False, otherwise. The
+                error message will be an empty string if no error
+                occurred.
         """
         error_msg = ""
 
-        # Invalid prompt name. Prompt name is empty or only has whitespaces.
+        # Invalid prompt name. Prompt name is empty or only has
+        # whitespaces.
         if not profile_name.strip():
             error_msg = (
                 f"Invalid prompt name: name can't be empty or whitespace only."
@@ -2477,7 +2496,8 @@ class PromptManager:
 
         profile_name_changed = profile_name != original_profile_name
 
-        # Invalid prompt name. Profile name is already in use and user isn't editing the selected profile's prompt.
+        # Invalid prompt name. Profile name is already in use and user
+        # isn't editing the selected profile's prompt.
         if profile_name in self.prompt_profile_names and profile_name_changed:
             error_msg = (
                 f"Invalid prompt name: name already in use."
@@ -2499,15 +2519,17 @@ class PromptManager:
         profile_prompt: str,
         original_profile_name: str = None,
     ) -> None:
-        """Save the prompt profile while overwriting the original profile if it is given.
+        """Save the prompt profile while overwriting the original
+        profile if it is given.
 
         Overwrites an existing prompt profile if it already exists.
 
         Args:
             prompt_name (str): The name for the prompt profile.
             prompt (str): The prompt for the prompt profile.
-            original_profile_name (str, None): The original name of the prompt profile being edited
-                if applicable. Defaults to None.
+            original_profile_name (str, None): The original name of the
+                prompt profile being edited if applicable. Defaults to
+                None.
         """
         # Editing a profile. Delete the old prompt profile.
         if original_profile_name is not None:
@@ -2522,7 +2544,8 @@ class PromptManager:
         if self._dropdown:
             selected_dropdown_profile_name = self._dropdown.get()
 
-            # Edited the currently selected profile in the dropdown. Select the new profile.
+            # Edited the currently selected profile in the dropdown.
+            # Select the new profile.
             if (
                 original_profile_name is not None
                 and original_profile_name == selected_dropdown_profile_name
@@ -2530,7 +2553,8 @@ class PromptManager:
                 self._update_prompt_profile_dropdown(
                     new_selected_profile=profile_name
                 )
-            # Added a profile or did not edit the currently selected profile in the dropdown
+            # Added a profile or did not edit the currently selected
+            # profile in the dropdown
             else:
                 self._update_prompt_profile_dropdown()
 
@@ -2538,7 +2562,8 @@ class PromptManager:
         """Delete a prompt profile by name.
 
         Args:
-            prompt_name (str): The name of the prompt profile to be deleted.
+            prompt_name (str): The name of the prompt profile to be
+                deleted.
         """
         del self.saved_prompt_profiles[profile_name]
 
@@ -2548,13 +2573,15 @@ class PromptManager:
         if self._dropdown:
             selected_prompt_profile_name = self._dropdown.get()
 
-            # Update the profile dropdown and select the unsaved prompt profile in the
-            # dropdown since the current profile selection was deleted
+            # Update the profile dropdown and select the unsaved prompt
+            # profile in the dropdown since the current profile
+            # selection was deleted
             if profile_name == selected_prompt_profile_name:
                 self._update_prompt_profile_dropdown(
                     new_selected_profile=self.unsaved_prompt_profile_name
                 )
-            # Update the profile dropdown and keep the current profile selection
+            # Update the profile dropdown and keep the current profile
+            # selection
             else:
                 self._update_prompt_profile_dropdown()
 
@@ -2566,11 +2593,12 @@ class PromptManager:
 
     @property
     def _dropdown(self) -> Optional[sg.Combo]:
-        """The prompt profile dropdown element that will be updated when the prompt
-        profiles change.
+        """The prompt profile dropdown element that will be updated
+        when the prompt profiles change.
 
         Returns:
-            Optional[sg.Combo]: Returns the dropdown element if known. Else, returns None.
+            Optional[sg.Combo]: Returns the dropdown element if known.
+                Else, returns None.
         """
         if self._dropdown_window and self._dropdown_key is not None:
             return self._dropdown_window[self._dropdown_key]
@@ -2578,11 +2606,12 @@ class PromptManager:
             return None
 
     def set_prompt_profile_dropdown(self, window: sg.Window, key: str) -> None:
-        """Set the prompt profile dropdown element that will be updated when the prompt
-        profiles change.
+        """Set the prompt profile dropdown element that will be updated
+        when the prompt profiles change.
 
         Args:
-            window (sg.Window): The window containing the dropdown element.
+            window (sg.Window): The window containing the dropdown
+                element.
             key (str): The key for the dropdown element.
         """
         self._dropdown_window = window
@@ -2591,30 +2620,35 @@ class PromptManager:
     def _update_prompt_profile_dropdown(
         self, new_selected_profile: Union[str, ellipsis] = ...
     ) -> None:
-        """Update the tracked prompt profile dropdown element if it exists.
+        """Update the tracked prompt profile dropdown element if it
+        exists.
 
         Args:
-            new_selected_profile (str, ellipsis): The dropdown selection will be changed
-                to this profile if given. Defaults to ellipsis.
+            new_selected_profile (str, ellipsis): The dropdown selection
+                will be changed to this profile if given. Defaults to
+                ellipsis.
         """
         if self._dropdown:
             selected_profile = new_selected_profile
 
-            # Keep the old selection for the dropdown if a new selection is not given
+            # Keep the old selection for the dropdown if a new selection
+            #  is not given
             if selected_profile is ...:
                 selected_profile = self._dropdown.get()
 
             # The width of the dropbox that fits all options
             new_dropdown_width = len(max(self.prompt_profile_names, key=len))
 
-            # Update the prompt profile list and the selected profile for the dropdown
+            # Update the prompt profile list and the selected profile
+            # for the dropdown
             self._dropdown.update(
                 value=selected_profile,
                 values=self.prompt_profile_names,
                 size=(new_dropdown_width, None),
             )
 
-            # Send an event changing the dropdown selection if a new selected profile is given.
+            # Send an event changing the dropdown selection if a new
+            # selected profile is given.
             if (
                 self._dropdown_window
                 and self._dropdown_key is not None
@@ -2646,14 +2680,15 @@ class ElementWindow:
 def widget_to_element_with_window(
     widget: tk.Widget,
 ) -> Optional[ElementWindow]:
-    """Return the element that matches a supplied tkinter widget and its window.
-    If no matching element is found, then None is returned.
+    """Return the element that matches a supplied tkinter widget and its
+    window. If no matching element is found, then None is returned.
 
     Args:
         widget (tk.Widget): A tkinter widget.
 
     Returns:
-        Optional[ElementWindow]: The element that matches a supplied tkinter
+        Optional[ElementWindow]: The element that matches a supplied
+            tkinter
         widget and its window. Else, None.
     """
 
@@ -2667,12 +2702,14 @@ def widget_to_element_with_window(
 def detect_all_widget_events(
     widget: tk.Widget, ignored_events: Iterable[str] = tuple()
 ):
-    """Add event detail printing bindings to the widget for every possible tkinter event.
+    """Add event detail printing bindings to the widget for every
+    possible tkinter event.
 
     Args:
         widget (tk.Widget): The widget to detect events for.
-        ignored_events (Iterable[str], optional): An Iterable of names for ignored tkinter events.
-            Event names can be accessed via tkinter.EventTypes.<type>.name. Defaults to tuple().
+        ignored_events (Iterable[str], optional): An Iterable of names
+            for ignored tkinter events. Event names can be accessed via
+            tkinter.EventTypes.<type>.name. Defaults to tuple().
     """
 
     @function_details
@@ -2702,7 +2739,6 @@ def detect_all_widget_events(
     )
 
     for event in tk.EventType:
-        # if all(event.name not in lst for lst in (undocumented_events, ignored_events)):
         if (
             event.name not in undocumented_events
             and event.name not in ignored_events
@@ -2719,13 +2755,15 @@ def set_row_size_of_element(
     width: Optional[int] = None,
     height: Optional[int] = None,
 ):
-    """Forcefully set the size of the row that the element is in. The row will no longer
-    fit to its children.
+    """Forcefully set the size of the row that the element is in. The
+    row will no longer fit to its children.
 
     Args:
         element (sg.Element): The element whose row is to be resized.
-        width (Optional[int], optional): New width of the row. Defaults to None.
-        height (Optional[int], optional): New height of the row. Defaults to None.
+        width (Optional[int], optional): New width of the row. Defaults
+            to None.
+        height (Optional[int], optional): New height of the row.
+            Defaults to None.
     """
     row_frame: tk.Frame = element.ParentRowFrame
 
@@ -2754,7 +2792,8 @@ def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
         GetWidgetSizeError: Error while getting the size of the widget.
 
     Returns:
-        Tuple[int, int]: Width and height of the widget as reported by the tkinter windows manager.
+        Tuple[int, int]: Width and height of the widget as reported by
+            the tkinter windows manager.
     """
     try:
         w = widget.winfo_width()
@@ -2767,17 +2806,20 @@ def get_widget_size(widget: tk.Widget) -> Tuple[int, int]:
 
 
 def get_element_size(element: sg.Element) -> Tuple[int, int]:
-    """Return the size of an Element's widget in Pixels.  Care must be taken as some elements use
-    characters to specify their size but will return pixels when calling this method.
+    """Return the size of an Element's widget in Pixels.  Care must be
+    taken as some elements use characters to specify their size but will
+    return pixels when calling this method.
 
     Args:
         element (sg.Element): An Element.
 
     Raises:
-        GetWidgetSizeError: Error while getting the size of the widget for this element.
+        GetWidgetSizeError: Error while getting the size of the widget
+            for this element.
 
     Returns:
-        Tuple[int, int]: Width and height of the element's widget as reported by the tkinter windows manager.
+        Tuple[int, int]: Width and height of the element's widget as
+            reported by the tkinter windows manager.
     """
     widget = element.widget
     return get_widget_size(widget)
@@ -2786,13 +2828,16 @@ def get_element_size(element: sg.Element) -> Tuple[int, int]:
 def change_row_autosizing(
     row: tk.Frame = None, element: sg.Element = None, auto_size: bool = False
 ) -> None:
-    """Set whether the row or the row of an element fits its contents. If both are given,
-    the row will be used.
+    """Set whether the row or the row of an element fits its contents.
+    If both are given, the row will be used.
 
     Args:
-        row (tk.Frame): The tkinter Frame that represents the row. Defaults to None.
-        element (sg.Element): The element whose row's setting is to be changed. Defaults to None.
-        auto_size (bool): If True, the row will fit its contents. Defaults to False.
+        row (tk.Frame): The tkinter Frame that represents the row.
+            Defaults to None.
+        element (sg.Element): The element whose row's setting is to be
+            changed. Defaults to None.
+        auto_size (bool): If True, the row will fit its contents.
+            Defaults to False.
     """
     if row:
         row_frame = row
@@ -2815,8 +2860,8 @@ class WidgetSize:
 
 
 def widget_resized(widget: tk.Widget) -> bool:
-    """Return whether the widget has resized by comparing the last size and the current
-    size returned by the tkinter windows manager.
+    """Return whether the widget has resized by comparing the last size
+    and the current size returned by the tkinter windows manager.
 
     Args:
         widget (tk.Widget): The widget to check for resizing.
@@ -2829,10 +2874,16 @@ def widget_resized(widget: tk.Widget) -> bool:
     """
     # lookup = widget_to_element_with_window(widget)
     # if not lookup or not lookup.element or not lookup.window:
-    #     print("\tchecking if widget resized. widget is not tracked by an active window")
+    #     print(
+    #         "\tchecking if widget resized. widget is not tracked by "
+    #         "an active window"
+    #     )
     # else:
     #     wrapper_element = lookup.element
-    #     print(f"\tchecking if widget resized for element w/ key: {wrapper_element.key}")
+    #     print(
+    #         "\tchecking if widget resized for element w/ key:"
+    #         f" {wrapper_element.key}"
+    #     )
 
     last_size = get_widget_last_size(widget)
 
@@ -2854,8 +2905,8 @@ def widget_resized(widget: tk.Widget) -> bool:
 def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
     """Return the last size of the widget.
 
-    If there's no last size for the widget, one will be created using the current size for future calls
-    and None will be returned.
+    If there's no last size for the widget, one will be created using
+    the current size for future calls and None will be returned.
 
     Args:
         widget (tk.Widget): The widget.
@@ -2869,7 +2920,8 @@ def get_widget_last_size(widget: tk.Widget) -> Optional[WidgetSize]:
     last_size_attr = "_last_size"
     last_size: Optional[WidgetSize] = getattr(widget, last_size_attr, None)
 
-    # No last size attribute yet. Add the last size attribute to the widget with the current size.
+    # No last size attribute yet. Add the last size attribute to the
+    # widget with the current size.
     if last_size is None:
         widget_width, widget_height = get_widget_size(widget)
 
@@ -2893,13 +2945,14 @@ class PostInit:
 
 
 class Multiline(sg.Multiline):
-    """Multiline Element with extra capabilities - Display and/or read multiple lines of text.
-    This is both an input and output element.
+    """Multiline Element with extra capabilities - Display and/or read
+    multiple lines of text. This is both an input and output element.
     """
 
     def write(self, txt: str) -> None:
         """
-        Called by Python (not tkinter?) when stdout or stderr wants to write
+        Called by Python (not tkinter?) when stdout or stderr wants to
+        write
 
         :param txt: text of output
         :type txt:  (str)
@@ -2916,13 +2969,14 @@ class Multiline(sg.Multiline):
         """Return formatted text meant for console output.
 
         Replaces \r with \n.
-        Replaces progress characters between '|'s in progress bars with proper '█'s.
+        Replaces progress characters between '|'s in progress bars with
+        proper '█'s.
 
         Args:
             text (str): The text to format.
         """
-        # remove the auto appended '\n' by every Multiline.get() call when rstrip is False
-        # _text = text if self.rstrip else text[:-1]
+        # remove the auto appended '\n' by every Multiline.get() call
+        # when rstrip is False
         _text = text
 
         # Replace all \r with \n
