@@ -1644,17 +1644,18 @@ def widget_name_to_widget(widget_name: str) -> Optional[tk.Widget]:
 
 def refresh_idletasks(window: sg.Window) -> sg.Window:
     """Refreshes the window by calling tkroot.update_idletasks().
-    Call this when you want all tkinter idle callbacks to be processed. This
-    will update the display of windows before it next idles but not process
-    events caused by the user.
+    Call this when you want all tkinter idle callbacks to be processed.
+    This will update the display of windows before it next idles but not
+    process events caused by the user.
 
-    Some tasks in updating the display, such as resizing and redrawing widgets,
-    are called idle tasks because they are usually deferred until the application
-    has finished handling events and has gone back to the main loop to wait for
-    new events.
+    Some tasks in updating the display, such as resizing and redrawing
+    widgets, are called idle tasks because they are usually deferred
+    until the application has finished handling events and has gone back
+    to the main loop to wait for new events.
 
     Args:
-        window (sg.Window): The window to refresh and process idle tasks for.
+        window (sg.Window): The window to refresh and process idle tasks
+            for.
 
     Returns:
         sg.Window: The window so that calls can be easily "chained".
@@ -1673,14 +1674,17 @@ def resize_window_relative_to_screen(
     width_factor: Union[float, int],
     height_factor: Union[float, int],
 ) -> None:
-    """Resize the window by specifying the width and height relative to the screen size.
+    """Resize the window by specifying the width and height relative to
+    the screen size.
 
     Args:
         window (sg.Window): The window to resize.
-        width_factor (Union[float, int]): The proportion of the screen's width to make the window.
+        width_factor (Union[float, int]): The proportion of the screen's
+            width to make the window.
             E.g., 0.2 is 20% of the screen's width.
-        height_factor (Union[float, int]): The proportion of the screen's height to make the window.
-            E.g., 0.2 is 20% of the screen's height.
+        height_factor (Union[float, int]): The proportion of the
+            screen's height to make the window. E.g., 0.2 is 20% of the
+            screen's height.
     """
 
     screen_width, screen_height = sg.Window.get_screen_size()
@@ -1700,14 +1704,15 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
 
     Args:
         window (sg.Window): The window the elements are in.
-        keys (Iterable[str]): The keys for the elements to set to the same width.
+        keys (Iterable[str]): The keys for the elements to set to the
+            same width.
     """
     elements: Iterator[sg.Element] = (window[key] for key in keys)
-    # elements: Iterable[sg.Element] = tuple(window[key] for key in keys)
 
     elements_with_width_pad: List[Tuple[sg.Element, int, Pad]] = []
 
-    # Get a list with each element paired with its width(including padx) and pad
+    # Get a list with each element paired with its width(including padx)
+    # and pad
     try:
         for element in elements:
             true_element_size_init_pad = get_element_true_size(
@@ -1730,17 +1735,20 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
 
     # Vertically align using right padding
     for element, width, pad in elements_with_width_pad:
-        # New right padding = original right padding + difference needed for alignment
+        # New right padding = original right padding + difference needed
+        # for alignment
         extra_right_padding = longest_width - width
         right_padding = extra_right_padding + pad.right
         element.widget.pack_configure(padx=(pad.left, right_padding))
 
 
 def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
-    """Return the placement information for an Element or tkinter widget as a dict.
+    """Return the placement information for an Element or tkinter widget
+    as a dict.
 
     Args:
-        target (Union[sg.Element, tk.Widget]): An Element or tkinter widget.
+        target (Union[sg.Element, tk.Widget]): An Element or tkinter
+            widget.
 
     Raises:
         TypeError: target argument is not an Element or tkinter widget.
