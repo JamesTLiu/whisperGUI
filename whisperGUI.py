@@ -1663,7 +1663,7 @@ def refresh_idletasks(window: sg.Window) -> sg.Window:
         return window
     try:
         rc = window.TKroot.update_idletasks()
-    except:
+    except Exception:
         pass
     return window
 
