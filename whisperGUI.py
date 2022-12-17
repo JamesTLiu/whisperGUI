@@ -276,11 +276,22 @@ def start_GUI(theme: str) -> None:
         show_model_info_at_start = False
 
         info_image_tooltip = "\n".join(
-            "Use this when a dialect/style of a language or punctuation is"
-            " desired.Does NOT guarantee the result will follow the initial"
-            " prompt.Initial prompt will NOT be included in the result.Try a"
-            " larger model if the result does not follow the initial"
-            " prompt.\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。"
+            [
+                (
+                    "Use this when a dialect/style of a language or"
+                    " punctuation is desired."
+                ),
+                (
+                    "Does NOT guarantee the result will follow the initial"
+                    " prompt."
+                ),
+                "Initial prompt will NOT be included in the result.",
+                (
+                    "Try a larger model if the result does not follow the"
+                    " initial prompt."
+                ),
+                "\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。",
+            ]
         )
 
         tab1_options_layout = [
