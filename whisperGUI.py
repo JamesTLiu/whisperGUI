@@ -1819,7 +1819,7 @@ def process_pad_into_tuple(pad) -> Tuple:
         pad (Union[int, Tuple[int, int]]): Padx as an int or (int, int).
 
     Raises:
-        TypeError: Parameter must be a 2-tuple or a number
+        TypeError: Pad parameter must be a 2-tuple or a number
 
     Returns:
         Tuple: The padding.
