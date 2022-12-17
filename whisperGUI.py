@@ -1827,6 +1827,8 @@ def process_pad_into_2_tuple(pad) -> Tuple:
     # It's a 2-tuple
     with suppress(TypeError):
         _, __ = pad
+        _ + 1
+        __ + 1
         return pad
 
     # It's a number
