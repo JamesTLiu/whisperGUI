@@ -3984,11 +3984,11 @@ class Image(ImageBase):
     ) -> None:
         """
         :param source:                  A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
-        :type source:                   str | bytes | None
+        :type source:                   str | bytes | Ellipsis | None
         :param filename:                image filename if there is a button image. GIFs and PNGs only.
-        :type filename:                 str | None
+        :type filename:                 str | Ellipsis | None
         :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
-        :type data:                     bytes | str | None
+        :type data:                     bytes | str | Ellipsis | None
         :param background_color:        color of background
         :type background_color:
         :param size:                    (width, height) size of image in pixels
