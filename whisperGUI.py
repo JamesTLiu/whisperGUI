@@ -1665,7 +1665,7 @@ def refresh_idletasks(window: sg.Window) -> sg.Window:
     if window.TKrootDestroyed:
         return window
     try:
-        rc = window.TKroot.update_idletasks()
+        window.TKroot.update_idletasks()
     except Exception:
         pass
     return window
