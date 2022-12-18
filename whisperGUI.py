@@ -2490,7 +2490,9 @@ class PromptManager:
                 error message will be an empty string if no error
                 occurred.
         """
-        error_msg = ""
+        is_successful = False
+
+        profile_name_changed = profile_name != original_profile_name
 
         # Invalid prompt name. Prompt name is empty or only has
         # whitespaces.
@@ -2499,18 +2501,19 @@ class PromptManager:
                 "Invalid prompt name: name can't be empty or whitespace only."
                 "\n\nPlease enter a new prompt name."
             )
-            return False, error_msg
-
-        profile_name_changed = profile_name != original_profile_name
-
+            return is_successful, error_msg
         # Invalid prompt name. Profile name is already in use and user
         # isn't editing the selected profile's prompt.
-        if profile_name in self.prompt_profile_names and profile_name_changed:
+        elif (
+            profile_name in self.prompt_profile_names and profile_name_changed
+        ):
             error_msg = (
                 "Invalid prompt name: name already in use."
                 "\n\nPlease enter a new prompt name."
             )
-            return False, error_msg
+            return is_successful, error_msg
+        else:
+            is_successful = True
 
         self._save_profile(
             profile_name=profile_name,
@@ -2518,7 +2521,8 @@ class PromptManager:
             original_profile_name=original_profile_name,
         )
 
-        return True, error_msg
+        error_msg = ""
+        return is_successful, error_msg
 
     def _save_profile(
         self,
