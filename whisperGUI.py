@@ -4666,13 +4666,10 @@ def popup(
             layout += [[sg.Image(data=image)]]
 
     for message in args_to_print:
-        # fancy code to check if string and convert if not is not need. Just always convert to string :-)
-        # if not isinstance(message, str): message = str(message)
+        # always convert message to string
         message = str(message)
-        if message.count(
-            "\n"
-        ):  # if there are line breaks, then wrap each segment separately
-            # message_wrapped = message         # used to just do this, but now breaking into smaller pieces
+        if message.count("\n"):
+            # if there are line breaks, wrap each segment separately
             message_wrapped = ""
             msg_list = message.split(
                 "\n"
