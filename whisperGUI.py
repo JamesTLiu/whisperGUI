@@ -4651,7 +4651,7 @@ def popup(
         args_to_print: Sequence[Any] = [""]
     else:
         args_to_print = args
-    if line_width != None:
+    if line_width is not None:
         local_line_width = line_width
     else:
         local_line_width = sg.MESSAGE_BOX_LINE_WIDTH
