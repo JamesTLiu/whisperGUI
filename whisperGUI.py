@@ -5028,8 +5028,10 @@ def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     """Get the number of lines needed to wrap the text.
 
     Args:
-        text (str): The text that needs the number of lines to use when wrapping.
-        max_line_width (int): The max width of each line that will be used during text wrapping.
+        text (str): The text that needs the number of lines to use when
+            wrapping.
+        max_line_width (int): The max width of each line that will be
+            used during text wrapping.
 
     Returns:
         int: The number of lines needed to wrap the text.
@@ -5038,7 +5040,7 @@ def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
         return 1
     lines = text.split("\n")
     num_lines = len(lines)  # number of original lines of text
-    max_line_len = max([len(l) for l in lines])  # longest line
+    max_line_len = max([len(line) for line in lines])  # longest line
     lines_used = []
     for L in lines:
         # fancy math to round up
