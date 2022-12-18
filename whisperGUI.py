@@ -1943,7 +1943,6 @@ def find_closest_element(
     Returns:
         Optional[sg.Text]: The closest element if found. Else, None.
     """
-
     # Ensure a valid index by accessing it
     element_list[index]
 
@@ -1963,52 +1962,8 @@ def find_closest_element(
     next_index = index + 1 if index < num_elements - 1 else index
     it_after = islice(element_list, next_index, None)
 
-    @dataclass(frozen=True)
-    class TestResult:
-        """The result from testing an element in a list.
-
-        Attributes:
-            element (Optional[sg.Element]): The element if it passes the
-                test. Else, None.
-            more_values_to_test (bool): True if there are more values to
-                test in the list.
-        """
-
-        element: Optional[sg.Element]
-        more_values_to_test: bool
-
-        def __iter__(self):
-            return iter((self.element, self.more_values_to_test))
-
-    def is_next_element_of_class(
-        it: Iterator[sg.Element], element_class: Type[sg.Element]
-    ) -> TestResult:
-        """Test if the next element returned by the iterator is of the
-        specified class.
-
-        Args:
-            it (Iterator): The iterator for the elements to test.
-            element_class (Type[sg.Element]): The class to test the next
-                element returned by the iterator for. Defaults to
-                sg.Element.
-
-        Returns:
-            TestResult: Contains the element if it's of the specified
-                class or None, and a bool that's True if the iterator
-                can keep iterating.
-        """
-
-        try:
-            next_element = next(it)
-        except StopIteration:
-            return TestResult(element=None, more_values_to_test=False)
-        else:
-            if isinstance(next_element, element_class):
-                return TestResult(
-                    element=next_element, more_values_to_test=True
-                )
-            return TestResult(element=None, more_values_to_test=True)
-
+    # Keep track of whether we're searching to the left and/or right of
+    # the element
     search_expanding_left = True
     search_expanding_right = True
 
@@ -2035,6 +1990,51 @@ def find_closest_element(
 
     # No Text element found in window
     return None
+
+
+@dataclass(frozen=True)
+class TestResult:
+    """The result from testing an element in a list.
+
+    Attributes:
+        element (Optional[sg.Element]): The element if it passes the
+            test. Else, None.
+        more_values_to_test (bool): True if there are more values to
+            test in the list.
+    """
+
+    element: Optional[sg.Element]
+    more_values_to_test: bool
+
+    def __iter__(self) -> Iterator:
+        return iter((self.element, self.more_values_to_test))
+
+
+def is_next_element_of_class(
+    it: Iterator[sg.Element], element_class: Type[sg.Element]
+) -> TestResult:
+    """Test if the next element returned by the iterator is an
+    instance of the specified class.
+
+    Args:
+        it (Iterator): The iterator for the elements to test.
+        element_class (Type[sg.Element]): The class to test the next
+            element returned by the iterator for. Defaults to
+            sg.Element.
+
+    Returns:
+        TestResult: Contains the element if it's of the specified
+            class or None, and a bool that's True if the iterator
+            can keep iterating.
+    """
+    try:
+        next_element = next(it)
+    except StopIteration:
+        return TestResult(element=None, more_values_to_test=False)
+    else:
+        if isinstance(next_element, element_class):
+            return TestResult(element=next_element, more_values_to_test=True)
+        return TestResult(element=None, more_values_to_test=True)
 
 
 class InvalidElementSize(Exception):
@@ -4582,7 +4582,7 @@ def update_elements(gui_elements: Iterable[sg.Element], **kwargs) -> None:
 
 
 # Taken from Pysimplegui.popup() and modified
-def popup(
+def popup(  # noqa: C901
     *args: Any,
     title=None,
     button_color=None,
