@@ -3527,19 +3527,6 @@ class Grid(sg.Column, SuperElement):
             )
             return
 
-        def _popup_alignment_error(block: Block) -> None:
-            sg.PopupError(
-                "Error when updating the Grid layout",
-                (
-                    "The spacing element is larger than the needed alignment"
-                    " padding"
-                ),
-                "The offensive block = ",
-                block,
-                keep_on_top=True,
-                image=_random_error_emoji(),
-            )
-
         for block in blocks:
             try:
                 inner_element_width, inner_element_height = get_element_size(
@@ -3573,7 +3560,7 @@ class Grid(sg.Column, SuperElement):
                 # Error: the spacing widget is taller than the uniform
                 # block height
                 if height_padding < 0:
-                    _popup_alignment_error(block)
+                    self._popup_alignment_error(block)
                     height_padding = 0
 
                 # Use horizontal padding to expand the block's width to
@@ -3604,6 +3591,16 @@ class Grid(sg.Column, SuperElement):
                 right_padding = block_col_width - inner_element_width
 
                 spacing_widget.pack_configure(padx=(0, right_padding))
+
+    def _popup_alignment_error(self, block: Block) -> None:
+        sg.PopupError(
+            "Error when updating the Grid layout",
+            "The spacing element is larger than the needed alignment padding",
+            "The offensive block = ",
+            block,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
 
     def _is_visible_with_layout(self) -> bool:
         # Return True if the Grid is visible and has a layout.
