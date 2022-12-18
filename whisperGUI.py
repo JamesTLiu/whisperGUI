@@ -4683,7 +4683,7 @@ def popup(
         else:
             message_wrapped = sg.textwrap.fill(message, local_line_width)
         message_wrapped_lines = message_wrapped.count("\n") + 1
-        longest_line_len = max([len(l) for l in message.split("\n")])
+        longest_line_len = max([len(line) for line in message.split("\n")])
         width_used = min(longest_line_len, local_line_width)
         max_line_total = max(max_line_total, width_used)
         # height = _GetNumLinesNeeded(message, width_used)
