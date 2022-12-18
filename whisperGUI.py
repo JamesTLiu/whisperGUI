@@ -1126,7 +1126,7 @@ def start_GUI(theme: str) -> None:
             # User has not selected a row in the prompt profile table
             else:
                 popup_window = popup_tracked(
-                    f"Please select a profile in the table.",
+                    "Please select a profile in the table.",
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid selection",
@@ -1207,7 +1207,7 @@ def start_GUI(theme: str) -> None:
             # User has not selected a row in the prompt profile table
             else:
                 popup_window = popup_tracked(
-                    f"Please select a profile in the table.",
+                    "Please select a profile in the table.",
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Invalid selection",
@@ -1222,7 +1222,8 @@ def start_GUI(theme: str) -> None:
             )
         # User has chosen a prompt profile
         elif event == prompt_profile_dropdown_key:
-            # Update the initial prompt input with the prompt profile's prompt
+            # Update the initial prompt input with the prompt profile's
+            # prompt
             chosen_prompt_profile = values[prompt_profile_dropdown_key]
 
             if (
@@ -1247,7 +1248,8 @@ def start_GUI(theme: str) -> None:
                 value=new_initial_prompt_input
             )
 
-            # Save the user's selected prompt profile to the settings file
+            # Save the user's selected prompt profile to the settings
+            # file
             sg.user_settings_set_entry(
                 prompt_profile_dropdown_key, chosen_prompt_profile
             )
@@ -1410,7 +1412,7 @@ def start_GUI(theme: str) -> None:
                 is_transcribing = True
             else:
                 popup_window = popup_tracked(
-                    f"Please select audio/video file(s) and an output folder.",
+                    "Please select audio/video file(s) and an output folder.",
                     popup_fn=popup,
                     window_tracker=window_tracker,
                     title="Missing selections",
@@ -1547,8 +1549,8 @@ def function_details(func: Callable) -> Callable:
 
 # @function_details
 def forward_resize_event(event: tk.Event) -> None:
-    """Generates a <<Resize>> virtual event if the passed <Configure> event
-    indicates a widget resize.
+    """Generates a <<Resize>> virtual event if the passed <Configure>
+    event indicates a widget resize.
 
     Args:
         event (tk.Event): A tkinter <Configure> event.
@@ -1558,11 +1560,11 @@ def forward_resize_event(event: tk.Event) -> None:
     if event.type != valid_event_type:
         sg.PopupError(
             (
-                f"Warning: forward_resize_event() was passed an event of the"
-                f" wrong type."
+                "Warning: forward_resize_event() was passed an event of the"
+                " wrong type."
             ),
             f"The event's type must be <{valid_event_type.name}>.",
-            f"The offensive event = ",
+            "The offensive event = ",
             event,
             keep_on_top=True,
             image=_random_error_emoji(),
@@ -1787,7 +1789,8 @@ def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
 
 
 def get_original_pad(element: sg.Element) -> Pad:
-    """Return the original padding for the Element as set by PySimpleGUI.
+    """Return the original padding for the Element that's set by
+    PySimpleGUI.
 
     Args:
         element (sg.Element): The element.
@@ -2308,7 +2311,9 @@ class ModalWindowManager:
         return (window, True)
 
     def update(self) -> None:
-        """Set as modal the most recent non-closed tracked modal window."""
+        """Set as modal the most recent non-closed tracked modal
+        window.
+        """
 
         stack_changed = False
 
@@ -2321,7 +2326,8 @@ class ModalWindowManager:
             self._modal_window_stack.pop()
             stack_changed = True
 
-        # Restore as modal the most recent non-closed tracked modal window
+        # Restore as modal the most recent non-closed tracked modal
+        # window
         if stack_changed and self._modal_window_stack:
             self._modal_window_stack[-1].make_modal()
 
@@ -2440,19 +2446,20 @@ class PromptManager:
         """
         error_msg = ""
 
-        # Invalid prompt name. Prompt name is empty or only has whitespaces.
+        # Invalid prompt name. Prompt name is empty or only has
+        # whitespaces.
         if not profile_name.strip():
             error_msg = (
-                f"Invalid prompt name: name can't be empty or whitespace only."
-                f"\n\nPlease enter a new prompt name."
+                "Invalid prompt name: name can't be empty or whitespace only."
+                "\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
         # Invalid prompt name. Prompt name already in use.
         if profile_name in self.prompt_profile_names:
             error_msg = (
-                f"Invalid prompt name: name already in use."
-                f"\n\nPlease enter a new prompt name."
+                "Invalid prompt name: name already in use."
+                "\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2489,8 +2496,8 @@ class PromptManager:
         # whitespaces.
         if not profile_name.strip():
             error_msg = (
-                f"Invalid prompt name: name can't be empty or whitespace only."
-                f"\n\nPlease enter a new prompt name."
+                "Invalid prompt name: name can't be empty or whitespace only."
+                "\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
@@ -2500,8 +2507,8 @@ class PromptManager:
         # isn't editing the selected profile's prompt.
         if profile_name in self.prompt_profile_names and profile_name_changed:
             error_msg = (
-                f"Invalid prompt name: name already in use."
-                f"\n\nPlease enter a new prompt name."
+                "Invalid prompt name: name already in use."
+                "\n\nPlease enter a new prompt name."
             )
             return False, error_msg
 
