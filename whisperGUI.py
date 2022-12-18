@@ -4932,10 +4932,9 @@ def popup_scrolled(
     max_line_total, max_line_width, total_lines, height_computed = 0, 0, 0, 0
     complete_output = ""
     for message in args:
-        # fancy code to check if string and convert if not is not need. Just always convert to string :-)
-        # if not isinstance(message, str): message = str(message)
+        # Always convert message to string
         message = str(message)
-        longest_line_len = max([len(l) for l in message.split("\n")])
+        longest_line_len = max([len(line) for line in message.split("\n")])
         width_used = min(longest_line_len, width)
         max_line_total = max(max_line_total, width_used)
         max_line_width = width
