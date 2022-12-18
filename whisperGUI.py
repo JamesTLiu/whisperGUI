@@ -2241,7 +2241,7 @@ def convert_to_bytes(
     else:
         try:
             img = PIL.Image.open(io.BytesIO(base64.b64decode(file_or_bytes)))
-        except Exception as e:
+        except Exception:
             dataBytesIO = io.BytesIO(file_or_bytes)
             img = PIL.Image.open(dataBytesIO)
 
