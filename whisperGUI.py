@@ -2636,9 +2636,9 @@ class PromptManager:
         exists.
 
         Args:
-            new_selected_profile (str, ellipsis): The dropdown selection
-                will be changed to this profile if given. Defaults to
-                ellipsis.
+            new_selected_profile (str, EllipsisType): The dropdown
+                selection will be changed to this profile if given.
+                Defaults to ... .
         """
         if self._dropdown:
             selected_profile = new_selected_profile
@@ -2729,7 +2729,6 @@ def detect_all_widget_events(
         widget: tk.Widget = event.widget
         lookup = widget_to_element_with_window(widget)
         if not lookup or not lookup.element or not lookup.window:
-            # print("element/window not found for widget in event", end="\n\n")
             return
         element = lookup.element
         print(
@@ -3457,7 +3456,8 @@ class Grid(sg.Column, SuperElement):
     def _update_alignment_uniform_size_info(self) -> None:
         # Update the block column widths and the uniform block size
 
-        # The height to set all blocks to when uniform block sizes are used
+        # The height to set all blocks to when uniform block sizes are
+        # used
         self.uniform_block_height = 1
 
         for block_col in self.block_columns:
@@ -3865,7 +3865,7 @@ class ImageBase(sg.Image, SuperElement):
 
     # @function_details
     def _update_image(
-        self, source: Union[str, bytes, None, ellipsis] = ...
+        self, source: Union[str, bytes, None, EllipsisType] = ...
     ) -> None:
         """Update the image with the given source. If size matching is
         on, a size-matched version of the source will be used.
@@ -3937,14 +3937,14 @@ class ImageBase(sg.Image, SuperElement):
         )
 
     def _determine_new_source(
-        self, source: Union[str, bytes, None, ellipsis]
+        self, source: Union[str, bytes, None, EllipsisType]
     ) -> Union[str, bytes, None]:
         """Return the new source based on the argument and any
         default(s).
 
         Args:
-            source (Union[str, bytes, None, ellipsis]): A filename, a
-                base64 bytes, None, or ... (no given source).
+            source (Union[str, bytes, None, EllipsisType]): A filename,
+                a base64 bytes, None, or ... (no given source).
 
         Returns:
             Union[str, bytes, None]:  The new source.
@@ -3985,11 +3985,11 @@ class Image(ImageBase):
     ) -> None:
         """
         :param source:                  A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
-        :type source:                   str | bytes | Ellipsis | None
+        :type source:                   str | bytes | EllipsisType | None
         :param filename:                image filename if there is a button image. GIFs and PNGs only.
-        :type filename:                 str | Ellipsis | None
+        :type filename:                 str | EllipsisType | None
         :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
-        :type data:                     bytes | str | Ellipsis | None
+        :type data:                     bytes | str | EllipsisType | None
         :param background_color:        color of background
         :type background_color:
         :param size:                    (width, height) size of image in pixels
@@ -4072,7 +4072,7 @@ class Image(ImageBase):
     update_image = ImageBase._update_image
 
     def _determine_new_source(
-        self, source: Union[str, bytes, None, ellipsis]
+        self, source: Union[str, bytes, None, EllipsisType]
     ) -> Union[str, bytes, None]:
         return source if source is not ... else self._original_source
 
@@ -4111,8 +4111,8 @@ class ToggleImage(ImageBase):
     def __init__(
         self,
         start_toggled_on: bool,
-        toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
-        toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
+        toggle_on_source: Union[str, bytes, None, EllipsisType] = ...,
+        toggle_off_source: Union[str, bytes, None, EllipsisType] = ...,
         background_color=None,
         size=(None, None),
         s=(None, None),
@@ -4252,8 +4252,8 @@ class ToggleImage(ImageBase):
 
     def update_toggle_images(
         self,
-        toggle_on_source: Union[str, bytes, None, ellipsis] = ...,
-        toggle_off_source: Union[str, bytes, None, ellipsis] = ...,
+        toggle_on_source: Union[str, bytes, None, EllipsisType] = ...,
+        toggle_off_source: Union[str, bytes, None, EllipsisType] = ...,
     ) -> None:
         """Update the sources for the toggle images and update the image
         with a new source based on the current toggle state. If size
@@ -4280,12 +4280,12 @@ class ToggleImage(ImageBase):
         self._update_image()
 
     def _determine_new_source(
-        self, source: Union[str, bytes, None, ellipsis]
+        self, source: Union[str, bytes, None, EllipsisType]
     ) -> Union[str, bytes, None]:
         if source is not ...:
             return source
         else:
-            # Return the appropriate source for the current toggle state.
+            # Return the source for the current toggle state
             return (
                 self.toggle_on_source
                 if self.is_toggled_on
@@ -5032,10 +5032,11 @@ def popup_scrolled(
     return window, button
 
 
-# Taken from Pysimplegui._GetNumLinesNeeded(). Needed by popup_scrolled().
-# ============================== GetNumLinesNeeded ==#
-# Helper function for determining how to wrap text   #
-# ===================================================#
+# Taken from Pysimplegui._GetNumLinesNeeded().
+# Needed by popup_scrolled().
+# ========================= GetNumLinesNeeded =========================#
+# Helper function for determining how to wrap text                     #
+# =====================================================================#
 def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     """Get the number of lines needed to wrap the text.
 
@@ -5051,13 +5052,13 @@ def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
     if max_line_width == 0:
         return 1
     lines = text.split("\n")
-    num_lines = len(lines)  # number of original lines of text
-    max_line_len = max([len(line) for line in lines])  # longest line
+    # num_lines = len(lines)  # number of original lines of text
+    # max_line_len = max([len(line) for line in lines])  # longest line
     lines_used = []
-    for L in lines:
+    for line in lines:
         # fancy math to round up
         lines_used.append(
-            len(L) // max_line_width + (len(L) % max_line_width > 0)
+            len(line) // max_line_width + (len(line) % max_line_width > 0)
         )
     total_lines_needed = sum(lines_used)
     return total_lines_needed
@@ -5503,7 +5504,7 @@ class OutputRedirector(io.StringIO):
         # an error.
         try:
             self.restore_stdout()
-        except Exception as e:
+        except Exception:
             pass
         try:
             self.restore_stderr()
@@ -5828,8 +5829,8 @@ def bind_window_resize_to_print(window: sg.Window) -> None:
 
 
 def add_print_for_widget_resizes(window: sg.Window) -> None:
-    """Add the printing of callback details for the resizing of all widgets
-    in the window (including the window).
+    """Add the printing of callback details for the resizing of all
+    widgets in the window (including the window).
 
     Args:
         window (sg.Window): The window.
