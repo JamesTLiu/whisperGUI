@@ -5453,7 +5453,7 @@ class OutputRedirector(io.StringIO):
         """
         try:
             self._previous_stdout.flush()
-        except:
+        except Exception:
             pass
 
     def __del__(self) -> None:
@@ -5466,7 +5466,7 @@ class OutputRedirector(io.StringIO):
             pass
         try:
             self.restore_stderr()
-        except:
+        except Exception:
             pass
 
 
