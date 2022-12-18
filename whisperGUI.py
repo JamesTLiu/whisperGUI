@@ -24,6 +24,7 @@ from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from operator import itemgetter
 from pathlib import Path
+from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -2629,7 +2630,7 @@ class PromptManager:
         self._dropdown_key = key
 
     def _update_prompt_profile_dropdown(
-        self, new_selected_profile: Union[str, ellipsis] = ...
+        self, new_selected_profile: Union[str, EllipsisType] = ...
     ) -> None:
         """Update the tracked prompt profile dropdown element if it
         exists.
