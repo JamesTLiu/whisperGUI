@@ -83,22 +83,6 @@ def start_GUI(theme: str) -> None:
     # Config file
     config_file_path = sg.user_settings_filename(filename="whisperGUI.config")
 
-    # Events for threads to report status
-    TRANSCRIBE_SUCCESS = "-TRANSCRIBE-SUCCESS-"
-    TRANSCRIBE_ERROR = "-TRANSCRIBE-ERROR-"
-    TRANSCRIBE_PROGRESS = "-TRANSCRIBE-PROGRESS-"
-    TRANSCRIBE_STOPPED = "-TRANSCRIBE-STOPPED-"
-
-    # Event for threads to pass objects to print
-    PRINT_ME = "-PRINT-ME-"
-
-    # Events that indicate that transcription has ended
-    TRANSCRIBE_DONE_EVENTS = (
-        TRANSCRIBE_SUCCESS,
-        TRANSCRIBE_ERROR,
-        TRANSCRIBE_STOPPED,
-    )
-
     prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
 
     # scaling of the application's size
@@ -988,8 +972,8 @@ def start_GUI(theme: str) -> None:
             size = base + toggle * 2
             print(f"set size to {(None, size)}")
             element.set_size(size=(None, size))
-        elif event == PRINT_ME:
-            print(values[PRINT_ME], end="")
+        elif event == GenEvents.PRINT_ME:
+            print(values[GenEvents.PRINT_ME], end="")
         # User selected an output directory
         elif event == Keys.OUTPUT_DIR_FIELD:
             # Save the output directory to the settings file when the
@@ -1344,11 +1328,11 @@ def start_GUI(theme: str) -> None:
                         "output_dir_path": output_dir_path,
                         "language": language_selected,
                         "model": model_selected,
-                        "success_event": TRANSCRIBE_SUCCESS,
-                        "fail_event": TRANSCRIBE_ERROR,
-                        "progress_event": TRANSCRIBE_PROGRESS,
-                        "process_stopped_event": TRANSCRIBE_STOPPED,
-                        "print_event": PRINT_ME,
+                        "success_event": GenEvents.TRANSCRIBE_SUCCESS,
+                        "fail_event": GenEvents.TRANSCRIBE_ERROR,
+                        "progress_event": GenEvents.TRANSCRIBE_PROGRESS,
+                        "process_stopped_event": GenEvents.TRANSCRIBE_STOPPED,
+                        "print_event": GenEvents.PRINT_ME,
                         "stop_flag": stop_flag,
                         "translate_to_english": translate_to_english,
                         "use_language_code": use_language_code,
@@ -1368,14 +1352,14 @@ def start_GUI(theme: str) -> None:
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # 1 transcription completed
-        elif event == TRANSCRIBE_PROGRESS:
+        elif event == GenEvents.TRANSCRIBE_PROGRESS:
             num_tasks_done += 1
         # All transcriptions completed
-        elif event == TRANSCRIBE_SUCCESS:
+        elif event == GenEvents.TRANSCRIBE_SUCCESS:
             transcription_time = transcription_timer.stop()
 
             # Show output file paths in a popup
-            output_paths = values[TRANSCRIBE_SUCCESS]
+            output_paths = values[GenEvents.TRANSCRIBE_SUCCESS]
             output_paths_formatted = "\n".join(output_paths)
             popup_window = popup_tracked(
                 (
@@ -1392,11 +1376,11 @@ def start_GUI(theme: str) -> None:
             )
             modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
-        elif event == TRANSCRIBE_ERROR:
+        elif event == GenEvents.TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
             sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
 
-            error_msg = values[TRANSCRIBE_ERROR]
+            error_msg = values[GenEvents.TRANSCRIBE_ERROR]
             popup_window = popup_tracked(
                 (
                     f"Status: FAILED\n\n{error_msg}\n\nPlease see the console"
@@ -1409,7 +1393,7 @@ def start_GUI(theme: str) -> None:
             )
             modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
-        elif event == TRANSCRIBE_STOPPED:
+        elif event == GenEvents.TRANSCRIBE_STOPPED:
             transcription_timer.stop(log_time=False)
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
@@ -1423,7 +1407,7 @@ def start_GUI(theme: str) -> None:
             window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
-        if event in TRANSCRIBE_DONE_EVENTS:
+        if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
             transcribe_thread = None
             is_transcribing = False
 
@@ -1533,6 +1517,26 @@ class Keys:
 
     # Key for saved prompts in the settings file
     SAVED_PROMPTS_SETTINGS = "SAVED PROMPTS"
+
+
+class GenEvents:
+    """Manually generated events."""
+
+    # Events for threads to report status
+    TRANSCRIBE_SUCCESS = "-TRANSCRIBE-SUCCESS-"
+    TRANSCRIBE_ERROR = "-TRANSCRIBE-ERROR-"
+    TRANSCRIBE_PROGRESS = "-TRANSCRIBE-PROGRESS-"
+    TRANSCRIBE_STOPPED = "-TRANSCRIBE-STOPPED-"
+
+    # Event for threads to pass objects to print
+    PRINT_ME = "-PRINT-ME-"
+
+    # Events that indicate that transcription has ended
+    TRANSCRIBE_DONE_EVENTS = (
+        TRANSCRIBE_SUCCESS,
+        TRANSCRIBE_ERROR,
+        TRANSCRIBE_STOPPED,
+    )
 
 
 def function_details(func: Callable) -> Callable:
