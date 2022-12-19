@@ -103,38 +103,6 @@ def start_GUI() -> None:
     # tracker for possibly active windows
     window_tracker = WindowTracker()
 
-    def make_tracked_main_window_with_synced_profiles(
-        window_tracker: WindowTracker,
-        prompt_manager: PromptManager,
-        prompt_profile_dropdown_key: str,
-    ) -> sg.Window:
-        """Create a tracked main window whose prompt profile dropdown is
-        updated by the prompt manager when needed.
-
-        Args:
-            window_tracker (WindowTracker): The window tracker to add
-                the created window to.
-            prompt_manager (PromptManager): The prompt manager for the
-                application.
-            prompt_profile_dropdown_key (str): The key of the prompt
-                profile dropdown that's updated by the prompt manager
-                when needed.
-
-        Returns:
-            sg.Window: The created main window.
-        """
-
-        window = window_tracker.track_window(
-            make_main_window(prompt_manager=prompt_manager)
-        )
-
-        # give the prompt manager the prompt profile dropdown so that
-        # it's updated on profile changes
-        prompt_manager.set_prompt_profile_dropdown(
-            window, prompt_profile_dropdown_key
-        )
-        return window
-
     main_window = make_tracked_main_window_with_synced_profiles(
         window_tracker=window_tracker,
         prompt_manager=prompt_manager,
@@ -1002,6 +970,39 @@ def set_up_global_bindings() -> None:
     # future windows won't use the global icon in the taskbar
     _.read(0)
     _.close()
+
+
+def make_tracked_main_window_with_synced_profiles(
+    window_tracker: WindowTracker,
+    prompt_manager: PromptManager,
+    prompt_profile_dropdown_key: str,
+) -> sg.Window:
+    """Create a tracked main window whose prompt profile dropdown is
+    updated by the prompt manager when needed.
+
+    Args:
+        window_tracker (WindowTracker): The window tracker to add
+            the created window to.
+        prompt_manager (PromptManager): The prompt manager for the
+            application.
+        prompt_profile_dropdown_key (str): The key of the prompt
+            profile dropdown that's updated by the prompt manager
+            when needed.
+
+    Returns:
+        sg.Window: The created main window.
+    """
+
+    window = window_tracker.track_window(
+        make_main_window(prompt_manager=prompt_manager)
+    )
+
+    # give the prompt manager the prompt profile dropdown so that
+    # it's updated on profile changes
+    prompt_manager.set_prompt_profile_dropdown(
+        window, prompt_profile_dropdown_key
+    )
+    return window
 
 
 class LanguageSpecifier:
