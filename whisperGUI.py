@@ -344,9 +344,7 @@ def start_GUI(theme: str) -> None:
             [sg.Text("Output Folder:")],
             [
                 sg.Input(
-                    default_text=sg.user_settings_get_entry(
-                        Keys.OUT_DIR, ""
-                    ),
+                    default_text=sg.user_settings_get_entry(Keys.OUT_DIR, ""),
                     key=Keys.OUTPUT_DIR_FIELD,
                     disabled=True,
                     expand_x=True,
@@ -355,9 +353,7 @@ def start_GUI(theme: str) -> None:
                 sg.FolderBrowse(
                     target=Keys.OUTPUT_DIR_FIELD,
                     key=Keys.OUT_DIR,
-                    initial_folder=sg.user_settings_get_entry(
-                        Keys.OUT_DIR
-                    ),
+                    initial_folder=sg.user_settings_get_entry(Keys.OUT_DIR),
                 ),
             ],
             [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
@@ -999,15 +995,11 @@ def start_GUI(theme: str) -> None:
             # Save the output directory to the settings file when the
             # corresponding option is on
             if sg.user_settings_get_entry(Keys.SAVE_OUTPUT_DIR_CHECKBOX):
-                sg.user_settings_set_entry(
-                    Keys.OUT_DIR, values[Keys.OUT_DIR]
-                )
+                sg.user_settings_set_entry(Keys.OUT_DIR, values[Keys.OUT_DIR])
         # User selected a language
         elif event == Keys.LANGUAGE:
             # Save the choice to the config file
-            sg.user_settings_set_entry(
-                Keys.LANGUAGE, values[Keys.LANGUAGE]
-            )
+            sg.user_settings_set_entry(Keys.LANGUAGE, values[Keys.LANGUAGE])
         # User selected a model
         elif event == Keys.MODEL:
             # Save the choice to the config file
@@ -1285,9 +1277,7 @@ def start_GUI(theme: str) -> None:
             ].is_toggled_on
 
             # Show/hide the table
-            window[Keys.MODEL_INFO_TABLE].update(
-                visible=model_info_toggled_on
-            )
+            window[Keys.MODEL_INFO_TABLE].update(visible=model_info_toggled_on)
         # User wants to start transcription
         elif event == Keys.START:
             # Get user provided paths for the video file and output
