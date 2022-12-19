@@ -112,123 +112,6 @@ def start_GUI() -> None:
     # keep track of the prompt manager window
     prompt_manager_window = None
 
-    def popup_add_edit_prompt_profile(
-        title: str,
-        submit_event: str,
-        profile_name: str = "",
-        profile_prompt: str = "",
-    ) -> sg.Window:
-        """Pop up either the add or edit prompt profile window.
-
-        Args:
-            title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile
-                values are submitted.
-            profile_name (str, optional): The editted profile's name
-                which prefills the profile name field in the window.
-                ONLY FOR PROFILE EDITS. Defaults to "".
-            prompt (str, optional): The editted profile's prompt which
-                prefills the profile prompt field in the window. ONLY
-                FOR PROFILE EDITS. Defaults to "".
-
-        Returns:
-            sg.Window: The add/edit prompt profile window.
-        """
-        layout = [
-            [
-                [sg.Text("Profile Name")],
-                [
-                    sg.Input(
-                        profile_name,
-                        key=Keys.NEW_PROFILE_NAME,
-                        expand_x=True,
-                        metadata=profile_name,
-                    )
-                ],
-                [sg.Text("Prompt")],
-                [
-                    sg.Input(
-                        profile_prompt,
-                        key=Keys.NEW_PROFILE_PROMPT,
-                        expand_x=True,
-                        metadata=profile_prompt,
-                    )
-                ],
-                [
-                    sg.Button(
-                        "Save",
-                        key=submit_event,
-                        focus=True,
-                        bind_return_key=True,
-                        expand_x=True,
-                    ),
-                    sg.Button(
-                        "Cancel",
-                        expand_x=True,
-                    ),
-                ],
-            ],
-        ]
-
-        # Create the window
-        win = Window(
-            title=title,
-            layout=layout,
-            finalize=True,
-            resizable=True,
-            auto_size_buttons=True,
-            auto_size_text=True,
-        )
-
-        return win
-
-    def popup_add_prompt_profile(
-        title: str,
-        submit_event: str,
-    ) -> sg.Window:
-        """Pop up the add prompt profile window.
-
-        Args:
-            title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile
-                values are submitted.
-
-        Returns:
-            sg.Window: The add prompt profile window.
-        """
-        return popup_add_edit_prompt_profile(
-            title=title, submit_event=submit_event
-        )
-
-    def popup_edit_prompt_profile(
-        title: str,
-        submit_event: str,
-        profile_name: str = "",
-        profile_prompt: str = "",
-    ) -> sg.Window:
-        """Pop up either the edit prompt profile window.
-
-        Args:
-            title (str): The title for the popup window.
-            submit_event (str): The event that occurs when new profile
-                values are submitted.
-            profile_name (str, optional): The editted profile's name
-                which prefills the profile name field in the window.
-                ONLY FOR PROFILE EDITS. Defaults to "".
-            prompt (str, optional): The editted profile's prompt which
-                prefills the profile prompt field in the window. ONLY
-                FOR PROFILE EDITS. Defaults to "".
-
-        Returns:
-            sg.Window: The edit prompt profile window.
-        """
-        return popup_add_edit_prompt_profile(
-            title=title,
-            submit_event=submit_event,
-            profile_name=profile_name,
-            profile_prompt=profile_prompt,
-        )
-
     # keep track of the add new prompt window
     add_new_prompt_window = None
 
@@ -1007,6 +890,126 @@ def reload_prompt_manager_window(
         return new_prompt_manager_window
     else:
         return None
+
+
+def popup_add_edit_prompt_profile(
+    title: str,
+    submit_event: str,
+    profile_name: str = "",
+    profile_prompt: str = "",
+) -> sg.Window:
+    """Pop up either the add or edit prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+        profile_name (str, optional): The editted profile's name
+            which prefills the profile name field in the window.
+            ONLY FOR PROFILE EDITS. Defaults to "".
+        prompt (str, optional): The editted profile's prompt which
+            prefills the profile prompt field in the window. ONLY
+            FOR PROFILE EDITS. Defaults to "".
+
+    Returns:
+        sg.Window: The add/edit prompt profile window.
+    """
+    layout = [
+        [
+            [sg.Text("Profile Name")],
+            [
+                sg.Input(
+                    profile_name,
+                    key=Keys.NEW_PROFILE_NAME,
+                    expand_x=True,
+                    metadata=profile_name,
+                )
+            ],
+            [sg.Text("Prompt")],
+            [
+                sg.Input(
+                    profile_prompt,
+                    key=Keys.NEW_PROFILE_PROMPT,
+                    expand_x=True,
+                    metadata=profile_prompt,
+                )
+            ],
+            [
+                sg.Button(
+                    "Save",
+                    key=submit_event,
+                    focus=True,
+                    bind_return_key=True,
+                    expand_x=True,
+                ),
+                sg.Button(
+                    "Cancel",
+                    expand_x=True,
+                ),
+            ],
+        ],
+    ]
+
+    # Create the window
+    win = Window(
+        title=title,
+        layout=layout,
+        finalize=True,
+        resizable=True,
+        auto_size_buttons=True,
+        auto_size_text=True,
+    )
+
+    return win
+
+
+def popup_add_prompt_profile(
+    title: str,
+    submit_event: str,
+) -> sg.Window:
+    """Pop up the add prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+
+    Returns:
+        sg.Window: The add prompt profile window.
+    """
+    return popup_add_edit_prompt_profile(
+        title=title, submit_event=submit_event
+    )
+
+
+def popup_edit_prompt_profile(
+    title: str,
+    submit_event: str,
+    profile_name: str = "",
+    profile_prompt: str = "",
+) -> sg.Window:
+    """Pop up either the edit prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+        profile_name (str, optional): The editted profile's name
+            which prefills the profile name field in the window.
+            ONLY FOR PROFILE EDITS. Defaults to "".
+        prompt (str, optional): The editted profile's prompt which
+            prefills the profile prompt field in the window. ONLY
+            FOR PROFILE EDITS. Defaults to "".
+
+    Returns:
+        sg.Window: The edit prompt profile window.
+    """
+    return popup_add_edit_prompt_profile(
+        title=title,
+        submit_event=submit_event,
+        profile_name=profile_name,
+        profile_prompt=profile_prompt,
+    )
 
 
 class LanguageSpecifier:
