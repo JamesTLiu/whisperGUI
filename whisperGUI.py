@@ -99,7 +99,7 @@ def start_GUI(theme: str) -> None:
         TRANSCRIBE_STOPPED,
     )
 
-    prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS_KEY)
+    prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
 
     # scaling of the application's size
     DEFAULT_GLOBAL_SCALING = 1.5
@@ -114,7 +114,7 @@ def start_GUI(theme: str) -> None:
     # Set global GUI options
     sg.set_options(
         scaling=sg.user_settings_get_entry(
-            Keys.SCALING_INPUT_SETTING_KEY, DEFAULT_GLOBAL_SCALING
+            Keys.SCALING_INPUT_SETTING, DEFAULT_GLOBAL_SCALING
         ),
         font=GUI_FONT,
         tooltip_font=GUI_FONT,
@@ -203,18 +203,18 @@ def start_GUI(theme: str) -> None:
         # Load whether to translating to English or not from the
         # settings file
         translate_to_english_last_choice = sg.user_settings_get_entry(
-            Keys.TRANSLATE_TO_ENGLISH_CHECKBOX_KEY, False
+            Keys.TRANSLATE_TO_ENGLISH_CHECKBOX, False
         )
 
         # Load whether to save the output directory or not from the
         # settings file
         save_output_dir = sg.user_settings_get_entry(
-            Keys.SAVE_OUTPUT_DIR_CHECKBOX_KEY, False
+            Keys.SAVE_OUTPUT_DIR_CHECKBOX, False
         )
 
         # Startup prompt profile
         startup_prompt_profile = sg.user_settings_get_entry(
-            Keys.PROMPT_PROFILE_DROPDOWN_KEY,
+            Keys.PROMPT_PROFILE_DROPDOWN,
             prompt_manager.unsaved_prompt_profile_name,
         )
 
@@ -241,12 +241,12 @@ def start_GUI(theme: str) -> None:
 
         tab1_options_layout = [
             [
-                sg.Text("Language:", key=Keys.LANGUAGE_TEXT_KEY),
+                sg.Text("Language:", key=Keys.LANGUAGE_TEXT),
                 sg.Combo(
                     values=LANGUAGES,
-                    key=Keys.LANGUAGE_KEY,
+                    key=Keys.LANGUAGE,
                     default_value=sg.user_settings_get_entry(
-                        Keys.LANGUAGE_KEY, AUTODETECT_OPTION
+                        Keys.LANGUAGE, AUTODETECT_OPTION
                     ),
                     auto_size_text=True,
                     readonly=True,
@@ -254,12 +254,12 @@ def start_GUI(theme: str) -> None:
                 ),
             ],
             [
-                sg.Text("Transcription Model:", key=Keys.MODEL_TEXT_KEY),
+                sg.Text("Transcription Model:", key=Keys.MODEL_TEXT),
                 sg.Combo(
                     values=models,
-                    key=Keys.MODEL_KEY,
+                    key=Keys.MODEL,
                     default_value=sg.user_settings_get_entry(
-                        Keys.MODEL_KEY, DEFAULT_MODEL
+                        Keys.MODEL, DEFAULT_MODEL
                     ),
                     auto_size_text=True,
                     readonly=True,
@@ -269,14 +269,14 @@ def start_GUI(theme: str) -> None:
             [
                 sg.Text(
                     text="Translate to English",
-                    key=Keys.TRANSLATE_TO_ENGLISH_TEXT_KEY,
+                    key=Keys.TRANSLATE_TO_ENGLISH_TEXT,
                 ),
                 FancyCheckbox(
                     start_toggled_on=translate_to_english_last_choice,
-                    key=Keys.TRANSLATE_TO_ENGLISH_CHECKBOX_KEY,
+                    key=Keys.TRANSLATE_TO_ENGLISH_CHECKBOX,
                     enable_events=True,
                     size_match=True,
-                    size_match_target=Keys.TRANSLATE_TO_ENGLISH_TEXT_KEY,
+                    size_match_target=Keys.TRANSLATE_TO_ENGLISH_TEXT,
                 ),
             ],
             [
@@ -286,13 +286,13 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Text(
                                 "Initial Prompt",
-                                key=Keys.INITIAL_PROMPT_TEXT_KEY,
+                                key=Keys.INITIAL_PROMPT_TEXT,
                             ),
                             InfoImage(
                                 tooltip=info_image_tooltip,
-                                key=Keys.INITIAL_PROMPT_INFO_KEY,
+                                key=Keys.INITIAL_PROMPT_INFO,
                                 size_match=True,
-                                size_match_target=Keys.INITIAL_PROMPT_TEXT_KEY,
+                                size_match_target=Keys.INITIAL_PROMPT_TEXT,
                             ),
                         ]
                     ],
@@ -302,7 +302,7 @@ def start_GUI(theme: str) -> None:
             [
                 sg.Combo(
                     values=prompt_manager.prompt_profile_names,
-                    key=Keys.PROMPT_PROFILE_DROPDOWN_KEY,
+                    key=Keys.PROMPT_PROFILE_DROPDOWN,
                     default_value=startup_prompt_profile,
                     readonly=True,
                     enable_events=True,
@@ -311,7 +311,7 @@ def start_GUI(theme: str) -> None:
                     default_text=prompt_manager.saved_prompt_profiles.get(
                         startup_prompt_profile, ""
                     ),
-                    key=Keys.INITIAL_PROMPT_INPUT_KEY,
+                    key=Keys.INITIAL_PROMPT_INPUT,
                     expand_x=True,
                     enable_events=True,
                 ),
@@ -319,17 +319,17 @@ def start_GUI(theme: str) -> None:
             [
                 sg.Button(
                     "Prompt Manager",
-                    key=Keys.START_PROMPT_MANAGER_KEY,
+                    key=Keys.START_PROMPT_MANAGER,
                 ),
             ],
             [
-                sg.Text("Model Information", key=Keys.MODEL_INFO_TEXT_KEY),
+                sg.Text("Model Information", key=Keys.MODEL_INFO_TEXT),
                 FancyToggle(
                     start_toggled_on=show_model_info_at_start,
-                    key=Keys.MODEL_INFO_TOGGLE_KEY,
+                    key=Keys.MODEL_INFO_TOGGLE,
                     enable_events=True,
                     size_match=True,
-                    size_match_target=Keys.MODEL_INFO_TEXT_KEY,
+                    size_match_target=Keys.MODEL_INFO_TEXT,
                 ),
             ],
         ]
@@ -339,24 +339,24 @@ def start_GUI(theme: str) -> None:
             [sg.Text("Select Audio/Video File(s)")],
             [
                 sg.Input(disabled=True, expand_x=True),
-                sg.FilesBrowse(key=Keys.IN_FILE_KEY),
+                sg.FilesBrowse(key=Keys.IN_FILE),
             ],
             [sg.Text("Output Folder:")],
             [
                 sg.Input(
                     default_text=sg.user_settings_get_entry(
-                        Keys.OUT_DIR_KEY, ""
+                        Keys.OUT_DIR, ""
                     ),
-                    key=Keys.OUTPUT_DIR_FIELD_KEY,
+                    key=Keys.OUTPUT_DIR_FIELD,
                     disabled=True,
                     expand_x=True,
                     enable_events=True,
                 ),
                 sg.FolderBrowse(
-                    target=Keys.OUTPUT_DIR_FIELD_KEY,
-                    key=Keys.OUT_DIR_KEY,
+                    target=Keys.OUTPUT_DIR_FIELD,
+                    key=Keys.OUT_DIR,
                     initial_folder=sg.user_settings_get_entry(
-                        Keys.OUT_DIR_KEY
+                        Keys.OUT_DIR
                     ),
                 ),
             ],
@@ -371,7 +371,7 @@ def start_GUI(theme: str) -> None:
                         justification="center",
                         num_rows=num_table_rows,
                         alternating_row_color="LightBlue3",
-                        key=Keys.MODEL_INFO_TABLE_KEY,
+                        key=Keys.MODEL_INFO_TABLE,
                         selected_row_colors="black on white",
                         enable_events=True,
                         expand_x=True,
@@ -385,7 +385,7 @@ def start_GUI(theme: str) -> None:
             ],
             [
                 Multiline(
-                    key=Keys.MULTILINE_KEY,
+                    key=Keys.MULTILINE,
                     background_color="black",
                     text_color="white",
                     auto_refresh=True,
@@ -404,7 +404,7 @@ def start_GUI(theme: str) -> None:
         ]
 
         language_specifier = sg.user_settings_get_entry(
-            Keys.LANGUAGE_SPECIFIER_SETTING_KEY,
+            Keys.LANGUAGE_SPECIFIER_SETTING,
             LANG_SPECIFIER_OPTIONS[0],
         )
 
@@ -412,7 +412,7 @@ def start_GUI(theme: str) -> None:
             [
                 sg.Text(
                     f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                    key=Keys.SCALING_TEXT_SETTING_KEY,
+                    key=Keys.SCALING_TEXT_SETTING,
                     background_color="blue",
                 ),
                 sg.Column(
@@ -420,15 +420,15 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Input(
                                 sg.user_settings_get_entry(
-                                    Keys.SCALING_INPUT_SETTING_KEY,
+                                    Keys.SCALING_INPUT_SETTING,
                                     DEFAULT_GLOBAL_SCALING,
                                 ),
                                 size=(5),
-                                key=Keys.SCALING_INPUT_SETTING_KEY,
+                                key=Keys.SCALING_INPUT_SETTING,
                             ),
                             sg.Button(
                                 "Apply",
-                                key=Keys.APPLY_GLOBAL_SCALING_KEY,
+                                key=Keys.APPLY_GLOBAL_SCALING,
                             ),
                         ]
                     ],
@@ -441,15 +441,15 @@ def start_GUI(theme: str) -> None:
             [
                 sg.Text(
                     text="Remember Output Folder",
-                    key=Keys.SAVE_OUTPUT_DIR_TEXT_KEY,
+                    key=Keys.SAVE_OUTPUT_DIR_TEXT,
                     background_color="blue",
                 ),
                 FancyCheckbox(
                     start_toggled_on=save_output_dir,
-                    key=Keys.SAVE_OUTPUT_DIR_CHECKBOX_KEY,
+                    key=Keys.SAVE_OUTPUT_DIR_CHECKBOX,
                     enable_events=True,
                     size_match=True,
-                    size_match_target=Keys.SAVE_OUTPUT_DIR_TEXT_KEY,
+                    size_match_target=Keys.SAVE_OUTPUT_DIR_TEXT,
                 ),
             ]
         ]
@@ -462,7 +462,7 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Text(
                                 "Output File Name Format:",
-                                key=Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT_KEY,
+                                key=Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
                                 background_color="blue",
                             )
                         ],
@@ -474,7 +474,7 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Combo(
                                 values=LANG_SPECIFIER_OPTIONS,
-                                key=Keys.LANGUAGE_SPECIFIER_SETTING_KEY,
+                                key=Keys.LANGUAGE_SPECIFIER_SETTING,
                                 default_value=language_specifier,
                                 auto_size_text=True,
                                 readonly=True,
@@ -487,7 +487,7 @@ def start_GUI(theme: str) -> None:
                                     language_specifier
                                 ],
                                 text_color="black",
-                                key=Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT_KEY,
+                                key=Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT,
                             )
                         ],
                     ],
@@ -552,12 +552,12 @@ def start_GUI(theme: str) -> None:
                             sg.Tab(
                                 "Main",
                                 tab1_layout,
-                                key=Keys.MAIN_TAB_KEY,
+                                key=Keys.MAIN_TAB,
                             ),
                             sg.Tab(
                                 "Settings",
                                 tab2_layout,
-                                key=Keys.SETTINGS_TAB_KEY,
+                                key=Keys.SETTINGS_TAB,
                             ),
                         ]
                     ],
@@ -575,7 +575,7 @@ def start_GUI(theme: str) -> None:
                 sg.Push(),
                 sg.Button("Pad change"),
                 sg.Button("Set Size"),
-                sg.Button("Start", key=Keys.START_KEY, auto_size_button=True),
+                sg.Button("Start", key=Keys.START, auto_size_button=True),
             ],
         ]
 
@@ -597,24 +597,24 @@ def start_GUI(theme: str) -> None:
 
         # Load the FolderBrowse's selected folder from the settings file
         # (Needed until an arg for FolderBrowse adds this functionality)
-        window[Keys.OUT_DIR_KEY].TKStringVar.set(
-            sg.user_settings_get_entry(Keys.OUT_DIR_KEY, "")
+        window[Keys.OUT_DIR].TKStringVar.set(
+            sg.user_settings_get_entry(Keys.OUT_DIR, "")
         )
 
         # Switch to the settings tab to load it and then switch back to
         # the main tab
-        window[Keys.SETTINGS_TAB_KEY].select()
+        window[Keys.SETTINGS_TAB].select()
         window.refresh()
 
         vertically_align_elements(
             window=window,
             keys=(
-                Keys.SCALING_TEXT_SETTING_KEY,
-                Keys.SAVE_OUTPUT_DIR_TEXT_KEY,
-                Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT_KEY,
+                Keys.SCALING_TEXT_SETTING,
+                Keys.SAVE_OUTPUT_DIR_TEXT,
+                Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
             ),
         )
-        window[Keys.MAIN_TAB_KEY].select()
+        window[Keys.MAIN_TAB].select()
 
         # Show the window
         window.reappear()
@@ -654,7 +654,7 @@ def start_GUI(theme: str) -> None:
     main_window = make_tracked_main_window_with_synced_profiles(
         window_tracker=window_tracker,
         prompt_manager=prompt_manager,
-        prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN_KEY,
+        prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
     def popup_prompt_manager(
@@ -678,7 +678,7 @@ def start_GUI(theme: str) -> None:
                 sg.Table(
                     prompt_manager.saved_prompt_profiles_list,
                     headings=[" Profile ", " Prompt   "],
-                    key=Keys.SAVED_PROMPTS_TABLE_KEY,
+                    key=Keys.SAVED_PROMPTS_TABLE,
                     expand_x=True,
                     expand_y=True,
                     justification="center",
@@ -694,21 +694,21 @@ def start_GUI(theme: str) -> None:
                         [
                             sg.Button(
                                 "Add Profile",
-                                key=Keys.OPEN_ADD_PROMPT_WINDOW_KEY,
+                                key=Keys.OPEN_ADD_PROMPT_WINDOW,
                                 expand_x=True,
                             )
                         ],
                         [
                             sg.Button(
                                 "Edit Profile",
-                                key=Keys.OPEN_EDIT_PROMPT_WINDOW_KEY,
+                                key=Keys.OPEN_EDIT_PROMPT_WINDOW,
                                 expand_x=True,
                             )
                         ],
                         [
                             sg.Button(
                                 "Delete Profile",
-                                key=Keys.DELETE_PROMPT_KEY,
+                                key=Keys.DELETE_PROMPT,
                                 expand_x=True,
                             )
                         ],
@@ -836,7 +836,7 @@ def start_GUI(theme: str) -> None:
                 [
                     sg.Input(
                         profile_name,
-                        key=Keys.NEW_PROFILE_NAME_KEY,
+                        key=Keys.NEW_PROFILE_NAME,
                         expand_x=True,
                         metadata=profile_name,
                     )
@@ -845,7 +845,7 @@ def start_GUI(theme: str) -> None:
                 [
                     sg.Input(
                         profile_prompt,
-                        key=Keys.NEW_PROFILE_PROMPT_KEY,
+                        key=Keys.NEW_PROFILE_PROMPT,
                         expand_x=True,
                         metadata=profile_prompt,
                     )
@@ -974,7 +974,7 @@ def start_GUI(theme: str) -> None:
             window.close()
         elif event == "Pad change":
             pad_toggle ^= True
-            element = window[Keys.INITIAL_PROMPT_INFO_KEY]
+            element = window[Keys.INITIAL_PROMPT_INFO]
             element_wrapper: sg.Element = element.ParentContainer
             pad = 30 if pad_toggle else 0
             element_wrapper.widget.pack_configure(pady=pad)
@@ -987,7 +987,7 @@ def start_GUI(theme: str) -> None:
             # element.set_size(size=(size, size))
 
             toggle ^= True
-            element = window[Keys.INITIAL_PROMPT_TEXT_KEY]
+            element = window[Keys.INITIAL_PROMPT_TEXT]
             base = 1
             size = base + toggle * 2
             print(f"set size to {(None, size)}")
@@ -995,23 +995,23 @@ def start_GUI(theme: str) -> None:
         elif event == PRINT_ME:
             print(values[PRINT_ME], end="")
         # User selected an output directory
-        elif event == Keys.OUTPUT_DIR_FIELD_KEY:
+        elif event == Keys.OUTPUT_DIR_FIELD:
             # Save the output directory to the settings file when the
             # corresponding option is on
-            if sg.user_settings_get_entry(Keys.SAVE_OUTPUT_DIR_CHECKBOX_KEY):
+            if sg.user_settings_get_entry(Keys.SAVE_OUTPUT_DIR_CHECKBOX):
                 sg.user_settings_set_entry(
-                    Keys.OUT_DIR_KEY, values[Keys.OUT_DIR_KEY]
+                    Keys.OUT_DIR, values[Keys.OUT_DIR]
                 )
         # User selected a language
-        elif event == Keys.LANGUAGE_KEY:
+        elif event == Keys.LANGUAGE:
             # Save the choice to the config file
             sg.user_settings_set_entry(
-                Keys.LANGUAGE_KEY, values[Keys.LANGUAGE_KEY]
+                Keys.LANGUAGE, values[Keys.LANGUAGE]
             )
         # User selected a model
-        elif event == Keys.MODEL_KEY:
+        elif event == Keys.MODEL:
             # Save the choice to the config file
-            sg.user_settings_set_entry(Keys.MODEL_KEY, values[Keys.MODEL_KEY])
+            sg.user_settings_set_entry(Keys.MODEL, values[Keys.MODEL])
         # User clicked a checkbox
         elif (
             window
@@ -1021,8 +1021,8 @@ def start_GUI(theme: str) -> None:
             # Save the checkbox state to the config file for
             # save-on-click checkboxes
             save_on_click_checkboxes = (
-                Keys.TRANSLATE_TO_ENGLISH_CHECKBOX_KEY,
-                Keys.SAVE_OUTPUT_DIR_CHECKBOX_KEY,
+                Keys.TRANSLATE_TO_ENGLISH_CHECKBOX,
+                Keys.SAVE_OUTPUT_DIR_CHECKBOX,
             )
 
             if event in save_on_click_checkboxes:
@@ -1031,28 +1031,28 @@ def start_GUI(theme: str) -> None:
             # Delete the saved output directory from the settings file
             # when the option is off
             if (
-                event == Keys.SAVE_OUTPUT_DIR_CHECKBOX_KEY
+                event == Keys.SAVE_OUTPUT_DIR_CHECKBOX
                 and not window[event].checked
             ):
-                if sg.user_settings_get_entry(Keys.OUT_DIR_KEY):
-                    sg.user_settings_delete_entry(Keys.OUT_DIR_KEY)
+                if sg.user_settings_get_entry(Keys.OUT_DIR):
+                    sg.user_settings_delete_entry(Keys.OUT_DIR)
         # Popup prompt manager window
-        elif event == Keys.START_PROMPT_MANAGER_KEY:
+        elif event == Keys.START_PROMPT_MANAGER:
             prompt_manager_window = window_tracker.track_window(
                 popup_prompt_manager()
             )
             modal_window_manager.track_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
-        elif event == Keys.OPEN_ADD_PROMPT_WINDOW_KEY:
+        elif event == Keys.OPEN_ADD_PROMPT_WINDOW:
             # Pop up a window to get a prompt name and prompt
             add_new_prompt_window = popup_add_prompt_profile(
                 title="Add new prompt profile",
-                submit_event=Keys.ADD_PROMPT_PROFILE_KEY,
+                submit_event=Keys.ADD_PROMPT_PROFILE,
             )
             modal_window_manager.track_modal_window(add_new_prompt_window)
         # User wants to edit a saved prompt profile
-        elif event == Keys.OPEN_EDIT_PROMPT_WINDOW_KEY:
-            selected_table_row_indices = values[Keys.SAVED_PROMPTS_TABLE_KEY]
+        elif event == Keys.OPEN_EDIT_PROMPT_WINDOW:
+            selected_table_row_indices = values[Keys.SAVED_PROMPTS_TABLE]
 
             # Ensure user has selected a row in the prompt profile table
             if selected_table_row_indices:
@@ -1069,7 +1069,7 @@ def start_GUI(theme: str) -> None:
                 # Pop up a window to edit the prompt name and prompt
                 edit_prompt_window = popup_edit_prompt_profile(
                     title="Edit prompt profile",
-                    submit_event=Keys.EDIT_PROMPT_PROFILE_KEY,
+                    submit_event=Keys.EDIT_PROMPT_PROFILE,
                     profile_name=selected_profile_name,
                     profile_prompt=selected_profile_prompt,
                 )
@@ -1086,18 +1086,18 @@ def start_GUI(theme: str) -> None:
                 modal_window_manager.track_modal_window(popup_window)
         # Handle adding or editing of a prompt profile
         elif event in (
-            Keys.ADD_PROMPT_PROFILE_KEY,
-            Keys.EDIT_PROMPT_PROFILE_KEY,
+            Keys.ADD_PROMPT_PROFILE,
+            Keys.EDIT_PROMPT_PROFILE,
         ):
             # Get the name and prompt to be saved
-            new_profile_name = values[Keys.NEW_PROFILE_NAME_KEY]
-            new_profile_prompt = values[Keys.NEW_PROFILE_PROMPT_KEY]
+            new_profile_name = values[Keys.NEW_PROFILE_NAME]
+            new_profile_prompt = values[Keys.NEW_PROFILE_PROMPT]
 
             # Get the original profile name of the add/edit profile
             # window before user changes.
-            original_profile_name = window[Keys.NEW_PROFILE_NAME_KEY].metadata
+            original_profile_name = window[Keys.NEW_PROFILE_NAME].metadata
 
-            if event == Keys.ADD_PROMPT_PROFILE_KEY:
+            if event == Keys.ADD_PROMPT_PROFILE:
                 (
                     add_edit_success,
                     error_msg,
@@ -1105,7 +1105,7 @@ def start_GUI(theme: str) -> None:
                     profile_name=new_profile_name,
                     profile_prompt=new_profile_prompt,
                 )
-            elif event == Keys.EDIT_PROMPT_PROFILE_KEY:
+            elif event == Keys.EDIT_PROMPT_PROFILE:
                 (
                     add_edit_success,
                     error_msg,
@@ -1137,9 +1137,9 @@ def start_GUI(theme: str) -> None:
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # User wants to delete a saved prompt profile
-        elif event == Keys.DELETE_PROMPT_KEY:
+        elif event == Keys.DELETE_PROMPT:
             # Delete the saved prompt profile
-            selected_table_row_indices = values[Keys.SAVED_PROMPTS_TABLE_KEY]
+            selected_table_row_indices = values[Keys.SAVED_PROMPTS_TABLE]
 
             # Ensure user has selected a row in the prompt profile table
             if selected_table_row_indices:
@@ -1169,16 +1169,16 @@ def start_GUI(theme: str) -> None:
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # User modified the initial prompt.
-        elif event == Keys.INITIAL_PROMPT_INPUT_KEY:
+        elif event == Keys.INITIAL_PROMPT_INPUT:
             # Select the unsaved prompt profile
-            window[Keys.PROMPT_PROFILE_DROPDOWN_KEY].update(
+            window[Keys.PROMPT_PROFILE_DROPDOWN].update(
                 value=prompt_manager.unsaved_prompt_profile_name
             )
         # User has chosen a prompt profile
-        elif event == Keys.PROMPT_PROFILE_DROPDOWN_KEY:
+        elif event == Keys.PROMPT_PROFILE_DROPDOWN:
             # Update the initial prompt input with the prompt profile's
             # prompt
-            chosen_prompt_profile = values[Keys.PROMPT_PROFILE_DROPDOWN_KEY]
+            chosen_prompt_profile = values[Keys.PROMPT_PROFILE_DROPDOWN]
 
             if (
                 chosen_prompt_profile
@@ -1198,28 +1198,28 @@ def start_GUI(theme: str) -> None:
                     " name or the unsaved prompt profile"
                 )
 
-            window[Keys.INITIAL_PROMPT_INPUT_KEY].update(
+            window[Keys.INITIAL_PROMPT_INPUT].update(
                 value=new_initial_prompt_input
             )
 
             # Save the user's selected prompt profile to the settings
             # file
             sg.user_settings_set_entry(
-                Keys.PROMPT_PROFILE_DROPDOWN_KEY, chosen_prompt_profile
+                Keys.PROMPT_PROFILE_DROPDOWN, chosen_prompt_profile
             )
         # User selected a language specifier for the result files
-        elif event == Keys.LANGUAGE_SPECIFIER_SETTING_KEY:
+        elif event == Keys.LANGUAGE_SPECIFIER_SETTING:
             # Update the language specifier option setting
             sg.user_settings_set_entry(event, values[event])
             current_language_specifier = values[event]
             example_text = LANG_SPECIFIER_TO_EXAMPLE_TEXT[
                 current_language_specifier
             ]
-            window[Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT_KEY].update(
+            window[Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT].update(
                 value=example_text
             )
         # User saved settings
-        elif event == Keys.APPLY_GLOBAL_SCALING_KEY:
+        elif event == Keys.APPLY_GLOBAL_SCALING:
 
             def popup_tracked_scaling_invalid() -> None:
                 """Pop up a tracked modal message window indicating an
@@ -1239,7 +1239,7 @@ def start_GUI(theme: str) -> None:
 
             # Ensure the scaling input is a decimal
             try:
-                scaling_input = Decimal(values[Keys.SCALING_INPUT_SETTING_KEY])
+                scaling_input = Decimal(values[Keys.SCALING_INPUT_SETTING])
             except decimal.InvalidOperation:
                 popup_tracked_scaling_invalid()
                 continue
@@ -1248,14 +1248,14 @@ def start_GUI(theme: str) -> None:
             if Decimal(MIN_SCALING) <= scaling_input <= Decimal(MAX_SCALING):
                 # Save the settings to the config file
                 sg.user_settings_set_entry(
-                    Keys.SCALING_INPUT_SETTING_KEY,
-                    values[Keys.SCALING_INPUT_SETTING_KEY],
+                    Keys.SCALING_INPUT_SETTING,
+                    values[Keys.SCALING_INPUT_SETTING],
                 )
 
                 # Use the new scaling globally
                 sg.set_options(
                     scaling=sg.user_settings_get_entry(
-                        Keys.SCALING_INPUT_SETTING_KEY, DEFAULT_GLOBAL_SCALING
+                        Keys.SCALING_INPUT_SETTING, DEFAULT_GLOBAL_SCALING
                     )
                 )
             # Scaling factor is out of accepted range
@@ -1274,46 +1274,46 @@ def start_GUI(theme: str) -> None:
             ) = make_tracked_main_window_with_synced_profiles(
                 window_tracker=window_tracker,
                 prompt_manager=prompt_manager,
-                prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN_KEY,
+                prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
             )
-            window[Keys.SETTINGS_TAB_KEY].select()
+            window[Keys.SETTINGS_TAB].select()
         # User pressed toggle button for the table
-        elif event == Keys.MODEL_INFO_TOGGLE_KEY:
+        elif event == Keys.MODEL_INFO_TOGGLE:
             # window[model_info_toggle_key].update(image_data=toggle_image)
             model_info_toggled_on = window[
-                Keys.MODEL_INFO_TOGGLE_KEY
+                Keys.MODEL_INFO_TOGGLE
             ].is_toggled_on
 
             # Show/hide the table
-            window[Keys.MODEL_INFO_TABLE_KEY].update(
+            window[Keys.MODEL_INFO_TABLE].update(
                 visible=model_info_toggled_on
             )
         # User wants to start transcription
-        elif event == Keys.START_KEY:
+        elif event == Keys.START:
             # Get user provided paths for the video file and output
             # directory
-            audio_video_file_paths_str = str(values[Keys.IN_FILE_KEY]).strip()
-            output_dir_path = str(values[Keys.OUT_DIR_KEY]).strip()
+            audio_video_file_paths_str = str(values[Keys.IN_FILE]).strip()
+            output_dir_path = str(values[Keys.OUT_DIR]).strip()
 
             # Require audio/video file(s) and output folder
             if audio_video_file_paths_str and output_dir_path:
                 # Get user selected language and model
-                language_selected = values[Keys.LANGUAGE_KEY]
+                language_selected = values[Keys.LANGUAGE]
                 if language_selected not in TO_LANGUAGE_CODE:
                     language_selected = None
 
-                model_selected = values[Keys.MODEL_KEY]
+                model_selected = values[Keys.MODEL]
 
                 # Get the user's choice of whether to translate the
                 # results into english
                 translate_to_english = window[
-                    Keys.TRANSLATE_TO_ENGLISH_CHECKBOX_KEY
+                    Keys.TRANSLATE_TO_ENGLISH_CHECKBOX
                 ].checked
 
                 # Get the user's choice of whether to use a language
                 # code as the language specifier in output files
                 language_specifier_selection = values[
-                    Keys.LANGUAGE_SPECIFIER_SETTING_KEY
+                    Keys.LANGUAGE_SPECIFIER_SETTING
                 ]
                 use_language_code = (
                     True
@@ -1324,14 +1324,14 @@ def start_GUI(theme: str) -> None:
 
                 #  Get the user's initial prompt for all transcriptions
                 # in this task
-                initial_prompt = values[Keys.INITIAL_PROMPT_INPUT_KEY]
+                initial_prompt = values[Keys.INITIAL_PROMPT_INPUT]
 
                 # Ensure timer is not running
                 with suppress(TimerError):
                     transcription_timer.stop()
 
                 # Clear the console output element
-                window[Keys.MULTILINE_KEY].update("")
+                window[Keys.MULTILINE].update("")
                 window.refresh()
 
                 # Convert string with file paths into a list
@@ -1404,7 +1404,7 @@ def start_GUI(theme: str) -> None:
         # Error while transcribing
         elif event == TRANSCRIBE_ERROR:
             transcription_timer.stop(log_time=False)
-            sg.one_line_progress_meter_cancel(key=Keys.PROGRESS_KEY)
+            sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
 
             error_msg = values[TRANSCRIBE_ERROR]
             popup_window = popup_tracked(
@@ -1454,7 +1454,7 @@ def start_GUI(theme: str) -> None:
                     num_tasks_done,
                     num_tasks,
                     f"Current file: \n{current_file}",
-                    key=Keys.PROGRESS_KEY,
+                    key=Keys.PROGRESS,
                     size=(30, 20),
                     orientation="h",
                 )
@@ -1464,15 +1464,15 @@ def start_GUI(theme: str) -> None:
                 if meter_updated:
                     # Track the meter window as a modal window if it's
                     # still active
-                    if Keys.PROGRESS_KEY in sg.QuickMeter.active_meters:
+                    if Keys.PROGRESS in sg.QuickMeter.active_meters:
                         meter_window = sg.QuickMeter.active_meters[
-                            Keys.PROGRESS_KEY
+                            Keys.PROGRESS
                         ].window
                         modal_window_manager.track_modal_window(meter_window)
                 # User clicked the Cancel button
                 else:
                     # Close the progress window
-                    sg.one_line_progress_meter_cancel(key=Keys.PROGRESS_KEY)
+                    sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
                     # Flag the thread to stop
                     stop_flag.set()
 
@@ -1489,58 +1489,58 @@ class Keys:
     INFO_IMAGE_KEY_PREFIX = "-INFO-"
 
     # Keys for main tab
-    MULTILINE_KEY = "-CONSOLE-OUTPUT-"
-    IN_FILE_KEY = "-IN-FILE-"
-    OUT_DIR_KEY = "-OUT-FOLDER-"
-    OUTPUT_DIR_FIELD_KEY = "-OUT-FOLDER-FIELD-"
-    LANGUAGE_KEY = "-LANGUAGE-"
-    LANGUAGE_TEXT_KEY = "-LANGUAGE-TEXT-"
-    MODEL_KEY = "-MODEL-"
-    MODEL_TEXT_KEY = "-MODEL-TEXT-"
-    TRANSLATE_TO_ENGLISH_TEXT_KEY = "-TRANSLATE-OPTION-TEXT-"
-    TRANSLATE_TO_ENGLISH_CHECKBOX_KEY = CHECKBOX_KEY_PREFIX + "TRANSLATE-"
-    MODEL_INFO_TEXT_KEY = "-MODEL-TABLE-TEXT-"
-    MODEL_INFO_TOGGLE_KEY = "-TOGGLE-MODEL-TABLE-"
-    MODEL_INFO_TABLE_KEY = "-MODEL-TABLE-"
-    INITIAL_PROMPT_TEXT_KEY = "-INITIAL-PROMPT-TEXT-"
-    INITIAL_PROMPT_INPUT_KEY = "-INITIAL-PROMPT-"
-    INITIAL_PROMPT_INFO_KEY = INFO_IMAGE_KEY_PREFIX + "INITIAL-PROMPT-"
-    PROMPT_PROFILE_DROPDOWN_KEY = "-PROMPT-PROFILE-"
-    START_PROMPT_MANAGER_KEY = "-START-PROMPT-MANAGER-"
-    START_KEY = "-START-TRANSCRIPTIONS-"
-    PROGRESS_KEY = "-PROGRESS-"
+    MULTILINE = "-CONSOLE-OUTPUT-"
+    IN_FILE = "-IN-FILE-"
+    OUT_DIR = "-OUT-FOLDER-"
+    OUTPUT_DIR_FIELD = "-OUT-FOLDER-FIELD-"
+    LANGUAGE = "-LANGUAGE-"
+    LANGUAGE_TEXT = "-LANGUAGE-TEXT-"
+    MODEL = "-MODEL-"
+    MODEL_TEXT = "-MODEL-TEXT-"
+    TRANSLATE_TO_ENGLISH_TEXT = "-TRANSLATE-OPTION-TEXT-"
+    TRANSLATE_TO_ENGLISH_CHECKBOX = CHECKBOX_KEY_PREFIX + "TRANSLATE-"
+    MODEL_INFO_TEXT = "-MODEL-TABLE-TEXT-"
+    MODEL_INFO_TOGGLE = "-TOGGLE-MODEL-TABLE-"
+    MODEL_INFO_TABLE = "-MODEL-TABLE-"
+    INITIAL_PROMPT_TEXT = "-INITIAL-PROMPT-TEXT-"
+    INITIAL_PROMPT_INPUT = "-INITIAL-PROMPT-"
+    INITIAL_PROMPT_INFO = INFO_IMAGE_KEY_PREFIX + "INITIAL-PROMPT-"
+    PROMPT_PROFILE_DROPDOWN = "-PROMPT-PROFILE-"
+    START_PROMPT_MANAGER = "-START-PROMPT-MANAGER-"
+    START = "-START-TRANSCRIPTIONS-"
+    PROGRESS = "-PROGRESS-"
 
     # Keys for prompt manager window
-    SAVED_PROMPTS_TABLE_KEY = "-SAVED-PROMPTS-TABLE-"
-    OPEN_ADD_PROMPT_WINDOW_KEY = "-OPEN-ADD-PROMPT-WINDOW-"
-    OPEN_EDIT_PROMPT_WINDOW_KEY = "-OPEN-EDIT-PROMPT-WINDOW-"
-    DELETE_PROMPT_KEY = "-DELETE-PROMPT-"
+    SAVED_PROMPTS_TABLE = "-SAVED-PROMPTS-TABLE-"
+    OPEN_ADD_PROMPT_WINDOW = "-OPEN-ADD-PROMPT-WINDOW-"
+    OPEN_EDIT_PROMPT_WINDOW = "-OPEN-EDIT-PROMPT-WINDOW-"
+    DELETE_PROMPT = "-DELETE-PROMPT-"
 
     # Keys for add/edit prompt window
-    NEW_PROFILE_NAME_KEY = "-NEW-PROMPT-NAME-"
-    NEW_PROFILE_PROMPT_KEY = "-NEW-PROMPT-"
+    NEW_PROFILE_NAME = "-NEW-PROMPT-NAME-"
+    NEW_PROFILE_PROMPT = "-NEW-PROMPT-"
 
-    ADD_PROMPT_PROFILE_KEY = "-ADD-PROMPT-"
-    EDIT_PROMPT_PROFILE_KEY = "-EDIT-PROMPT-"
+    ADD_PROMPT_PROFILE = "-ADD-PROMPT-"
+    EDIT_PROMPT_PROFILE = "-EDIT-PROMPT-"
 
     # Keys for settings tab
-    APPLY_GLOBAL_SCALING_KEY = "-SAVE-SCALING-"
-    SCALING_TEXT_SETTING_KEY = "-GLOBAL-SCALING-TEXT-"
-    SCALING_INPUT_SETTING_KEY = "-GLOBAL-SCALING-"
-    SAVE_OUTPUT_DIR_TEXT_KEY = "-SAVE-OUTPUT-DIR-TEXT-"
-    SAVE_OUTPUT_DIR_CHECKBOX_KEY = CHECKBOX_KEY_PREFIX + "SAVE-OUTPUT-DIR-"
-    LANGUAGE_SPECIFIER_SETTING_KEY = "-LANGUAGE-SPECIFIER-"
-    LANGUAGE_SPECIFIER_EXAMPLE_TEXT_KEY = "-LANGUAGE-SPECIFIER-EXAMPLE-TEXT-"
-    LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT_KEY = (
+    APPLY_GLOBAL_SCALING = "-SAVE-SCALING-"
+    SCALING_TEXT_SETTING = "-GLOBAL-SCALING-TEXT-"
+    SCALING_INPUT_SETTING = "-GLOBAL-SCALING-"
+    SAVE_OUTPUT_DIR_TEXT = "-SAVE-OUTPUT-DIR-TEXT-"
+    SAVE_OUTPUT_DIR_CHECKBOX = CHECKBOX_KEY_PREFIX + "SAVE-OUTPUT-DIR-"
+    LANGUAGE_SPECIFIER_SETTING = "-LANGUAGE-SPECIFIER-"
+    LANGUAGE_SPECIFIER_EXAMPLE_TEXT = "-LANGUAGE-SPECIFIER-EXAMPLE-TEXT-"
+    LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT = (
         "-LANGUAGE-SPECIFIER-OUTPUT-FORMAT-TEXT-"
     )
 
     # Keys for tabs
-    MAIN_TAB_KEY = "-MAIN-TAB-"
-    SETTINGS_TAB_KEY = "-SETTINGS-TAB-"
+    MAIN_TAB = "-MAIN-TAB-"
+    SETTINGS_TAB = "-SETTINGS-TAB-"
 
     # Key for saved prompts in the settings file
-    SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
+    SAVED_PROMPTS_SETTINGS = "SAVED PROMPTS"
 
 
 def function_details(func: Callable) -> Callable:
