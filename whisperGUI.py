@@ -807,10 +807,6 @@ class GUI_Settings:
     THEME = "Dark Blue 3"
 
 
-def get_settings_file_path() -> str:
-    return str(sg.user_settings_object().full_filename)
-
-
 def set_up_global_bindings() -> None:
     """Set up global tk bindings."""
     # Make a temporary window so that tkroot exists
@@ -1493,6 +1489,10 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     window.reappear()
 
     return window
+
+
+def get_settings_file_path() -> str:
+    return str(sg.user_settings_object().full_filename)
 
 
 class Keys:
