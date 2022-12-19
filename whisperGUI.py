@@ -109,95 +109,6 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
-    def popup_prompt_manager(
-        location: Tuple[Optional[int], Optional[int]] = (None, None),
-        alpha_channel: float = None,
-    ) -> Window:
-        """Pop up the prompt manager window.
-
-        Args:
-            location (Tuple[Optional[int], Optional[int]], optional):
-                The location for the prompt manager window. Defaults to
-                (None, None).
-            alpha_channel (float, optional): The alpha channel to set
-                for the prompt manager window. Defaults to None.
-
-        Returns:
-            sg.Window: The prompt manager window.
-        """
-        layout = [
-            [
-                sg.Table(
-                    prompt_manager.saved_prompt_profiles_list,
-                    headings=[" Profile ", " Prompt   "],
-                    key=Keys.SAVED_PROMPTS_TABLE,
-                    expand_x=True,
-                    expand_y=True,
-                    justification="center",
-                    auto_size_columns=True,
-                    max_col_width=100,
-                    alternating_row_color="LightBlue3",
-                    selected_row_colors="black on white",
-                    select_mode=sg.TABLE_SELECT_MODE_BROWSE,
-                    enable_events=True,
-                ),
-                sg.Column(
-                    [
-                        [
-                            sg.Button(
-                                "Add Profile",
-                                key=Keys.OPEN_ADD_PROMPT_WINDOW,
-                                expand_x=True,
-                            )
-                        ],
-                        [
-                            sg.Button(
-                                "Edit Profile",
-                                key=Keys.OPEN_EDIT_PROMPT_WINDOW,
-                                expand_x=True,
-                            )
-                        ],
-                        [
-                            sg.Button(
-                                "Delete Profile",
-                                key=Keys.DELETE_PROMPT,
-                                expand_x=True,
-                            )
-                        ],
-                        [sg.Text("")],
-                        [sg.Text("")],
-                        [sg.Text("")],
-                        [sg.Text("")],
-                        [
-                            sg.Button(
-                                "Close",
-                                focus=True,
-                                bind_return_key=True,
-                                expand_x=True,
-                            )
-                        ],
-                    ],
-                    vertical_alignment="top",
-                    expand_x=False,
-                    pad=(0, 0),
-                ),
-            ]
-        ]
-
-        # Create the window
-        win = Window(
-            "Prompt Manager",
-            layout,
-            finalize=True,
-            resizable=True,
-            auto_size_buttons=True,
-            auto_size_text=True,
-            location=location,
-            alpha_channel=alpha_channel,
-        )
-
-        return win
-
     def reload_prompt_manager_window(
         prompt_manager_window: sg.Window,
         modal_window_manager: ModalWindowManager = None,
@@ -242,7 +153,9 @@ def start_GUI() -> None:
                 return None
 
             new_prompt_manager_window = popup_prompt_manager(
-                location=(x_pos, y_pos), alpha_channel=0
+                prompt_manager=prompt_manager,
+                location=(x_pos, y_pos),
+                alpha_channel=0,
             )
             new_prompt_manager_window.reappear()
             prompt_manager_window.close()
@@ -487,7 +400,7 @@ def start_GUI() -> None:
         # Popup prompt manager window
         elif event == Keys.START_PROMPT_MANAGER:
             prompt_manager_window = window_tracker.track_window(
-                popup_prompt_manager()
+                popup_prompt_manager(prompt_manager=prompt_manager)
             )
             modal_window_manager.track_modal_window(prompt_manager_window)
         # Popup add new prompt profile window
@@ -1003,6 +916,97 @@ def make_tracked_main_window_with_synced_profiles(
         window, prompt_profile_dropdown_key
     )
     return window
+
+
+def popup_prompt_manager(
+    prompt_manager: PromptManager,
+    location: Tuple[Optional[int], Optional[int]] = (None, None),
+    alpha_channel: float = None,
+) -> Window:
+    """Pop up the prompt manager window.
+
+    Args:
+        location (Tuple[Optional[int], Optional[int]], optional):
+            The location for the prompt manager window. Defaults to
+            (None, None).
+        alpha_channel (float, optional): The alpha channel to set
+            for the prompt manager window. Defaults to None.
+
+    Returns:
+        sg.Window: The prompt manager window.
+    """
+    layout = [
+        [
+            sg.Table(
+                prompt_manager.saved_prompt_profiles_list,
+                headings=[" Profile ", " Prompt   "],
+                key=Keys.SAVED_PROMPTS_TABLE,
+                expand_x=True,
+                expand_y=True,
+                justification="center",
+                auto_size_columns=True,
+                max_col_width=100,
+                alternating_row_color="LightBlue3",
+                selected_row_colors="black on white",
+                select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                enable_events=True,
+            ),
+            sg.Column(
+                [
+                    [
+                        sg.Button(
+                            "Add Profile",
+                            key=Keys.OPEN_ADD_PROMPT_WINDOW,
+                            expand_x=True,
+                        )
+                    ],
+                    [
+                        sg.Button(
+                            "Edit Profile",
+                            key=Keys.OPEN_EDIT_PROMPT_WINDOW,
+                            expand_x=True,
+                        )
+                    ],
+                    [
+                        sg.Button(
+                            "Delete Profile",
+                            key=Keys.DELETE_PROMPT,
+                            expand_x=True,
+                        )
+                    ],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [
+                        sg.Button(
+                            "Close",
+                            focus=True,
+                            bind_return_key=True,
+                            expand_x=True,
+                        )
+                    ],
+                ],
+                vertical_alignment="top",
+                expand_x=False,
+                pad=(0, 0),
+            ),
+        ]
+    ]
+
+    # Create the window
+    win = Window(
+        "Prompt Manager",
+        layout,
+        finalize=True,
+        resizable=True,
+        auto_size_buttons=True,
+        auto_size_text=True,
+        location=location,
+        alpha_channel=alpha_channel,
+    )
+
+    return win
 
 
 class LanguageSpecifier:
