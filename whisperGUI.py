@@ -109,67 +109,6 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
-    def reload_prompt_manager_window(
-        prompt_manager_window: sg.Window,
-        modal_window_manager: ModalWindowManager = None,
-        window_tracker: WindowTracker = None,
-    ) -> Optional[sg.Window]:
-        """Reload the prompt manager window and track the new window.
-
-        Args:
-            prompt_manager_window (sg.Window): The prompt manager window
-                to reload.
-            modal_window_manager (ModalWindowManager, optional): The new
-                prompt manager window
-                will be tracked and made modal by a modal window manager
-                if given. Defaults to None.
-            window_tracker (WindowTracker, optional): The new prompt
-                manager window will be tracked by a window tracker if
-                given. Defaults to None.
-
-        Returns:
-            Optional[sg.Window]: The new prompt manager window or None.
-        """
-
-        if prompt_manager_window:
-            # prompt_manager_window.close()
-            # new_prompt_manager_window = popup_prompt_manager()
-            x_pos, y_pos = prompt_manager_window.current_location(
-                more_accurate=True
-            )
-
-            if x_pos is None or y_pos is None:
-                sg.PopupError(
-                    "Error reloading the prompt manager window",
-                    (
-                        "Unable to get the current location of the current"
-                        " prompt manager window."
-                    ),
-                    "The offensive prompt manager window = ",
-                    prompt_manager_window,
-                    keep_on_top=True,
-                    image=_random_error_emoji(),
-                )
-                return None
-
-            new_prompt_manager_window = popup_prompt_manager(
-                prompt_manager=prompt_manager,
-                location=(x_pos, y_pos),
-                alpha_channel=0,
-            )
-            new_prompt_manager_window.reappear()
-            prompt_manager_window.close()
-
-            if window_tracker:
-                window_tracker.track_window(new_prompt_manager_window)
-            if modal_window_manager:
-                modal_window_manager.update()
-                modal_window_manager.track_modal_window(prompt_manager_window)
-
-            return new_prompt_manager_window
-        else:
-            return None
-
     # keep track of the prompt manager window
     prompt_manager_window = None
 
@@ -483,6 +422,7 @@ def start_GUI() -> None:
                 add_new_prompt_window = None
 
                 prompt_manager_window = reload_prompt_manager_window(
+                    prompt_manager=prompt_manager,
                     prompt_manager_window=prompt_manager_window,
                     modal_window_manager=modal_window_manager,
                     window_tracker=window_tracker,
@@ -515,6 +455,7 @@ def start_GUI() -> None:
                 )
 
                 prompt_manager_window = reload_prompt_manager_window(
+                    prompt_manager=prompt_manager,
                     prompt_manager_window=prompt_manager_window,
                     modal_window_manager=modal_window_manager,
                     window_tracker=window_tracker,
@@ -1007,6 +948,69 @@ def popup_prompt_manager(
     )
 
     return win
+
+
+def reload_prompt_manager_window(
+    prompt_manager: PromptManager,
+    prompt_manager_window: sg.Window,
+    modal_window_manager: ModalWindowManager = None,
+    window_tracker: WindowTracker = None,
+) -> Optional[sg.Window]:
+    """Reload the prompt manager window and track the new window.
+
+    Args:
+        prompt_manager_window (sg.Window): The prompt manager window
+            to reload.
+        modal_window_manager (ModalWindowManager, optional): The new
+            prompt manager window
+            will be tracked and made modal by a modal window manager
+            if given. Defaults to None.
+        window_tracker (WindowTracker, optional): The new prompt
+            manager window will be tracked by a window tracker if
+            given. Defaults to None.
+
+    Returns:
+        Optional[sg.Window]: The new prompt manager window or None.
+    """
+
+    if prompt_manager_window:
+        # prompt_manager_window.close()
+        # new_prompt_manager_window = popup_prompt_manager()
+        x_pos, y_pos = prompt_manager_window.current_location(
+            more_accurate=True
+        )
+
+        if x_pos is None or y_pos is None:
+            sg.PopupError(
+                "Error reloading the prompt manager window",
+                (
+                    "Unable to get the current location of the current"
+                    " prompt manager window."
+                ),
+                "The offensive prompt manager window = ",
+                prompt_manager_window,
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
+            return None
+
+        new_prompt_manager_window = popup_prompt_manager(
+            prompt_manager=prompt_manager,
+            location=(x_pos, y_pos),
+            alpha_channel=0,
+        )
+        new_prompt_manager_window.reappear()
+        prompt_manager_window.close()
+
+        if window_tracker:
+            window_tracker.track_window(new_prompt_manager_window)
+        if modal_window_manager:
+            modal_window_manager.update()
+            modal_window_manager.track_modal_window(prompt_manager_window)
+
+        return new_prompt_manager_window
+    else:
+        return None
 
 
 class LanguageSpecifier:
