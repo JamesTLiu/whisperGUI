@@ -383,29 +383,14 @@ def start_GUI() -> None:
             )
         # User saved settings
         elif event == Keys.APPLY_GLOBAL_SCALING:
-
-            def popup_tracked_scaling_invalid() -> None:
-                """Pop up a tracked modal message window indicating an
-                invalid scaling input.
-                """
-                popup_window = popup_tracked(
-                    (
-                        "Please enter a number for the scaling factor between"
-                        f" {GUI_Settings.MIN_SCALING} and"
-                        f" {GUI_Settings.MAX_SCALING}."
-                    ),
-                    popup_fn=popup,
-                    window_tracker=window_tracker,
-                    title="Invalid scaling factor",
-                    non_blocking=True,
-                )
-                modal_window_manager.track_modal_window(popup_window)
-
             # Ensure the scaling input is a decimal
             try:
                 scaling_input = Decimal(values[Keys.SCALING_INPUT_SETTING])
             except decimal.InvalidOperation:
-                popup_tracked_scaling_invalid()
+                popup_tracked_scaling_invalid(
+                    window_tracker=window_tracker,
+                    modal_window_manager=modal_window_manager,
+                )
                 continue
 
             # Ensure scaling factor is within accepted range
@@ -429,7 +414,10 @@ def start_GUI() -> None:
                 )
             # Scaling factor is out of accepted range
             else:
-                popup_tracked_scaling_invalid()
+                popup_tracked_scaling_invalid(
+                    window_tracker=window_tracker,
+                    modal_window_manager=modal_window_manager,
+                )
                 continue
 
             # Close all windows and remove them from tracking
@@ -1580,6 +1568,26 @@ class GenEvents:
         TRANSCRIBE_ERROR,
         TRANSCRIBE_STOPPED,
     )
+
+
+def popup_tracked_scaling_invalid(
+    window_tracker: WindowTracker, modal_window_manager: ModalWindowManager
+) -> None:
+    """Pop up a tracked modal message window indicating an
+    invalid scaling input.
+    """
+    popup_window = popup_tracked(
+        (
+            "Please enter a number for the scaling factor between"
+            f" {GUI_Settings.MIN_SCALING} and"
+            f" {GUI_Settings.MAX_SCALING}."
+        ),
+        popup_fn=popup,
+        window_tracker=window_tracker,
+        title="Invalid scaling factor",
+        non_blocking=True,
+    )
+    modal_window_manager.track_modal_window(popup_window)
 
 
 def function_details(func: Callable) -> Callable:
