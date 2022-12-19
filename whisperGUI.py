@@ -116,10 +116,6 @@ def start_GUI() -> None:
     # stop flag for the thread
     stop_flag = threading.Event()
 
-    pad_toggle = False
-
-    toggle = False
-
     while True:
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
@@ -137,26 +133,6 @@ def start_GUI() -> None:
                 prompt_manager_window = None
 
             window.close()
-        elif event == "Pad change":
-            pad_toggle ^= True
-            element = window[Keys.INITIAL_PROMPT_INFO]
-            element_wrapper: sg.Element = element.ParentContainer
-            pad = 30 if pad_toggle else 0
-            element_wrapper.widget.pack_configure(pady=pad)
-        elif event == "Set Size":
-            # toggle ^= True
-            # element = window[initial_prompt_info_key]
-            # base = 50
-            # size = base + toggle * base
-            # print(f"set size to {(size, size)}")
-            # element.set_size(size=(size, size))
-
-            toggle ^= True
-            element = window[Keys.INITIAL_PROMPT_TEXT]
-            base = 1
-            size = base + toggle * 2
-            print(f"set size to {(None, size)}")
-            element.set_size(size=(None, size))
         elif event == GenEvents.PRINT_ME:
             print(values[GenEvents.PRINT_ME], end="")
         # User selected an output directory
@@ -1440,8 +1416,6 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 justification="center",
             ),
             sg.Push(),
-            sg.Button("Pad change"),
-            sg.Button("Set Size"),
             sg.Button("Start", key=Keys.START, auto_size_button=True),
         ],
     ]
