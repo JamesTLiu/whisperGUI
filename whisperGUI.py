@@ -138,6 +138,9 @@ def start_GUI(theme: str) -> None:
     MAIN_TAB_KEY = "-MAIN-TAB-"
     SETTINGS_TAB_KEY = "-SETTINGS-TAB-"
 
+    # Key for saved prompts in the settings file
+    SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
+
     # Events for threads to report status
     TRANSCRIBE_SUCCESS = "-TRANSCRIBE-SUCCESS-"
     TRANSCRIBE_ERROR = "-TRANSCRIBE-ERROR-"
@@ -153,9 +156,6 @@ def start_GUI(theme: str) -> None:
         TRANSCRIBE_ERROR,
         TRANSCRIBE_STOPPED,
     )
-
-    # Key for saved prompts in the settings file
-    SAVED_PROMPTS_SETTINGS_KEY = "SAVED PROMPTS"
 
     prompt_manager = PromptManager(SAVED_PROMPTS_SETTINGS_KEY)
 
