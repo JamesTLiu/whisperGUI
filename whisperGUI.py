@@ -80,7 +80,7 @@ def start_GUI() -> None:
     sg.theme(GUI_Settings.THEME)
 
     # Set the settings file's name
-    sg.user_settings_filename(filename=GUI_Settings.SETTINGS_FILE_PATH)
+    sg.user_settings_filename(filename=GUI_Settings.SETTINGS_FILE_NAME)
 
     prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
 
@@ -980,9 +980,13 @@ class GUI_Settings:
     # Default global font for the GUI
     DEFAULT_FONT = ("Arial", 20)
 
-    SETTINGS_FILE_PATH = "whisperGUI.config"
+    SETTINGS_FILE_NAME = "whisperGUI.config"
 
     THEME = "Dark Blue 3"
+
+
+def get_settings_file_path() -> str:
+    return str(sg.user_settings_object().full_filename)
 
 
 def set_up_global_bindings() -> None:
@@ -1354,11 +1358,13 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
         ]
     ]
 
+    settings_file_path = get_settings_file_path()
+
     file_path_frame_layout = [
         [
             sg.Input(
-                f"{GUI_Settings.SETTINGS_FILE_PATH}",
-                size=len(GUI_Settings.SETTINGS_FILE_PATH) - 6,
+                f"{settings_file_path}",
+                size=len(settings_file_path) - 6,
                 disabled=True,
             )
         ]
