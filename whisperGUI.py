@@ -81,20 +81,19 @@ def start_GUI() -> None:
 
     prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
 
-    # tracker for possibly active windows
     window_tracker = WindowTracker()
+
+    prompt_manager_window = None
+
+    add_new_prompt_window = None
+
+    modal_window_manager = ModalWindowManager()
 
     main_window = make_tracked_main_window_with_synced_profiles(
         window_tracker=window_tracker,
         prompt_manager=prompt_manager,
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
-
-    # keep track of the prompt manager window
-    prompt_manager_window = None
-
-    # keep track of the add new prompt window
-    add_new_prompt_window = None
 
     # timer for transcription task
     transcription_timer = CustomTimer()
@@ -116,8 +115,6 @@ def start_GUI() -> None:
 
     # stop flag for the thread
     stop_flag = threading.Event()
-
-    modal_window_manager = ModalWindowManager()
 
     pad_toggle = False
 
