@@ -1474,8 +1474,10 @@ def start_GUI(theme: str) -> None:
 
 
 class Keys:
-    CHECKBOX_KEY_PREFIX = "-CHECKBOX-"
+    """Keys for elements and/or settings."""
 
+    # Shared prefixes for keys
+    CHECKBOX_KEY_PREFIX = "-CHECKBOX-"
     INFO_IMAGE_KEY_PREFIX = "-INFO-"
 
     # Keys for main tab
