@@ -67,41 +67,30 @@ if TYPE_CHECKING:
 
 def main():
     set_env.set_env_vars()
-    start_GUI("Dark Blue 3")
+    start_GUI()
 
 
-def start_GUI(theme: str) -> None:
+def start_GUI() -> None:
     """Start the GUI.
 
     Raises:
         NonExistentPromptProfileName: A non-existent prompt profile name
             was used.
     """
+    sg.theme(GUI_Settings.THEME)
 
-    sg.theme(theme)
-
-    # Config file
-    config_file_path = sg.user_settings_filename(filename="whisperGUI.config")
+    # Set the settings file's name
+    sg.user_settings_filename(filename=GUI_Settings.SETTINGS_FILE_PATH)
 
     prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
-
-    # scaling of the application's size
-    DEFAULT_GLOBAL_SCALING = 1.5
-
-    # Range of accepted scaling factor values from the user
-    MIN_SCALING = 0.5
-    MAX_SCALING = 3
-
-    # Default global font for the GUI
-    GUI_FONT = ("Arial", 20)
 
     # Set global GUI options
     sg.set_options(
         scaling=sg.user_settings_get_entry(
-            Keys.SCALING_INPUT_SETTING, DEFAULT_GLOBAL_SCALING
+            Keys.SCALING_INPUT_SETTING, GUI_Settings.DEFAULT_GLOBAL_SCALING
         ),
-        font=GUI_FONT,
-        tooltip_font=GUI_FONT,
+        font=GUI_Settings.DEFAULT_FONT,
+        tooltip_font=GUI_Settings.DEFAULT_FONT,
         force_modal_windows=True,
     )
 
@@ -111,485 +100,8 @@ def start_GUI(theme: str) -> None:
 
     set_up_global_bindings()
 
-    # number of rows for the table
-    num_table_rows = 5
-
-    # whether multiline element strips whitespaces from the end of the
-    # new text to append
-    is_multiline_rstripping_on_update = False
-
-    # Options used in the language specifier setting
-    LANGUAGE_SPECIFIER_AS_LANG = "Language"
-    LANGUAGE_SPECIFIER_AS_CODE = "Language Code"
-
-    LANG_SPECIFIER_OPTIONS = (
-        LANGUAGE_SPECIFIER_AS_LANG,
-        LANGUAGE_SPECIFIER_AS_CODE,
-    )
-
-    LANG_SPECIFIER_EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
-    LANG_SPECIFIER_TO_EXAMPLE_TEXT = dict(
-        zip(LANG_SPECIFIER_OPTIONS, LANG_SPECIFIER_EXAMPLE_TEXTS)
-    )
-
     # tracker for possibly active windows
     window_tracker = WindowTracker()
-
-    def make_main_window() -> sg.Window:
-        """Create the main window for the GUI.
-
-        Returns:
-            sg.Window: The created main window.
-        """
-        # Supported language options for the model
-        AUTODETECT_OPTION = "autodetect"
-        LANGUAGES = (AUTODETECT_OPTION, *sorted(TO_LANGUAGE_CODE.keys()))
-
-        # Information for the table comparing models
-        model_data_table = [
-            [
-                "Size",
-                "Parameters",
-                "English-only",
-                "Multilingual",
-                "Needed VRAM",
-                "Relative speed",
-            ],
-            ["tiny", "39 M", "tiny.en", "tiny", "~1 GB", "~32x"],
-            ["base", "74 M", "base.en", "base", "~1 GB", "~16x"],
-            ["small", "244 M", "small.en", "small", "~2 GB", "~6x"],
-            ["medium", "769 M", "medium.en", "medium", "~5 GB", "~2x"],
-            ["large", "1550 M", "N/A", "large", "~10 GB", "1x"],
-        ]
-
-        # list of available whisper models
-        models = whisper.available_models()
-
-        # default to base model
-        DEFAULT_MODEL = models[3]
-
-        # Append whitespace to each table header string to avoid cutoffs
-        table_headings = [
-            str(model_data_table[0][x]) + "  "
-            for x in range(len(model_data_table[0]))
-        ]
-
-        # Load whether to translating to English or not from the
-        # settings file
-        translate_to_english_last_choice = sg.user_settings_get_entry(
-            Keys.TRANSLATE_TO_ENGLISH_CHECKBOX, False
-        )
-
-        # Load whether to save the output directory or not from the
-        # settings file
-        save_output_dir = sg.user_settings_get_entry(
-            Keys.SAVE_OUTPUT_DIR_CHECKBOX, False
-        )
-
-        # Startup prompt profile
-        startup_prompt_profile = sg.user_settings_get_entry(
-            Keys.PROMPT_PROFILE_DROPDOWN,
-            prompt_manager.unsaved_prompt_profile_name,
-        )
-
-        show_model_info_at_start = False
-
-        info_image_tooltip = "\n".join(
-            [
-                (
-                    "Use this when a dialect/style of a language or"
-                    " punctuation is desired."
-                ),
-                (
-                    "Does NOT guarantee the result will follow the initial"
-                    " prompt."
-                ),
-                "Initial prompt will NOT be included in the result.",
-                (
-                    "Try a larger model if the result does not follow the"
-                    " initial prompt."
-                ),
-                "\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。",
-            ]
-        )
-
-        tab1_options_layout = [
-            [
-                sg.Text("Language:", key=Keys.LANGUAGE_TEXT),
-                sg.Combo(
-                    values=LANGUAGES,
-                    key=Keys.LANGUAGE,
-                    default_value=sg.user_settings_get_entry(
-                        Keys.LANGUAGE, AUTODETECT_OPTION
-                    ),
-                    auto_size_text=True,
-                    readonly=True,
-                    enable_events=True,
-                ),
-            ],
-            [
-                sg.Text("Transcription Model:", key=Keys.MODEL_TEXT),
-                sg.Combo(
-                    values=models,
-                    key=Keys.MODEL,
-                    default_value=sg.user_settings_get_entry(
-                        Keys.MODEL, DEFAULT_MODEL
-                    ),
-                    auto_size_text=True,
-                    readonly=True,
-                    enable_events=True,
-                ),
-            ],
-            [
-                sg.Text(
-                    text="Translate to English",
-                    key=Keys.TRANSLATE_TO_ENGLISH_TEXT,
-                ),
-                FancyCheckbox(
-                    start_toggled_on=translate_to_english_last_choice,
-                    key=Keys.TRANSLATE_TO_ENGLISH_CHECKBOX,
-                    enable_events=True,
-                    size_match=True,
-                    size_match_target=Keys.TRANSLATE_TO_ENGLISH_TEXT,
-                ),
-            ],
-            [
-                sg.Text("Prompt Profile"),
-                sg.Column(
-                    layout=[
-                        [
-                            sg.Text(
-                                "Initial Prompt",
-                                key=Keys.INITIAL_PROMPT_TEXT,
-                            ),
-                            InfoImage(
-                                tooltip=info_image_tooltip,
-                                key=Keys.INITIAL_PROMPT_INFO,
-                                size_match=True,
-                                size_match_target=Keys.INITIAL_PROMPT_TEXT,
-                            ),
-                        ]
-                    ],
-                    pad=0,
-                ),
-            ],
-            [
-                sg.Combo(
-                    values=prompt_manager.prompt_profile_names,
-                    key=Keys.PROMPT_PROFILE_DROPDOWN,
-                    default_value=startup_prompt_profile,
-                    readonly=True,
-                    enable_events=True,
-                ),
-                sg.Input(
-                    default_text=prompt_manager.saved_prompt_profiles.get(
-                        startup_prompt_profile, ""
-                    ),
-                    key=Keys.INITIAL_PROMPT_INPUT,
-                    expand_x=True,
-                    enable_events=True,
-                ),
-            ],
-            [
-                sg.Button(
-                    "Prompt Manager",
-                    key=Keys.START_PROMPT_MANAGER,
-                ),
-            ],
-            [
-                sg.Text("Model Information", key=Keys.MODEL_INFO_TEXT),
-                FancyToggle(
-                    start_toggled_on=show_model_info_at_start,
-                    key=Keys.MODEL_INFO_TOGGLE,
-                    enable_events=True,
-                    size_match=True,
-                    size_match_target=Keys.MODEL_INFO_TEXT,
-                ),
-            ],
-        ]
-
-        # main tab
-        tab1_layout = [
-            [sg.Text("Select Audio/Video File(s)")],
-            [
-                sg.Input(disabled=True, expand_x=True),
-                sg.FilesBrowse(key=Keys.IN_FILE),
-            ],
-            [sg.Text("Output Folder:")],
-            [
-                sg.Input(
-                    default_text=sg.user_settings_get_entry(Keys.OUT_DIR, ""),
-                    key=Keys.OUTPUT_DIR_FIELD,
-                    disabled=True,
-                    expand_x=True,
-                    enable_events=True,
-                ),
-                sg.FolderBrowse(
-                    target=Keys.OUTPUT_DIR_FIELD,
-                    key=Keys.OUT_DIR,
-                    initial_folder=sg.user_settings_get_entry(Keys.OUT_DIR),
-                ),
-            ],
-            [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
-            [
-                sg.pin(
-                    sg.Table(
-                        values=model_data_table[1:][:],
-                        headings=table_headings,
-                        max_col_width=25,
-                        auto_size_columns=True,
-                        justification="center",
-                        num_rows=num_table_rows,
-                        alternating_row_color="LightBlue3",
-                        key=Keys.MODEL_INFO_TABLE,
-                        selected_row_colors="black on white",
-                        enable_events=True,
-                        expand_x=True,
-                        expand_y=True,
-                        vertical_scroll_only=False,
-                        hide_vertical_scroll=True,
-                        visible=show_model_info_at_start,
-                    ),
-                    expand_x=True,
-                )
-            ],
-            [
-                Multiline(
-                    key=Keys.MULTILINE,
-                    background_color="black",
-                    text_color="white",
-                    auto_refresh=True,
-                    autoscroll=True,
-                    reroute_stderr=True,
-                    reroute_stdout=True,
-                    reroute_cprint=True,
-                    write_only=True,
-                    echo_stdout_stderr=True,
-                    disabled=True,
-                    rstrip=is_multiline_rstripping_on_update,
-                    expand_x=True,
-                    expand_y=True,
-                )
-            ],
-        ]
-
-        language_specifier = sg.user_settings_get_entry(
-            Keys.LANGUAGE_SPECIFIER_SETTING,
-            LANG_SPECIFIER_OPTIONS[0],
-        )
-
-        app_size_frame_layout = [
-            [
-                sg.Text(
-                    f"Size Multiplier ({MIN_SCALING} to {MAX_SCALING}):",
-                    key=Keys.SCALING_TEXT_SETTING,
-                    background_color="blue",
-                ),
-                sg.Column(
-                    layout=[
-                        [
-                            sg.Input(
-                                sg.user_settings_get_entry(
-                                    Keys.SCALING_INPUT_SETTING,
-                                    DEFAULT_GLOBAL_SCALING,
-                                ),
-                                size=(5),
-                                key=Keys.SCALING_INPUT_SETTING,
-                            ),
-                            sg.Button(
-                                "Apply",
-                                key=Keys.APPLY_GLOBAL_SCALING,
-                            ),
-                        ]
-                    ],
-                    pad=0,
-                ),
-            ]
-        ]
-
-        output_folder_frame_layout = [
-            [
-                sg.Text(
-                    text="Remember Output Folder",
-                    key=Keys.SAVE_OUTPUT_DIR_TEXT,
-                    background_color="blue",
-                ),
-                FancyCheckbox(
-                    start_toggled_on=save_output_dir,
-                    key=Keys.SAVE_OUTPUT_DIR_CHECKBOX,
-                    enable_events=True,
-                    size_match=True,
-                    size_match_target=Keys.SAVE_OUTPUT_DIR_TEXT,
-                ),
-            ]
-        ]
-
-        language_specifier_frame_layout = [
-            [
-                sg.Column(
-                    layout=[
-                        [sg.Text("Specifier")],
-                        [
-                            sg.Text(
-                                "Output File Name Format:",
-                                key=Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
-                                background_color="blue",
-                            )
-                        ],
-                    ],
-                    pad=0,
-                ),
-                sg.Column(
-                    layout=[
-                        [
-                            sg.Combo(
-                                values=LANG_SPECIFIER_OPTIONS,
-                                key=Keys.LANGUAGE_SPECIFIER_SETTING,
-                                default_value=language_specifier,
-                                auto_size_text=True,
-                                readonly=True,
-                                enable_events=True,
-                            ),
-                        ],
-                        [
-                            sg.Text(
-                                LANG_SPECIFIER_TO_EXAMPLE_TEXT[
-                                    language_specifier
-                                ],
-                                text_color="black",
-                                key=Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT,
-                            )
-                        ],
-                    ],
-                    pad=0,
-                ),
-            ]
-        ]
-
-        file_path_frame_layout = [
-            [
-                sg.Input(
-                    f"{config_file_path}",
-                    size=len(config_file_path) - 6,
-                    disabled=True,
-                )
-            ]
-        ]
-
-        tab2_settings_layout = [
-            [
-                sg.Frame(
-                    title="Resize the Application",
-                    layout=app_size_frame_layout,
-                    expand_x=True,
-                )
-            ],
-            [
-                sg.Frame(
-                    title="Output Folder",
-                    layout=output_folder_frame_layout,
-                    expand_x=True,
-                )
-            ],
-            [
-                sg.Frame(
-                    title="Language Specifier",
-                    layout=language_specifier_frame_layout,
-                    expand_x=True,
-                )
-            ],
-            [
-                sg.Frame(
-                    title="Settings File Path",
-                    layout=file_path_frame_layout,
-                    expand_x=True,
-                )
-            ],
-        ]
-
-        # settings tab
-        tab2_layout = [
-            [sg.Text("Program Settings", font=(GUI_FONT[0], 30))],
-            [sg.Column(layout=tab2_settings_layout, pad=0)],
-        ]
-
-        # Define the window's contents
-        layout = [
-            [
-                sg.TabGroup(
-                    [
-                        [
-                            sg.Tab(
-                                "Main",
-                                tab1_layout,
-                                key=Keys.MAIN_TAB,
-                            ),
-                            sg.Tab(
-                                "Settings",
-                                tab2_layout,
-                                key=Keys.SETTINGS_TAB,
-                            ),
-                        ]
-                    ],
-                    tab_location="topright",
-                    expand_x=True,
-                    expand_y=True,
-                )
-            ],
-            [
-                sg.StatusBar(
-                    "Powered by OpenAI Whisper Speech Recognition System",
-                    auto_size_text=True,
-                    justification="center",
-                ),
-                sg.Push(),
-                sg.Button("Pad change"),
-                sg.Button("Set Size"),
-                sg.Button("Start", key=Keys.START, auto_size_button=True),
-            ],
-        ]
-
-        # Create the window
-        window = Window(
-            "WhisperGUI - Convert Audio/Video Files to Text",
-            layout,
-            finalize=True,
-            resizable=True,
-            auto_size_buttons=True,
-            auto_size_text=True,
-            alpha_channel=0,
-        )
-
-        # Set the window size relative to the screen
-        resize_window_relative_to_screen(
-            window=window, width_factor=0.9, height_factor=0.85
-        )
-
-        # Load the FolderBrowse's selected folder from the settings file
-        # (Needed until an arg for FolderBrowse adds this functionality)
-        window[Keys.OUT_DIR].TKStringVar.set(
-            sg.user_settings_get_entry(Keys.OUT_DIR, "")
-        )
-
-        # Switch to the settings tab to load it and then switch back to
-        # the main tab
-        window[Keys.SETTINGS_TAB].select()
-        window.refresh()
-
-        vertically_align_elements(
-            window=window,
-            keys=(
-                Keys.SCALING_TEXT_SETTING,
-                Keys.SAVE_OUTPUT_DIR_TEXT,
-                Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
-            ),
-        )
-        window[Keys.MAIN_TAB].select()
-
-        # Show the window
-        window.reappear()
-
-        return window
 
     def make_tracked_main_window_with_synced_profiles(
         window_tracker: WindowTracker,
@@ -612,7 +124,9 @@ def start_GUI(theme: str) -> None:
             sg.Window: The created main window.
         """
 
-        window = window_tracker.track_window(make_main_window())
+        window = window_tracker.track_window(
+            make_main_window(prompt_manager=prompt_manager)
+        )
 
         # give the prompt manager the prompt profile dropdown so that
         # it's updated on profile changes
@@ -1178,7 +692,7 @@ def start_GUI(theme: str) -> None:
             # Update the language specifier option setting
             sg.user_settings_set_entry(event, values[event])
             current_language_specifier = values[event]
-            example_text = LANG_SPECIFIER_TO_EXAMPLE_TEXT[
+            example_text = LanguageSpecifier.TO_EXAMPLE_TEXT[
                 current_language_specifier
             ]
             window[Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT].update(
@@ -1194,7 +708,8 @@ def start_GUI(theme: str) -> None:
                 popup_window = popup_tracked(
                     (
                         "Please enter a number for the scaling factor between"
-                        f" {MIN_SCALING} and {MAX_SCALING}."
+                        f" {GUI_Settings.MIN_SCALING} and"
+                        f" {GUI_Settings.MAX_SCALING}."
                     ),
                     popup_fn=popup,
                     window_tracker=window_tracker,
@@ -1211,7 +726,11 @@ def start_GUI(theme: str) -> None:
                 continue
 
             # Ensure scaling factor is within accepted range
-            if Decimal(MIN_SCALING) <= scaling_input <= Decimal(MAX_SCALING):
+            if (
+                Decimal(GUI_Settings.MIN_SCALING)
+                <= scaling_input
+                <= Decimal(GUI_Settings.MAX_SCALING)
+            ):
                 # Save the settings to the config file
                 sg.user_settings_set_entry(
                     Keys.SCALING_INPUT_SETTING,
@@ -1221,7 +740,8 @@ def start_GUI(theme: str) -> None:
                 # Use the new scaling globally
                 sg.set_options(
                     scaling=sg.user_settings_get_entry(
-                        Keys.SCALING_INPUT_SETTING, DEFAULT_GLOBAL_SCALING
+                        Keys.SCALING_INPUT_SETTING,
+                        GUI_Settings.DEFAULT_GLOBAL_SCALING,
                     )
                 )
             # Scaling factor is out of accepted range
@@ -1282,7 +802,7 @@ def start_GUI(theme: str) -> None:
                 use_language_code = (
                     True
                     if language_specifier_selection
-                    == LANGUAGE_SPECIFIER_AS_CODE
+                    == LanguageSpecifier.CODE_OPTION
                     else False
                 )
 
@@ -1447,6 +967,24 @@ def start_GUI(theme: str) -> None:
     main_window.close()
 
 
+class GUI_Settings:
+    """Settings used in the GUI."""
+
+    # scaling of the application's size
+    DEFAULT_GLOBAL_SCALING = 1.5
+
+    # Range of accepted scaling factor values from the user
+    MIN_SCALING = 0.5
+    MAX_SCALING = 3
+
+    # Default global font for the GUI
+    DEFAULT_FONT = ("Arial", 20)
+
+    SETTINGS_FILE_PATH = "whisperGUI.config"
+
+    THEME = "Dark Blue 3"
+
+
 def set_up_global_bindings() -> None:
     """Set up global tk bindings."""
     # Make a temporary window so that tkroot exists
@@ -1460,6 +998,486 @@ def set_up_global_bindings() -> None:
     # future windows won't use the global icon in the taskbar
     _.read(0)
     _.close()
+
+
+class LanguageSpecifier:
+    """Language specifier related info."""
+
+    # Options used in the language specifier setting
+    LANG_OPTION = "Language"
+    CODE_OPTION = "Language Code"
+
+    OPTIONS = (
+        LANG_OPTION,
+        CODE_OPTION,
+    )
+
+    EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
+    TO_EXAMPLE_TEXT = dict(zip(OPTIONS, EXAMPLE_TEXTS))
+
+
+def make_main_window(prompt_manager: PromptManager) -> sg.Window:
+    """Create the main window for the GUI.
+
+    Returns:
+        sg.Window: The created main window.
+    """
+    # Supported language options for the model
+    AUTODETECT_OPTION = "autodetect"
+    LANGUAGES = (AUTODETECT_OPTION, *sorted(TO_LANGUAGE_CODE.keys()))
+
+    # Information for the table comparing models
+    model_data_table = [
+        [
+            "Size",
+            "Parameters",
+            "English-only",
+            "Multilingual",
+            "Needed VRAM",
+            "Relative speed",
+        ],
+        ["tiny", "39 M", "tiny.en", "tiny", "~1 GB", "~32x"],
+        ["base", "74 M", "base.en", "base", "~1 GB", "~16x"],
+        ["small", "244 M", "small.en", "small", "~2 GB", "~6x"],
+        ["medium", "769 M", "medium.en", "medium", "~5 GB", "~2x"],
+        ["large", "1550 M", "N/A", "large", "~10 GB", "1x"],
+    ]
+
+    # list of available whisper models
+    models = whisper.available_models()
+
+    # default to base model
+    DEFAULT_MODEL = models[3]
+
+    # Append whitespace to each table header string to avoid cutoffs
+    table_headings = [
+        str(model_data_table[0][x]) + "  "
+        for x in range(len(model_data_table[0]))
+    ]
+
+    # Load whether to translating to English or not from the
+    # settings file
+    translate_to_english_last_choice = sg.user_settings_get_entry(
+        Keys.TRANSLATE_TO_ENGLISH_CHECKBOX, False
+    )
+
+    # Load whether to save the output directory or not from the
+    # settings file
+    save_output_dir = sg.user_settings_get_entry(
+        Keys.SAVE_OUTPUT_DIR_CHECKBOX, False
+    )
+
+    # Startup prompt profile
+    startup_prompt_profile = sg.user_settings_get_entry(
+        Keys.PROMPT_PROFILE_DROPDOWN,
+        prompt_manager.unsaved_prompt_profile_name,
+    )
+
+    show_model_info_at_start = False
+
+    info_image_tooltip = "\n".join(
+        [
+            (
+                "Use this when a dialect/style of a language or"
+                " punctuation is desired."
+            ),
+            "Does NOT guarantee the result will follow the initial prompt.",
+            "Initial prompt will NOT be included in the result.",
+            (
+                "Try a larger model if the result does not follow the"
+                " initial prompt."
+            ),
+            "\nEx. Chinese (simplified) with punctuation: 以下是普通话的句子。",
+        ]
+    )
+
+    tab1_options_layout = [
+        [
+            sg.Text("Language:", key=Keys.LANGUAGE_TEXT),
+            sg.Combo(
+                values=LANGUAGES,
+                key=Keys.LANGUAGE,
+                default_value=sg.user_settings_get_entry(
+                    Keys.LANGUAGE, AUTODETECT_OPTION
+                ),
+                auto_size_text=True,
+                readonly=True,
+                enable_events=True,
+            ),
+        ],
+        [
+            sg.Text("Transcription Model:", key=Keys.MODEL_TEXT),
+            sg.Combo(
+                values=models,
+                key=Keys.MODEL,
+                default_value=sg.user_settings_get_entry(
+                    Keys.MODEL, DEFAULT_MODEL
+                ),
+                auto_size_text=True,
+                readonly=True,
+                enable_events=True,
+            ),
+        ],
+        [
+            sg.Text(
+                text="Translate to English",
+                key=Keys.TRANSLATE_TO_ENGLISH_TEXT,
+            ),
+            FancyCheckbox(
+                start_toggled_on=translate_to_english_last_choice,
+                key=Keys.TRANSLATE_TO_ENGLISH_CHECKBOX,
+                enable_events=True,
+                size_match=True,
+                size_match_target=Keys.TRANSLATE_TO_ENGLISH_TEXT,
+            ),
+        ],
+        [
+            sg.Text("Prompt Profile"),
+            sg.Column(
+                layout=[
+                    [
+                        sg.Text(
+                            "Initial Prompt",
+                            key=Keys.INITIAL_PROMPT_TEXT,
+                        ),
+                        InfoImage(
+                            tooltip=info_image_tooltip,
+                            key=Keys.INITIAL_PROMPT_INFO,
+                            size_match=True,
+                            size_match_target=Keys.INITIAL_PROMPT_TEXT,
+                        ),
+                    ]
+                ],
+                pad=0,
+            ),
+        ],
+        [
+            sg.Combo(
+                values=prompt_manager.prompt_profile_names,
+                key=Keys.PROMPT_PROFILE_DROPDOWN,
+                default_value=startup_prompt_profile,
+                readonly=True,
+                enable_events=True,
+            ),
+            sg.Input(
+                default_text=prompt_manager.saved_prompt_profiles.get(
+                    startup_prompt_profile, ""
+                ),
+                key=Keys.INITIAL_PROMPT_INPUT,
+                expand_x=True,
+                enable_events=True,
+            ),
+        ],
+        [
+            sg.Button(
+                "Prompt Manager",
+                key=Keys.START_PROMPT_MANAGER,
+            ),
+        ],
+        [
+            sg.Text("Model Information", key=Keys.MODEL_INFO_TEXT),
+            FancyToggle(
+                start_toggled_on=show_model_info_at_start,
+                key=Keys.MODEL_INFO_TOGGLE,
+                enable_events=True,
+                size_match=True,
+                size_match_target=Keys.MODEL_INFO_TEXT,
+            ),
+        ],
+    ]
+
+    # number of rows for the table
+    num_table_rows = 5
+
+    # whether multiline element strips whitespaces from the end of the
+    # new text to append
+    is_multiline_rstripping_on_update = False
+
+    # main tab
+    tab1_layout = [
+        [sg.Text("Select Audio/Video File(s)")],
+        [
+            sg.Input(disabled=True, expand_x=True),
+            sg.FilesBrowse(key=Keys.IN_FILE),
+        ],
+        [sg.Text("Output Folder:")],
+        [
+            sg.Input(
+                default_text=sg.user_settings_get_entry(Keys.OUT_DIR, ""),
+                key=Keys.OUTPUT_DIR_FIELD,
+                disabled=True,
+                expand_x=True,
+                enable_events=True,
+            ),
+            sg.FolderBrowse(
+                target=Keys.OUTPUT_DIR_FIELD,
+                key=Keys.OUT_DIR,
+                initial_folder=sg.user_settings_get_entry(Keys.OUT_DIR),
+            ),
+        ],
+        [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
+        [
+            sg.pin(
+                sg.Table(
+                    values=model_data_table[1:][:],
+                    headings=table_headings,
+                    max_col_width=25,
+                    auto_size_columns=True,
+                    justification="center",
+                    num_rows=num_table_rows,
+                    alternating_row_color="LightBlue3",
+                    key=Keys.MODEL_INFO_TABLE,
+                    selected_row_colors="black on white",
+                    enable_events=True,
+                    expand_x=True,
+                    expand_y=True,
+                    vertical_scroll_only=False,
+                    hide_vertical_scroll=True,
+                    visible=show_model_info_at_start,
+                ),
+                expand_x=True,
+            )
+        ],
+        [
+            Multiline(
+                key=Keys.MULTILINE,
+                background_color="black",
+                text_color="white",
+                auto_refresh=True,
+                autoscroll=True,
+                reroute_stderr=True,
+                reroute_stdout=True,
+                reroute_cprint=True,
+                write_only=True,
+                echo_stdout_stderr=True,
+                disabled=True,
+                rstrip=is_multiline_rstripping_on_update,
+                expand_x=True,
+                expand_y=True,
+            )
+        ],
+    ]
+
+    language_specifier = sg.user_settings_get_entry(
+        Keys.LANGUAGE_SPECIFIER_SETTING,
+        LanguageSpecifier.OPTIONS[0],
+    )
+
+    app_size_frame_layout = [
+        [
+            sg.Text(
+                (
+                    f"Size Multiplier ({GUI_Settings.MIN_SCALING} to"
+                    f" {GUI_Settings.MAX_SCALING}):"
+                ),
+                key=Keys.SCALING_TEXT_SETTING,
+                background_color="blue",
+            ),
+            sg.Column(
+                layout=[
+                    [
+                        sg.Input(
+                            sg.user_settings_get_entry(
+                                Keys.SCALING_INPUT_SETTING,
+                                GUI_Settings.DEFAULT_GLOBAL_SCALING,
+                            ),
+                            size=(5),
+                            key=Keys.SCALING_INPUT_SETTING,
+                        ),
+                        sg.Button(
+                            "Apply",
+                            key=Keys.APPLY_GLOBAL_SCALING,
+                        ),
+                    ]
+                ],
+                pad=0,
+            ),
+        ]
+    ]
+
+    output_folder_frame_layout = [
+        [
+            sg.Text(
+                text="Remember Output Folder",
+                key=Keys.SAVE_OUTPUT_DIR_TEXT,
+                background_color="blue",
+            ),
+            FancyCheckbox(
+                start_toggled_on=save_output_dir,
+                key=Keys.SAVE_OUTPUT_DIR_CHECKBOX,
+                enable_events=True,
+                size_match=True,
+                size_match_target=Keys.SAVE_OUTPUT_DIR_TEXT,
+            ),
+        ]
+    ]
+
+    language_specifier_frame_layout = [
+        [
+            sg.Column(
+                layout=[
+                    [sg.Text("Specifier")],
+                    [
+                        sg.Text(
+                            "Output File Name Format:",
+                            key=Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
+                            background_color="blue",
+                        )
+                    ],
+                ],
+                pad=0,
+            ),
+            sg.Column(
+                layout=[
+                    [
+                        sg.Combo(
+                            values=LanguageSpecifier.OPTIONS,
+                            key=Keys.LANGUAGE_SPECIFIER_SETTING,
+                            default_value=language_specifier,
+                            auto_size_text=True,
+                            readonly=True,
+                            enable_events=True,
+                        ),
+                    ],
+                    [
+                        sg.Text(
+                            LanguageSpecifier.TO_EXAMPLE_TEXT[
+                                language_specifier
+                            ],
+                            text_color="black",
+                            key=Keys.LANGUAGE_SPECIFIER_EXAMPLE_TEXT,
+                        )
+                    ],
+                ],
+                pad=0,
+            ),
+        ]
+    ]
+
+    file_path_frame_layout = [
+        [
+            sg.Input(
+                f"{GUI_Settings.SETTINGS_FILE_PATH}",
+                size=len(GUI_Settings.SETTINGS_FILE_PATH) - 6,
+                disabled=True,
+            )
+        ]
+    ]
+
+    tab2_settings_layout = [
+        [
+            sg.Frame(
+                title="Resize the Application",
+                layout=app_size_frame_layout,
+                expand_x=True,
+            )
+        ],
+        [
+            sg.Frame(
+                title="Output Folder",
+                layout=output_folder_frame_layout,
+                expand_x=True,
+            )
+        ],
+        [
+            sg.Frame(
+                title="Language Specifier",
+                layout=language_specifier_frame_layout,
+                expand_x=True,
+            )
+        ],
+        [
+            sg.Frame(
+                title="Settings File Path",
+                layout=file_path_frame_layout,
+                expand_x=True,
+            )
+        ],
+    ]
+
+    # settings tab
+    tab2_layout = [
+        [sg.Text("Program Settings", font=(GUI_Settings.DEFAULT_FONT[0], 30))],
+        [sg.Column(layout=tab2_settings_layout, pad=0)],
+    ]
+
+    # Define the window's contents
+    layout = [
+        [
+            sg.TabGroup(
+                [
+                    [
+                        sg.Tab(
+                            "Main",
+                            tab1_layout,
+                            key=Keys.MAIN_TAB,
+                        ),
+                        sg.Tab(
+                            "Settings",
+                            tab2_layout,
+                            key=Keys.SETTINGS_TAB,
+                        ),
+                    ]
+                ],
+                tab_location="topright",
+                expand_x=True,
+                expand_y=True,
+            )
+        ],
+        [
+            sg.StatusBar(
+                "Powered by OpenAI Whisper Speech Recognition System",
+                auto_size_text=True,
+                justification="center",
+            ),
+            sg.Push(),
+            sg.Button("Pad change"),
+            sg.Button("Set Size"),
+            sg.Button("Start", key=Keys.START, auto_size_button=True),
+        ],
+    ]
+
+    # Create the window
+    window = Window(
+        "WhisperGUI - Convert Audio/Video Files to Text",
+        layout,
+        finalize=True,
+        resizable=True,
+        auto_size_buttons=True,
+        auto_size_text=True,
+        alpha_channel=0,
+    )
+
+    # Set the window size relative to the screen
+    resize_window_relative_to_screen(
+        window=window, width_factor=0.9, height_factor=0.85
+    )
+
+    # Load the FolderBrowse's selected folder from the settings file
+    # (Needed until an arg for FolderBrowse adds this functionality)
+    window[Keys.OUT_DIR].TKStringVar.set(
+        sg.user_settings_get_entry(Keys.OUT_DIR, "")
+    )
+
+    # Switch to the settings tab to load it and then switch back to
+    # the main tab
+    window[Keys.SETTINGS_TAB].select()
+    window.refresh()
+
+    vertically_align_elements(
+        window=window,
+        keys=(
+            Keys.SCALING_TEXT_SETTING,
+            Keys.SAVE_OUTPUT_DIR_TEXT,
+            Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
+        ),
+    )
+    window[Keys.MAIN_TAB].select()
+
+    # Show the window
+    window.reappear()
+
+    return window
 
 
 class Keys:
@@ -5806,7 +5824,8 @@ def cycle_gui_through_themes():
 
     for theme in themes:
         logger.info(f"theme={theme}")
-        start_GUI(theme)
+        GUI_Settings.THEME = theme
+        start_GUI()
 
 
 def element_with_size_matching_image(
