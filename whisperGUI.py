@@ -473,7 +473,7 @@ def start_GUI() -> None:
                 use_language_code = (
                     True
                     if language_specifier_selection
-                    == LanguageSpecifier.CODE_OPTION
+                    == LanguageSpecifier.Options.CODE
                     else False
                 )
 
@@ -1005,17 +1005,22 @@ def popup_edit_prompt_profile(
 class LanguageSpecifier:
     """Language specifier related info."""
 
-    # Options used in the language specifier setting
-    LANG_OPTION = "Language"
-    CODE_OPTION = "Language Code"
+    class Options:
+        # Options used in the language specifier setting
+        LANG = "Language"
+        CODE = "Language Code"
 
-    OPTIONS = (
-        LANG_OPTION,
-        CODE_OPTION,
-    )
+        @classmethod
+        def get_all_options(cls) -> Tuple[str, ...]:
+            """Return all language specifier options.
+
+            Returns:
+                Tuple[str, ...]: All language specifier options.
+            """
+            return (cls.LANG, cls.CODE)
 
     EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
-    TO_EXAMPLE_TEXT = dict(zip(OPTIONS, EXAMPLE_TEXTS))
+    TO_EXAMPLE_TEXT = dict(zip(Options.get_all_options(), EXAMPLE_TEXTS))
 
 
 def make_main_window(prompt_manager: PromptManager) -> sg.Window:
@@ -1262,7 +1267,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
 
     language_specifier = sg.user_settings_get_entry(
         Keys.LANGUAGE_SPECIFIER_SETTING,
-        LanguageSpecifier.OPTIONS[0],
+        LanguageSpecifier.Options.LANG,
     )
 
     app_size_frame_layout = [
@@ -1333,7 +1338,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 layout=[
                     [
                         sg.Combo(
-                            values=LanguageSpecifier.OPTIONS,
+                            values=LanguageSpecifier.Options.get_all_options(),
                             key=Keys.LANGUAGE_SPECIFIER_SETTING,
                             default_value=language_specifier,
                             auto_size_text=True,
