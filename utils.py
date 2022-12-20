@@ -1147,3 +1147,21 @@ def close_connections(
     for conn in connections:
         conn.close()
 
+
+def str_to_file_paths(
+    file_paths_string: str, delimiter: str = r";"
+) -> Tuple[str, ...]:
+    """Split a string with file paths based on a delimiter.
+
+    Args:
+        file_paths_string (str): The string with file paths.
+        delimiter (str, optional): The delimiter that separates file
+            paths in the string. Defaults to r";".
+
+    Returns:
+        Tuple[str, ...]: A tuple of file paths (str).
+    """
+    audio_video_paths_list = re.split(delimiter, file_paths_string)
+    return tuple(
+        str(Path(file_path).resolve()) for file_path in audio_video_paths_list
+    )

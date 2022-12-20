@@ -68,6 +68,7 @@ from utils import (
     resize_window_relative_to_screen,
     set_resizable_axis,
     set_window_autosize,
+    str_to_file_paths,
     vertically_align_elements,
     widget_resized,
 )
@@ -3596,27 +3597,6 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
     )
 
 
-def popup_tracked(
-    *args: Any,
-    popup_fn: Callable[..., Tuple[sg.Window, Optional[str]]],
-    window_tracker: WindowTracker,
-    **kwargs: Any,
-) -> sg.Window:
-    """Pop up a tracked window.
-
-    Args:
-        popup_fn (Popup_Callable): The function to call to create a
-            popup.
-        window_tracker (WindowTracker): Tracker for possibly active
-            windows which the created popup will be added to.
-    """
-    popup_window, _ = popup_fn(*args, **kwargs)
-
-    window_tracker.track_window(popup_window)
-
-    return popup_window
-
-
 class CustomTimer(Timer):
     """codetiming.Timer with a stop() that optionally prints the elapsed
     time.
@@ -3659,6 +3639,27 @@ class CustomTimer(Timer):
             self.timers.add(self.name, self.last)
 
         return self.last
+
+
+def popup_tracked(
+    *args: Any,
+    popup_fn: Callable[..., Tuple[sg.Window, Optional[str]]],
+    window_tracker: WindowTracker,
+    **kwargs: Any,
+) -> sg.Window:
+    """Pop up a tracked window.
+
+    Args:
+        popup_fn (Popup_Callable): The function to call to create a
+            popup.
+        window_tracker (WindowTracker): Tracker for possibly active
+            windows which the created popup will be added to.
+    """
+    popup_window, _ = popup_fn(*args, **kwargs)
+
+    window_tracker.track_window(popup_window)
+
+    return popup_window
 
 
 # Taken from Pysimplegui.popup() and modified
@@ -4253,25 +4254,6 @@ def DummyButton(
         metadata=metadata,
         expand_x=expand_x,
         expand_y=expand_y,
-    )
-
-
-def str_to_file_paths(
-    file_paths_string: str, delimiter: str = r";"
-) -> Tuple[str, ...]:
-    """Split a string with file paths based on a delimiter.
-
-    Args:
-        file_paths_string (str): The string with file paths.
-        delimiter (str, optional): The delimiter that separates file
-            paths in the string. Defaults to r";".
-
-    Returns:
-        Tuple[str, ...]: A tuple of file paths (str).
-    """
-    audio_video_paths_list = re.split(delimiter, file_paths_string)
-    return tuple(
-        str(Path(file_path).resolve()) for file_path in audio_video_paths_list
     )
 
 
