@@ -1637,3 +1637,704 @@ class ClosestElementOfSpecifiedTypeNotFoundInWindow(Warning):
 
 class InvalidElementSize(Exception):
     """The width and/or height of the element is not greater than 0."""
+
+
+def popup_tracked(
+    *args: Any,
+    popup_fn: Callable[..., Tuple[sg.Window, Optional[str]]],
+    window_tracker: WindowTracker,
+    **kwargs: Any,
+) -> sg.Window:
+    """Pop up a tracked window.
+
+    Args:
+        popup_fn (Popup_Callable): The function to call to create a
+            popup.
+        window_tracker (WindowTracker): Tracker for possibly active
+            windows which the created popup will be added to.
+    """
+    popup_window, _ = popup_fn(*args, **kwargs)
+
+    window_tracker.track_window(popup_window)
+
+    return popup_window
+
+
+# Taken from Pysimplegui.popup() and modified
+def popup(  # noqa: C901
+    *args: Any,
+    title=None,
+    button_color=None,
+    background_color=None,
+    text_color=None,
+    button_type=sg.POPUP_BUTTONS_OK,
+    auto_close=False,
+    auto_close_duration=None,
+    custom_text=(None, None),
+    non_blocking=False,
+    icon=None,
+    line_width=None,
+    font=None,
+    no_titlebar=False,
+    grab_anywhere=False,
+    keep_on_top=None,
+    location=(None, None),
+    relative_location=(None, None),
+    any_key_closes=False,
+    image=None,
+    modal=True,
+) -> Tuple[sg.Window, Optional[str]]:
+    """
+    Popup - Display a popup Window with as many parms as you wish to include.  This is the GUI equivalent of the
+    "print" statement.  It's also great for "pausing" your program's flow until the user can read some error messages.
+
+    If this popup doesn't have the features you want, then you can easily make your own. Popups can be accomplished in 1 line of code:
+    choice, _ = Window('Continue?', [[sg.T('Do you want to continue?')], [sg.Yes(s=10), sg.No(s=10)]], disable_close=True).read(close=True)
+
+
+    :param *args:               Variable number of your arguments.  Load up the call with stuff to see!
+    :type *args:                (Any)
+    :param title:               Optional title for the window. If none provided, the first arg will be used instead.
+    :type title:                (str)
+    :param button_color:        Color of the buttons shown (text color, button color)
+    :type button_color:         (str, str) | None
+    :param background_color:    Window's background color
+    :type background_color:     (str)
+    :param text_color:          text color
+    :type text_color:           (str)
+    :param button_type:         NOT USER SET!  Determines which pre-defined buttons will be shown (Default value = POPUP_BUTTONS_OK). There are many Popup functions and they call Popup, changing this parameter to get the desired effect.
+    :type button_type:          (int)
+    :param auto_close:          If True the window will automatically close
+    :type auto_close:           (bool)
+    :param auto_close_duration: time in seconds to keep window open before closing it automatically
+    :type auto_close_duration:  (int)
+    :param custom_text:         A string or pair of strings that contain the text to display on the buttons
+    :type custom_text:          (str, str) | str
+    :param non_blocking:        If True then will immediately return from the function without waiting for the user's input.
+    :type non_blocking:         (bool)
+    :param icon:                icon to display on the window. Same format as a Window call
+    :type icon:                 str | bytes
+    :param line_width:          Width of lines in characters.  Defaults to MESSAGE_BOX_LINE_WIDTH
+    :type line_width:           (int)
+    :param font:                specifies the  font family, size, etc. Tuple or Single string format 'name size styles'. Styles: italic * roman bold normal underline overstrike
+    :type font:                 str | Tuple[font_name, size, modifiers]
+    :param no_titlebar:         If True will not show the frame around the window and the titlebar across the top
+    :type no_titlebar:          (bool)
+    :param grab_anywhere:       If True can grab anywhere to move the window. If no_titlebar is True, grab_anywhere should likely be enabled too
+    :type grab_anywhere:        (bool)
+    :param location:            Location on screen to display the top left corner of window. Defaults to window centered on screen
+    :type location:             (int, int)
+    :param relative_location:   (x,y) location relative to the default location of the window, in pixels. Normally the window centers.  This location is relative to the location the window would be created. Note they can be negative.
+    :type relative_location:    (int, int)
+    :param keep_on_top:         If True the window will remain above all current windows
+    :type keep_on_top:          (bool)
+    :param any_key_closes:      If True then will turn on return_keyboard_events for the window which will cause window to close as soon as any key is pressed.  Normally the return key only will close the window.  Default is false.
+    :type any_key_closes:       (bool)
+    :param image:               Image to include at the top of the popup window
+    :type image:                (str) or (bytes)
+    :param modal:               If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True
+    :type modal:                bool
+    :return:                    Returns the window for the popup and text of the button that was pressed.  None will be returned in place of the button text if user closed window with X
+    :rtype:                     (sg.Window, str | None)
+    """  # noqa: E501
+
+    if not args:
+        args_to_print: Sequence[Any] = [""]
+    else:
+        args_to_print = args
+    if line_width is not None:
+        local_line_width = line_width
+    else:
+        local_line_width = sg.MESSAGE_BOX_LINE_WIDTH
+    _title = title if title is not None else args_to_print[0]
+
+    layout: List[List] = [[]]
+    max_line_total, total_lines = 0, 0
+    if image is not None:
+        if isinstance(image, str):
+            layout += [[sg.Image(filename=image)]]
+        else:
+            layout += [[sg.Image(data=image)]]
+
+    for message in args_to_print:
+        # always convert message to string
+        message = str(message)
+        if message.count("\n"):
+            # if there are line breaks, wrap each segment separately
+            message_wrapped = ""
+            msg_list = message.split(
+                "\n"
+            )  # break into segments that will each be wrapped
+            message_wrapped = "\n".join(
+                [sg.textwrap.fill(msg, local_line_width) for msg in msg_list]
+            )
+        else:
+            message_wrapped = sg.textwrap.fill(message, local_line_width)
+        message_wrapped_lines = message_wrapped.count("\n") + 1
+        longest_line_len = max([len(line) for line in message.split("\n")])
+        width_used = min(longest_line_len, local_line_width)
+        max_line_total = max(max_line_total, width_used)
+        # height = _GetNumLinesNeeded(message, width_used)
+        height = message_wrapped_lines
+        layout += [
+            [
+                sg.Text(
+                    message_wrapped,
+                    auto_size_text=True,
+                    text_color=text_color,
+                    background_color=background_color,
+                )
+            ]
+        ]
+        total_lines += height
+
+    if non_blocking:
+        PopupButton = (
+            sg.DummyButton
+        )  # important to use or else button will close other windows too!
+    else:
+        PopupButton = sg.Button
+    # show either an OK or Yes/No depending on paramater
+    if custom_text != (None, None):
+        if type(custom_text) is not tuple:
+            layout += [
+                [
+                    PopupButton(
+                        custom_text,
+                        size=(len(custom_text), 1),
+                        button_color=button_color,
+                        focus=True,
+                        bind_return_key=True,
+                    )
+                ]
+            ]
+        elif custom_text[1] is None:
+            layout += [
+                [
+                    PopupButton(
+                        custom_text[0],
+                        size=(len(custom_text[0]), 1),
+                        button_color=button_color,
+                        focus=True,
+                        bind_return_key=True,
+                    )
+                ]
+            ]
+        else:
+            layout += [
+                [
+                    PopupButton(
+                        custom_text[0],
+                        button_color=button_color,
+                        focus=True,
+                        bind_return_key=True,
+                        size=(len(custom_text[0]), 1),
+                    ),
+                    PopupButton(
+                        custom_text[1],
+                        button_color=button_color,
+                        size=(len(custom_text[1]), 1),
+                    ),
+                ]
+            ]
+    elif button_type is sg.POPUP_BUTTONS_YES_NO:
+        layout += [
+            [
+                PopupButton(
+                    "Yes",
+                    button_color=button_color,
+                    focus=True,
+                    bind_return_key=True,
+                    pad=((20, 5), 3),
+                    size=(5, 1),
+                ),
+                PopupButton("No", button_color=button_color, size=(5, 1)),
+            ]
+        ]
+    elif button_type is sg.POPUP_BUTTONS_CANCELLED:
+        layout += [
+            [
+                PopupButton(
+                    "Cancelled",
+                    button_color=button_color,
+                    focus=True,
+                    bind_return_key=True,
+                    pad=((20, 0), 3),
+                )
+            ]
+        ]
+    elif button_type is sg.POPUP_BUTTONS_ERROR:
+        layout += [
+            [
+                PopupButton(
+                    "Error",
+                    size=(6, 1),
+                    button_color=button_color,
+                    focus=True,
+                    bind_return_key=True,
+                    pad=((20, 0), 3),
+                )
+            ]
+        ]
+    elif button_type is sg.POPUP_BUTTONS_OK_CANCEL:
+        layout += [
+            [
+                PopupButton(
+                    "OK",
+                    size=(6, 1),
+                    button_color=button_color,
+                    focus=True,
+                    bind_return_key=True,
+                ),
+                PopupButton("Cancel", size=(6, 1), button_color=button_color),
+            ]
+        ]
+    elif button_type is sg.POPUP_BUTTONS_NO_BUTTONS:
+        pass
+    else:
+        layout += [
+            [
+                PopupButton(
+                    "OK",
+                    size=(5, 1),
+                    button_color=button_color,
+                    focus=True,
+                    bind_return_key=True,
+                    pad=((20, 0), 3),
+                )
+            ]
+        ]
+
+    window = Window(
+        _title,
+        layout,
+        auto_size_text=True,
+        background_color=background_color,
+        button_color=button_color,
+        auto_close=auto_close,
+        auto_close_duration=auto_close_duration,
+        icon=icon,
+        font=font,
+        no_titlebar=no_titlebar,
+        grab_anywhere=grab_anywhere,
+        keep_on_top=keep_on_top,
+        location=location,
+        relative_location=relative_location,
+        return_keyboard_events=any_key_closes,
+        modal=modal,
+        finalize=True,
+    )
+
+    if non_blocking:
+        button, values = window.read(timeout=0)
+    else:
+        button, values = window.read()
+        window.close()
+
+    return window, button
+
+
+# Taken from Pysimplegui.popup_scrolled() and modified
+# ========================  Scrolled Text Box   =====#
+# ===================================================#
+def popup_scrolled(
+    *args,
+    title=None,
+    button_color=None,
+    background_color=None,
+    text_color=None,
+    yes_no=False,
+    auto_close=False,
+    auto_close_duration=None,
+    size=(None, None),
+    location=(None, None),
+    relative_location=(None, None),
+    non_blocking=False,
+    no_titlebar=False,
+    grab_anywhere=False,
+    keep_on_top=None,
+    font=None,
+    image=None,
+    icon=None,
+    modal=True,
+    no_sizegrip=False,
+    disabled=False,
+) -> Tuple[Optional[sg.Window], Optional[str]]:
+    """
+    Show a scrolled Popup window containing the user's text that was supplied.  Use with as many items to print as you
+    want, just like a print statement.
+
+    :param *args:               Variable number of items to display
+    :type *args:                (Any)
+    :param title:               Title to display in the window.
+    :type title:                (str)
+    :param button_color:        button color (foreground, background)
+    :type button_color:         (str, str) or str
+    :param yes_no:              If True, displays Yes and No buttons instead of Ok
+    :type yes_no:               (bool)
+    :param auto_close:          if True window will close itself
+    :type auto_close:           (bool)
+    :param auto_close_duration: Older versions only accept int. Time in seconds until window will close
+    :type auto_close_duration:  int | float
+    :param size:                (w,h) w=characters-wide, h=rows-high
+    :type size:                 (int, int)
+    :param location:            Location on the screen to place the upper left corner of the window
+    :type location:             (int, int)
+    :param relative_location:   (x,y) location relative to the default location of the window, in pixels. Normally the window centers.  This location is relative to the location the window would be created. Note they can be negative.
+    :type relative_location:    (int, int)
+    :param non_blocking:        if True the call will immediately return rather than waiting on user input
+    :type non_blocking:         (bool)
+    :param background_color:    color of background
+    :type background_color:     (str)
+    :param text_color:          color of the text
+    :type text_color:           (str)
+    :param no_titlebar:         If True no titlebar will be shown
+    :type no_titlebar:          (bool)
+    :param grab_anywhere:       If True, than can grab anywhere to move the window (Default = False)
+    :type grab_anywhere:        (bool)
+    :param keep_on_top:         If True the window will remain above all current windows
+    :type keep_on_top:          (bool)
+    :param font:                specifies the  font family, size, etc. Tuple or Single string format 'name size styles'. Styles: italic * roman bold normal underline overstrike
+    :type font:                 (str or (str, int[, str]) or None)
+    :param image:               Image to include at the top of the popup window
+    :type image:                (str) or (bytes)
+    :param icon:                filename or base64 string to be used for the window's icon
+    :type icon:                 bytes | str
+    :param modal:               If True then makes the popup will behave like a Modal window... all other windows are non-operational until this one is closed. Default = True
+    :type modal:                bool
+    :param no_sizegrip:         If True no Sizegrip will be shown when there is no titlebar. It's only shown if there is no titlebar
+    :type no_sizegrip:          (bool)
+    :return:                    Returns the window for the popup and text of the button that was pressed.  None will be returned in place of the button text if user closed window with X.
+                                (None, None) will be returned if no positional arguments are given.
+    :rtype:                     (sg.Window | None, str | None | TIMEOUT_KEY)
+    """  # noqa: E501
+    if not args:
+        return (None, None)
+    width, height = size
+    width = width if width else sg.MESSAGE_BOX_LINE_WIDTH
+
+    layout: List[List] = [[]]
+
+    if image is not None:
+        if isinstance(image, str):
+            layout += [[sg.Image(filename=image)]]
+        else:
+            layout += [[sg.Image(data=image)]]
+    max_line_total, max_line_width, total_lines, height_computed = 0, 0, 0, 0
+    complete_output = ""
+    for message in args:
+        # Always convert message to string
+        message = str(message)
+        longest_line_len = max([len(line) for line in message.split("\n")])
+        width_used = min(longest_line_len, width)
+        max_line_total = max(max_line_total, width_used)
+        max_line_width = width
+        lines_needed = GetNumLinesNeeded(message, width_used)
+        height_computed += lines_needed + 1
+        complete_output += message + "\n"
+        total_lines += lines_needed
+    height_computed = (
+        sg.MAX_SCROLLED_TEXT_BOX_HEIGHT
+        if height_computed > sg.MAX_SCROLLED_TEXT_BOX_HEIGHT
+        else height_computed
+    )
+    if height:
+        height_computed = height
+    layout += [
+        [
+            Multiline(
+                complete_output,
+                size=(max_line_width, height_computed),
+                background_color=background_color,
+                text_color=text_color,
+                expand_x=True,
+                expand_y=True,
+                k="-MLINE-",
+                disabled=disabled,
+            )
+        ]
+    ]
+    pad = max_line_total - 15 if max_line_total > 15 else 1
+    # show either an OK or Yes/No depending on paramater
+    button = sg.DummyButton if non_blocking else sg.Button
+    if yes_no:
+        layout += [
+            [
+                sg.Text(
+                    "",
+                    size=(pad, 1),
+                    auto_size_text=False,
+                    background_color=background_color,
+                ),
+                button("Yes"),
+                button("No"),
+            ]
+        ]
+    else:
+        layout += [
+            [
+                sg.Text(
+                    "",
+                    size=(pad, 1),
+                    auto_size_text=False,
+                    background_color=background_color,
+                ),
+                button("OK", size=(5, 1), button_color=button_color),
+            ]
+        ]
+    if no_titlebar and no_sizegrip is not True:
+        layout += [[sg.Sizegrip()]]
+
+    window = Window(
+        title or args[0],
+        layout,
+        auto_size_text=True,
+        button_color=button_color,
+        auto_close=auto_close,
+        auto_close_duration=auto_close_duration,
+        location=location,
+        relative_location=relative_location,
+        resizable=True,
+        font=font,
+        background_color=background_color,
+        no_titlebar=no_titlebar,
+        grab_anywhere=grab_anywhere,
+        keep_on_top=keep_on_top,
+        modal=modal,
+        icon=icon,
+    )
+    if non_blocking:
+        button, values = window.read(timeout=0)
+    else:
+        button, values = window.read()
+        window.close()
+    return window, button
+
+
+# Taken from Pysimplegui._GetNumLinesNeeded().
+# Needed by popup_scrolled().
+# ========================= GetNumLinesNeeded =========================#
+# Helper function for determining how to wrap text                     #
+# =====================================================================#
+def GetNumLinesNeeded(text: str, max_line_width: int) -> int:
+    """Get the number of lines needed to wrap the text.
+
+    Args:
+        text (str): The text that needs the number of lines to use when
+            wrapping.
+        max_line_width (int): The max width of each line that will be
+            used during text wrapping.
+
+    Returns:
+        int: The number of lines needed to wrap the text.
+    """
+    if max_line_width == 0:
+        return 1
+    lines = text.split("\n")
+    # num_lines = len(lines)  # number of original lines of text
+    # max_line_len = max([len(line) for line in lines])  # longest line
+    lines_used = []
+    for line in lines:
+        # fancy math to round up
+        lines_used.append(
+            len(line) // max_line_width + (len(line) % max_line_width > 0)
+        )
+    total_lines_needed = sum(lines_used)
+    return total_lines_needed
+
+
+# Taken from Pysimplegui.DummyButton() and modified.
+# ---------------  Dummy BUTTON Element lazy function  --------------- #
+def DummyButton(
+    button_text,
+    image_filename=None,
+    image_data=None,
+    image_size=(None, None),
+    image_subsample=None,
+    border_width=None,
+    tooltip=None,
+    size=(None, None),
+    s=(None, None),
+    auto_size_button=None,
+    button_color=None,
+    font=None,
+    disabled=False,
+    bind_return_key=False,
+    focus=False,
+    pad=None,
+    p=None,
+    key=None,
+    k=None,
+    visible=True,
+    metadata=None,
+    expand_x=False,
+    expand_y=False,
+):
+    """
+    This is a special type of Button.
+
+    It will close the window but NOT send an event that the window has been closed.
+
+    It's used in conjunction with non-blocking windows to silently close them.  They are used to
+    implement the non-blocking popup windows. They're also found in some Demo Programs, so look there for proper use.
+
+    :param button_text:      text in the button
+    :type button_text:       (str)
+    :param image_filename:   image filename if there is a button image
+    :type image_filename:    image filename if there is a button image
+    :param image_data:       in-RAM image to be displayed on button
+    :type image_data:        in-RAM image to be displayed on button
+    :param image_size:       image size (O.K.)
+    :type image_size:        (Default = (None))
+    :param image_subsample:  amount to reduce the size of the image
+    :type image_subsample:   amount to reduce the size of the image
+    :param border_width:     width of border around element
+    :type border_width:      (int)
+    :param tooltip:          text, that will appear when mouse hovers over the element
+    :type tooltip:           (str)
+    :param size:             (w,h) w=characters-wide, h=rows-high
+    :type size:              (int, int)
+    :param s:                Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+    :type s:                 (int, int)  | (None, None) | int
+    :param auto_size_button: True if button size is determined by button text
+    :type auto_size_button:  (bool)
+    :param button_color:     button color (foreground, background)
+    :type button_color:      (str, str) or str
+    :param font:             specifies the  font family, size, etc. Tuple or Single string format 'name size styles'. Styles: italic * roman bold normal underline overstrike
+    :type font:              (str or (str, int[, str]) or None)
+    :param disabled:         set disable state for element (Default = False)
+    :type disabled:          (bool)
+    :param bind_return_key:  (Default = False) If True, then the return key will cause a the Listbox to generate an event
+    :type bind_return_key:   (bool)
+    :param focus:            if focus should be set to this
+    :type focus:             (bool)
+    :param pad:              Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+    :type pad:               (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+    :param p:                Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+    :type p:                 (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+    :param key:              key for uniquely identify this element (for window.find_element)
+    :type key:               str | int | tuple | object
+    :param k:                Same as the Key. You can use either k or key. Which ever is set will be used.
+    :type k:                 str | int | tuple | object
+    :param visible:          set initial visibility state of the Button
+    :type visible:           (bool)
+    :param metadata:         Anything you want to store along with this button
+    :type metadata:          (Any)
+    :param expand_x:         If True the element will automatically expand in the X direction to fill available space
+    :type expand_x:          (bool)
+    :param expand_y:         If True the element will automatically expand in the Y direction to fill available space
+    :type expand_y:          (bool)
+    :return:                 returns a button
+    :rtype:                  (Button)
+    """  # noqa: E501
+    return sg.Button(
+        button_text=button_text,
+        button_type=sg.BUTTON_TYPE_CLOSES_WIN_ONLY,
+        image_filename=image_filename,
+        image_data=image_data,
+        image_size=image_size,
+        image_subsample=image_subsample,
+        border_width=border_width,
+        tooltip=tooltip,
+        size=size,
+        s=s,
+        auto_size_button=auto_size_button,
+        button_color=button_color,
+        font=font,
+        disabled=disabled,
+        bind_return_key=bind_return_key,
+        focus=focus,
+        pad=pad,
+        p=p,
+        key=key,
+        k=k,
+        visible=visible,
+        metadata=metadata,
+        expand_x=expand_x,
+        expand_y=expand_y,
+    )
+
+
+class ModalWindowManager:
+    """A manager for tracking modal windows in order to remodal a
+    previous window when a more recent one is closed.
+    """
+
+    def __init__(self) -> None:
+        self._modal_window_stack: List[sg.Window] = []
+
+    def track_modal_window(self, window: sg.Window) -> Tuple[sg.Window, bool]:
+        """Add a modal window as the most recent tracked modal window.
+
+        The given window will be ignored if it's a closed window.
+
+        Args:
+            window (sg.Window): A modal window. If a non-modal window is
+                added, it will be changed into a modal window.
+
+        Returns:
+            Tuple[sg.Window, bool]: A tuple with the window and True if
+                tracking succeeded, False otherwise.
+        """
+
+        # Ignore the window if it's already the most recent tracked
+        # modal window
+        if self._modal_window_stack and window is self._modal_window_stack[-1]:
+            return (window, True)
+
+        if not window.is_closed():
+            window.make_modal()
+
+        # Add the window as the most recent tracked modal window.
+        self._modal_window_stack.append(window)
+        return (window, True)
+
+    def update(self) -> None:
+        """Set as modal the most recent non-closed tracked modal
+        window.
+        """
+
+        stack_changed = False
+
+        # Clear closed modal windows from the top of the modal window
+        # tracking stack
+        while (
+            self._modal_window_stack
+            and self._modal_window_stack[-1].was_closed()
+        ):
+            self._modal_window_stack.pop()
+            stack_changed = True
+
+        # Restore as modal the most recent non-closed tracked modal
+        # window
+        if stack_changed and self._modal_window_stack:
+            self._modal_window_stack[-1].make_modal()
+
+
+class WindowTracker:
+    """A tracker for possibly open windows."""
+
+    def __init__(self) -> None:
+        self._tracked_windows: Set[sg.Window] = set()
+
+    def track_window(self, window: sg.Window) -> sg.Window:
+        """Track the window.
+
+        Args:
+            win (sg.Window): The window to be tracked.
+
+        Returns:
+            sg.Window: The tracked window.
+        """
+        self._tracked_windows.add(window)
+        return window
+
+    @property
+    def windows(self) -> Set[sg.Window]:
+        """The currently tracked windows."""
+        return self._tracked_windows
+
+    @windows.deleter
+    def windows(self) -> None:
+        """Stop tracking the currently tracked windows."""
+        self._tracked_windows.clear()
