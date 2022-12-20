@@ -11,7 +11,8 @@ def set_env_vars() -> None:
     """Set needed environment variables.
 
     Raises:
-        UnsupportedDebianOS: The Debian Operating System is not supported.
+        UnsupportedDebianOS: The Debian Operating System is not
+            supported.
         UnsupportedOS: The Operating System is not supported.
     """
     # path starts at ffmpeg
@@ -39,20 +40,24 @@ def set_env_vars() -> None:
             ffmpeg_directory /= "armhf"
         else:
             raise UnsupportedDebianOS(
-                f"Unsupported operating system: {current_os} with {current_machine}."
+                f"Unsupported operating system: {current_os} with"
+                f" {current_machine}."
             )
 
     elif current_os == "darwin":
         ffmpeg_directory /= "ffmpeg/mac"
     else:
         raise UnsupportedOS(
-            f"Unsupported operating system: {current_os}.\nOnly Windows, Linux, and Darwin (mac) are supported."
+            f"Unsupported operating system: {current_os}.\nOnly Windows,"
+            " Linux, and Darwin (mac) are supported."
         )
 
     os.environ["PATH"] += os.pathsep + str(ffmpeg_directory.resolve())
 
     os.environ.setdefault("LD_LIBRARY_PATH", "")
-    os.environ["LD_LIBRARY_PATH"] += os.pathsep + str(Path("./torch/lib/").resolve())
+    os.environ["LD_LIBRARY_PATH"] += os.pathsep + str(
+        Path("./torch/lib/").resolve()
+    )
 
 
 class UnsupportedOS(Exception):
@@ -64,7 +69,8 @@ class UnsupportedDebianOS(UnsupportedOS):
 
 
 def get_script_cwd() -> Path:
-    """Get the file path for the directory containing the current script.
+    """Get the file path for the directory containing the current
+    script.
 
     Returns:
         Path: file path for the directory containing the current script.
