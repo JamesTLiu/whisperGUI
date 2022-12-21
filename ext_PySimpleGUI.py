@@ -964,17 +964,17 @@ class ImageBase(sg.Image, SuperElement):
 
         self.size_match_element = size_match_element
 
-        if size_match_element_key:
-            if isinstance(size_match_element_key, sg.Element):
-                self.size_match_element = size_match_element_key
-            elif isinstance(size_match_element_key, str):
-                self.size_match_element = None
-            else:
-                raise TypeError(
-                    "Invalid type for parameter size_match_element. Passed"
-                    f" type: {type(size_match_element_key)}. Only an Element"
-                    " or str is allowed."
-                )
+        # if size_match_element_key:
+        #     if isinstance(size_match_element_key, sg.Element):
+        #         self.size_match_element = size_match_element_key
+        #     elif isinstance(size_match_element_key, str):
+        #         self.size_match_element = None
+        #     else:
+        #         raise TypeError(
+        #             "Invalid type for parameter size_match_element. Passed"
+        #             f" type: {type(size_match_element_key)}. Only an Element"
+        #             " or str is allowed."
+        #         )
 
         self.size_match_element_type = size_match_element_type
 
@@ -1023,9 +1023,7 @@ class ImageBase(sg.Image, SuperElement):
         if window and self.size_match:
             # Look up the element with the given key for the size match
             # target
-            if self.size_match_element is None and isinstance(
-                self._size_match_element_key, str
-            ):
+            if self.size_match_element is None and self._size_match_element_key:
                 try:
                     self.size_match_element = window[self._size_match_element_key]
                 except KeyError:
@@ -1047,6 +1045,8 @@ class ImageBase(sg.Image, SuperElement):
                 size_match_element=self.size_match_element,
                 closest_element_type=self.size_match_element_type,
             )
+
+            # Set the size match element to the closest element
             if self.size_match_element is None:
                 self.size_match_element = size_matched_pairs.get(self, None)
 
