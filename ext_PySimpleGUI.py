@@ -907,6 +907,7 @@ class ImageBase(sg.Image, SuperElement):
         enable_events=False,
         metadata=None,
         size_match=False,
+        size_match_element=None,
         size_match_element_key=None,
         size_match_element_type=sg.Element,
     ) -> None:
@@ -949,6 +950,8 @@ class ImageBase(sg.Image, SuperElement):
         :type metadata:                 (Any)
         :param size_match:              If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
         :type size_match:               (bool)
+        :param size_match_element:      The element to size match the image to.
+        :type size_match_element:       (sg.Element)
         :param size_match_element_key:  The key of the element to size match the image to.
         :type size_match_element_key:   (str)
         :param size_match_element_type: The type of the closest Element to size match will be this type.
@@ -957,9 +960,10 @@ class ImageBase(sg.Image, SuperElement):
 
         self.size_match = size_match
 
-        self._size_match_target = size_match_element_key
+        self._size_match_element_key = size_match_element_key
 
-        self.size_match_element = None
+        self.size_match_element = size_match_element
+
         if size_match_element_key:
             if isinstance(size_match_element_key, sg.Element):
                 self.size_match_element = size_match_element_key
@@ -1020,16 +1024,16 @@ class ImageBase(sg.Image, SuperElement):
             # Look up the element with the given key for the size match
             # target
             if self.size_match_element is None and isinstance(
-                self._size_match_target, str
+                self._size_match_element_key, str
             ):
                 try:
-                    self.size_match_element = window[self._size_match_target]
+                    self.size_match_element = window[self._size_match_element_key]
                 except KeyError:
                     sg.PopupError(
                         "Invalid key for size match element of this Image.",
                         (
                             "The window with this Image does not contain an"
-                            f" element with the key {self._size_match_target}."
+                            f" element with the key {self._size_match_element_key}."
                         ),
                         "The closest element will be used instead.",
                         keep_on_top=True,
@@ -1118,6 +1122,7 @@ class Image(ImageBase):
         enable_events=False,
         metadata=None,
         size_match=False,
+        size_match_element=None,
         size_match_element_key=None,
         size_match_element_type=sg.Element,
     ) -> None:
@@ -1160,6 +1165,8 @@ class Image(ImageBase):
         :type metadata:                 (Any)
         :param size_match:              If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
         :type size_match:               (bool)
+        :param size_match_element:      The element to size match the image to.
+        :type size_match_element:       (sg.Element)
         :param size_match_element_key:  The key of the element to size match the image to.
         :type size_match_element_key:   (str)
         :param size_match_element_type: The type of the closest Element to size match will be this type.
@@ -1195,6 +1202,7 @@ class Image(ImageBase):
             enable_events=enable_events,
             metadata=metadata,
             size_match=size_match,
+            size_match_element=size_match_element,
             size_match_element_key=size_match_element_key,
             size_match_element_type=size_match_element_type,
         )
@@ -1267,6 +1275,7 @@ class ToggleImage(ImageBase):
         enable_events=False,
         metadata=None,
         size_match=False,
+        size_match_element=None,
         size_match_element_key=None,
         size_match_element_type: Type[sg.Element] = sg.Element,
     ):
@@ -1311,6 +1320,8 @@ class ToggleImage(ImageBase):
         :type metadata:                        (Any)
         :param size_match:                     If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
         :type size_match:                      (bool)
+        :param size_match_element:             The element to size match the image to.
+        :type size_match_element:              (sg.Element)
         :param size_match_element_key:         The key of the element to size match the image to.
         :type size_match_element_key:          (str)
         :param size_match_element_type:        The type of the closest Element to size match will be this type.
@@ -1353,6 +1364,7 @@ class ToggleImage(ImageBase):
             enable_events=enable_events,
             metadata=metadata,
             size_match=size_match,
+            size_match_element=size_match_element,
             size_match_element_key=size_match_element_key,
             size_match_element_type=size_match_element_type,
         )
