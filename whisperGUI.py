@@ -985,7 +985,6 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                     f" {GUI_Settings.MAX_SCALING}):"
                 ),
                 key=Keys.SCALING_TEXT_SETTING,
-                background_color="blue",
             ),
             sg.Column(
                 layout=[
@@ -1014,7 +1013,6 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
             sg.Text(
                 text="Remember Output Folder",
                 key=Keys.SAVE_OUTPUT_DIR_TEXT,
-                background_color="blue",
             ),
             FancyCheckbox(
                 start_toggled_on=save_output_dir,
@@ -1035,7 +1033,6 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                         sg.Text(
                             "Output File Name Format:",
                             key=Keys.LANGUAGE_SPECIFIER_OUTPUT_FORMAT_TEXT,
-                            background_color="blue",
                         )
                     ],
                 ],
