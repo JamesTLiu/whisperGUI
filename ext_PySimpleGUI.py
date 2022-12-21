@@ -1066,8 +1066,12 @@ class ImageBase(sg.Image, SuperElement):
             self.update(source=new_source)
 
     def _set_up_auto_size_match_element(self, element: sg.Element) -> None:
-        # Set up a binding so that this element updates when the size
-        # match element resizes
+        """Set up a binding so that this element updates when the size
+        match element resizes.
+
+        Args:
+            element (sg.Element): The element to size match.
+        """
 
         # @function_details
         def update_image_on_element_resize(event: tk.Event) -> None:
