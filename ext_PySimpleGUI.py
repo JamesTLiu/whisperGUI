@@ -919,7 +919,7 @@ class ImageBase(sg.Image, SuperElement):
         :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
         :type data:                     bytes | str | None
         :param background_color:        color of background
-        :type background_color:
+        :type background_color:         (str)
         :param size:                    (width, height) size of image in pixels
         :type size:                     (int, int)
         :param s:                       Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
@@ -1134,7 +1134,7 @@ class Image(ImageBase):
         :param data:                    Raw or Base64 representation of the image to put on button. Choose either filename or data
         :type data:                     bytes | str | EllipsisType | None
         :param background_color:        color of background
-        :type background_color:
+        :type background_color:         (str)
         :param size:                    (width, height) size of image in pixels
         :type size:                     (int, int)
         :param s:                       Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
@@ -1280,52 +1280,52 @@ class ToggleImage(ImageBase):
         size_match_element_type: Type[sg.Element] = sg.Element,
     ):
         """
-        :param start_toggled_on:               Set to True if you want this element to start toggled on.
-        :type start_toggled_on:                bool
-        :param toggle_on_source:               A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type.
-        :type toggle_on_source:                str | bytes | None
-        :param toggle_off_source:              A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type.
-        :type toggle_off_source:               str | bytes | None
-        :param source:                         A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
-        :type source:                          str | bytes | None
-        :param background_color:               color of background
-        :type background_color:
-        :param size:                           (width, height) size of image in pixels
-        :type size:                            (int, int)
-        :param s:                              Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
-        :type s:                               (int, int)  | (None, None) | int
-        :param pad:                            Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
-        :type pad:                             (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
-        :param p:                              Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
-        :type p:                               (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
-        :param key:                            Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
-        :type key:                             str | int | tuple | object
-        :param k:                              Same as the Key. You can use either k or key. Which ever is set will be used.
-        :type k:                               str | int | tuple | object
-        :param tooltip:                        text, that will appear when mouse hovers over the element
-        :type tooltip:                         (str)
-        :param subsample:                      amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
-        :type subsample:                       (int)
-        :param right_click_menu:               A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
-        :type right_click_menu:                List[List[ List[str] | str ]]
-        :param expand_x:                       If True the element will automatically expand in the X direction to fill available space
-        :type expand_x:                        (bool)
-        :param expand_y:                       If True the element will automatically expand in the Y direction to fill available space
-        :type expand_y:                        (bool)
-        :param visible:                        set visibility state of the element
-        :type visible:                         (bool)
-        :param enable_events:                  Turns on the element specific events. For an Image element, the event is "image clicked"
-        :type enable_events:                   (bool)
-        :param metadata:                       User metadata that can be set to ANYTHING
-        :type metadata:                        (Any)
-        :param size_match:                     If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
-        :type size_match:                      (bool)
-        :param size_match_element:             The element to size match the image to.
-        :type size_match_element:              (sg.Element)
-        :param size_match_element_key:         The key of the element to size match the image to.
-        :type size_match_element_key:          (str)
-        :param size_match_element_type:        The type of the closest Element to size match will be this type.
-        :type size_match_element_type:         (Type[sg.Element])
+        :param start_toggled_on:        Set to True if you want this element to start toggled on.
+        :type start_toggled_on:         bool
+        :param toggle_on_source:        A filename or a base64 bytes for the toggle on image. Will automatically detect and handle the type.
+        :type toggle_on_source:         str | bytes | None
+        :param toggle_off_source:       A filename or a base64 bytes for the toggle off image. Will automatically detect and handle the type.
+        :type toggle_off_source:        str | bytes | None
+        :param source:                  A filename or a base64 bytes. Will automatically detect the type and fill in filename or data for you.
+        :type source:                   str | bytes | None
+        :param background_color:        color of background
+        :type background_color:         (str)
+        :param size:                    (width, height) size of image in pixels
+        :type size:                     (int, int)
+        :param s:                       Same as size parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, size will be used
+        :type s:                        (int, int)  | (None, None) | int
+        :param pad:                     Amount of padding to put around element in pixels (left/right, top/bottom) or ((left, right), (top, bottom)) or an int. If an int, then it's converted into a tuple (int, int)
+        :type pad:                      (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param p:                       Same as pad parameter.  It's an alias. If EITHER of them are set, then the one that's set will be used. If BOTH are set, pad will be used
+        :type p:                        (int, int) or ((int, int),(int,int)) or (int,(int,int)) or  ((int, int),int) | int
+        :param key:                     Used with window.find_element and with return values to uniquely identify this element to uniquely identify this element
+        :type key:                      str | int | tuple | object
+        :param k:                       Same as the Key. You can use either k or key. Which ever is set will be used.
+        :type k:                        str | int | tuple | object
+        :param tooltip:                 text, that will appear when mouse hovers over the element
+        :type tooltip:                  (str)
+        :param subsample:               amount to reduce the size of the image. Divides the size by this number. 2=1/2, 3=1/3, 4=1/4, etc
+        :type subsample:                (int)
+        :param right_click_menu:        A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
+        :type right_click_menu:         List[List[ List[str] | str ]]
+        :param expand_x:                If True the element will automatically expand in the X direction to fill available space
+        :type expand_x:                 (bool)
+        :param expand_y:                If True the element will automatically expand in the Y direction to fill available space
+        :type expand_y:                 (bool)
+        :param visible:                 set visibility state of the element
+        :type visible:                  (bool)
+        :param enable_events:           Turns on the element specific events. For an Image element, the event is "image clicked"
+        :type enable_events:            (bool)
+        :param metadata:                User metadata that can be set to ANYTHING
+        :type metadata:                 (Any)
+        :param size_match:              If True, the image will be sized matched to the size_match_element if given or the closest Element with the size_match_element_type.
+        :type size_match:               (bool)
+        :param size_match_element:      The element to size match the image to.
+        :type size_match_element:       (sg.Element)
+        :param size_match_element_key:  The key of the element to size match the image to.
+        :type size_match_element_key:   (str)
+        :param size_match_element_type: The type of the closest Element to size match will be this type.
+        :type size_match_element_type:  (Type[sg.Element])
         """  # noqa: E501
 
         self.is_toggled_on = start_toggled_on
