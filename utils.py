@@ -873,50 +873,34 @@ def find_closest_element(
 
     while search_expanding_left or search_expanding_right:
         if search_expanding_left:
-            (
-                text_element_before,
-                search_expanding_left,
-            ) = is_next_element_of_class(
-                it=it_before, element_class=element_class
-            )
-            if text_element_before:
-                return text_element_before
+            try:
+                text_element_before = is_next_element_of_class(
+                    it=it_before, element_class=element_class
+                )
+            except StopIteration:
+                search_expanding_left = False
+            else:
+                if text_element_before:
+                    return text_element_before
 
         if search_expanding_right:
-            (
-                text_element_after,
-                search_expanding_right,
-            ) = is_next_element_of_class(
-                it=it_after, element_class=element_class
-            )
-            if text_element_after:
-                return text_element_after
+            try:
+                text_element_after = is_next_element_of_class(
+                    it=it_after, element_class=element_class
+                )
+            except StopIteration:
+                search_expanding_right = False
+            else:
+                if text_element_after:
+                    return text_element_after
 
     # No Text element found in window
     return None
 
 
-@dataclass(frozen=True)
-class TestResult:
-    """The result from testing an element in a list.
-
-    Attributes:
-        element (Optional[sg.Element]): The element if it passes the
-            test. Else, None.
-        more_values_to_test (bool): True if there are more values to
-            test in the list.
-    """
-
-    element: Optional[sg.Element]
-    more_values_to_test: bool
-
-    def __iter__(self) -> Iterator:
-        return iter((self.element, self.more_values_to_test))
-
-
 def is_next_element_of_class(
     it: Iterator[sg.Element], element_class: Type[sg.Element]
-) -> TestResult:
+) -> Union[sg.Element, None]:
     """Test if the next element returned by the iterator is an
     instance of the specified class.
 
@@ -926,19 +910,15 @@ def is_next_element_of_class(
             element returned by the iterator for. Defaults to
             sg.Element.
 
+    Raises:
+        StopIteration: Iterator exhausted.
+
     Returns:
-        TestResult: Contains the element if it's of the specified
-            class or None, and a bool that's True if the iterator
-            can keep iterating.
+        Union[sg.Element, None]: The element of the specified
+            class or None.
     """
-    try:
-        next_element = next(it)
-    except StopIteration:
-        return TestResult(element=None, more_values_to_test=False)
-    else:
-        if isinstance(next_element, element_class):
-            return TestResult(element=next_element, more_values_to_test=True)
-        return TestResult(element=None, more_values_to_test=True)
+    next_element = next(it)
+    return next_element if isinstance(next_element, element_class) else None
 
 
 def convert_to_bytes(
