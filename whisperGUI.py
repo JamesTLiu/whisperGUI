@@ -858,8 +858,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                             tooltip=info_image_tooltip,
                             key=Keys.INITIAL_PROMPT_INFO,
                             size_match=True,
-                            # size_match_target=Keys.INITIAL_PROMPT_TEXT,
-                            size_match_element_type=sg.Text,
+                            size_match_element_key=Keys.INITIAL_PROMPT_TEXT,
                         ),
                     ]
                 ],
