@@ -964,18 +964,6 @@ class ImageBase(sg.Image, SuperElement):
 
         self.size_match_element = size_match_element
 
-        # if size_match_element_key:
-        #     if isinstance(size_match_element_key, sg.Element):
-        #         self.size_match_element = size_match_element_key
-        #     elif isinstance(size_match_element_key, str):
-        #         self.size_match_element = None
-        #     else:
-        #         raise TypeError(
-        #             "Invalid type for parameter size_match_element. Passed"
-        #             f" type: {type(size_match_element_key)}. Only an Element"
-        #             " or str is allowed."
-        #         )
-
         self.size_match_element_type = size_match_element_type
 
         # Track if auto size matching a target element is set up
