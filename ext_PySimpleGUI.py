@@ -974,7 +974,7 @@ class ImageBase(sg.Image, SuperElement):
         self.size_match_element_type = size_match_element_type
 
         # Track if auto size matching a target element is set up
-        self._auto_size_match_set_up = False
+        self._auto_size_matching = False
 
         super().__init__(
             source=source,
@@ -1046,11 +1046,11 @@ class ImageBase(sg.Image, SuperElement):
                 self.size_match_element = size_matched_pairs.get(self, None)
 
             if (
-                not self._auto_size_match_set_up
+                not self._auto_size_matching
                 and self.size_match_element is not None
             ):
                 self._set_up_auto_size_match_element(self.size_match_element)
-                self._auto_size_match_set_up = True
+                self._auto_size_matching = True
         else:
             self.update(source=new_source)
 
