@@ -852,9 +852,7 @@ def find_closest_element(
 
     num_elements = len(element_list)
 
-    # Convert a negative index to a positive index
-    if index < 0:
-        index %= num_elements
+    get_pos_index(index, num_elements)
 
     # iterator for the elements before the target element
     prev_index = index - 1 if index > 0 else 0
@@ -896,6 +894,22 @@ def find_closest_element(
 
     # No Text element found in window
     return None
+
+
+def get_pos_index(index: int, length: int) -> int:
+    """Return a positive index given an index.
+
+    Args:
+        index (int): An index.
+        length (int): The length of the sequence the index is for.
+
+    Returns:
+        int: A positive index.
+    """
+    # Negative index
+    if index < 0:
+        index %= length
+    return index
 
 
 def is_next_element_of_class(
