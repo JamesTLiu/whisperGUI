@@ -2172,3 +2172,78 @@ class WindowTracker:
     def windows(self) -> None:
         """Stop tracking the currently tracked windows."""
         self._tracked_windows.clear()
+
+
+def set_up_resize_event() -> None:
+    """Set up the <<Resize>> virtual event for all widgets."""
+    # Make a temporary window to ensure that tkroot exists
+    _ = Window("", layout=[[sg.Text()]], finalize=True, alpha_channel=0)
+
+    _.TKroot.event_add("<<Resize>>", "None")
+    _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
+
+    # Read the window once before closing it to avoid the bug where
+    # closing the 1st finalized window without reading it causes future
+    # windows to not use the global icon in the taskbar.
+    _.read(0)
+    _.close()
+
+
+# @function_details
+def forward_resize_event(event: tk.Event) -> None:
+    """Generates a <<Resize>> virtual event if the passed <Configure>
+    event indicates a widget resize.
+
+    Args:
+        event (tk.Event): A tkinter <Configure> event.
+    """
+    valid_event_type = tk.EventType.Configure
+
+    if event.type != valid_event_type:
+        sg.PopupError(
+            (
+                "Warning: forward_resize_event() was passed an event of the"
+                " wrong type."
+            ),
+            f"The event's type must be <{valid_event_type.name}>.",
+            "The offensive event = ",
+            event,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+        return
+
+    widget = get_event_widget(event)
+
+    # The widget for the event cannot be retrieved. Ignore this event.
+    if widget is None:
+        return
+
+    try:
+        has_widget_resized = widget_resized(widget)
+    except GetWidgetSizeError:
+        sg.PopupError(
+            "Warning: Error while determining if the event's widget resized.",
+            "The offensive widget = ",
+            widget,
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+        return
+
+    if has_widget_resized:
+        # print(f"forwarding resize event.")
+        # lookup = widget_to_element_with_window(widget)
+        # if not lookup or not lookup.element or not lookup.window:
+        #     print("\tevent widget is not tracked by an active window")
+        #     ...
+        # else:
+        #     wrapper_element = lookup.element
+        #     print(
+        #         f"\tevent element key: {wrapper_element.key}. size:"
+        #         f" {event.width, event.height}."
+        #     )
+
+        widget.event_generate(
+            "<<Resize>>",
+        )
