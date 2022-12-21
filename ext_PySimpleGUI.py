@@ -1056,6 +1056,7 @@ class ImageBase(sg.Image, SuperElement):
             if self.size_match_element is None:
                 self.size_match_element = size_matched_pairs.get(self, None)
 
+            # Set up auto size matching to the size match element
             if (
                 not self._auto_size_matching
                 and self.size_match_element is not None
