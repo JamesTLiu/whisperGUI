@@ -67,7 +67,7 @@ from utils import (
     get_widget_size,
     resize_window_relative_to_screen,
     set_resizable_axis,
-    set_window_autosize,
+    set_window_to_autosize,
     setup_height_matched_images,
     str_to_file_paths,
     vertically_align_elements,
@@ -567,7 +567,7 @@ class Grid(sg.Column, SuperElement):
 
     def _set_nonresizable_autosize_window(self):
         set_resizable_axis(window=self.ParentForm, x_axis=False, y_axis=False)
-        set_window_autosize(self.ParentForm)
+        set_window_to_autosize(self.ParentForm)
 
     def _popup_get_size_error(self, element: sg.Element):
         sg.PopupError(

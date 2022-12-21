@@ -544,7 +544,7 @@ def set_resizable_axis(window: sg.Window, x_axis: bool, y_axis: bool) -> None:
     window.TKroot.resizable(x_axis, y_axis)
 
 
-def set_window_autosize(window: sg.Window) -> None:
+def set_window_to_autosize(window: sg.Window) -> None:
     window.TKroot.geometry("")
 
 
