@@ -693,15 +693,20 @@ class GUI_Settings:
 
 def set_up_global_bindings() -> None:
     """Set up global tk bindings."""
-    # Make a temporary window so that tkroot exists
+    set_up_resize_event()
+
+
+def set_up_resize_event() -> None:
+    """Set up the <<Resize>> virtual event for all widgets."""
+    # Make a temporary window to ensure that tkroot exists
     _ = Window("", layout=[[sg.Text()]], finalize=True, alpha_channel=0)
 
-    # Set up up the <<Resize>> event for all widgets
     _.TKroot.event_add("<<Resize>>", "None")
     _.TKroot.bind_all("<Configure>", forward_resize_event, add="+")
 
-    # Read the 1st finalized window once before closing it or else
-    # future windows won't use the global icon in the taskbar
+    # Read the window once before closing it to avoid the bug where
+    # closing the 1st finalized window without reading it causes future
+    # windows to not use the global icon in the taskbar.
     _.read(0)
     _.close()
 
