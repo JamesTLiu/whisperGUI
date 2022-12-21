@@ -842,7 +842,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 key=Keys.TRANSLATE_TO_ENGLISH_CHECKBOX,
                 enable_events=True,
                 size_match=True,
-                size_match_target=Keys.TRANSLATE_TO_ENGLISH_TEXT,
+                size_match_element_key=Keys.TRANSLATE_TO_ENGLISH_TEXT,
             ),
         ],
         [
@@ -858,7 +858,8 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                             tooltip=info_image_tooltip,
                             key=Keys.INITIAL_PROMPT_INFO,
                             size_match=True,
-                            size_match_target=Keys.INITIAL_PROMPT_TEXT,
+                            # size_match_target=Keys.INITIAL_PROMPT_TEXT,
+                            size_match_element_type=sg.Text,
                         ),
                     ]
                 ],
@@ -895,7 +896,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 key=Keys.MODEL_INFO_TOGGLE,
                 enable_events=True,
                 size_match=True,
-                size_match_target=Keys.MODEL_INFO_TEXT,
+                size_match_element_key=Keys.MODEL_INFO_TEXT,
             ),
         ],
     ]
@@ -1021,7 +1022,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 key=Keys.SAVE_OUTPUT_DIR_CHECKBOX,
                 enable_events=True,
                 size_match=True,
-                size_match_target=Keys.SAVE_OUTPUT_DIR_TEXT,
+                size_match_element_key=Keys.SAVE_OUTPUT_DIR_TEXT,
             ),
         ]
     ]
