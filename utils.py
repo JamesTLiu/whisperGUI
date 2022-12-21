@@ -548,7 +548,7 @@ def set_window_to_autosize(window: sg.Window) -> None:
     window.TKroot.geometry("")
 
 
-def refresh_window(element: sg.Element) -> None:
+def refresh_window_of_element(element: sg.Element) -> None:
     """Refresh the window of the given Element.
 
     Args:
