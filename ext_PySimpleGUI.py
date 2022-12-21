@@ -1023,15 +1023,21 @@ class ImageBase(sg.Image, SuperElement):
         if window and self.size_match:
             # Look up the element with the given key for the size match
             # target
-            if self.size_match_element is None and self._size_match_element_key:
+            if (
+                self.size_match_element is None
+                and self._size_match_element_key
+            ):
                 try:
-                    self.size_match_element = window[self._size_match_element_key]
+                    self.size_match_element = window[
+                        self._size_match_element_key
+                    ]
                 except KeyError:
                     sg.PopupError(
                         "Invalid key for size match element of this Image.",
                         (
                             "The window with this Image does not contain an"
-                            f" element with the key {self._size_match_element_key}."
+                            " element with the key"
+                            f" {self._size_match_element_key}."
                         ),
                         "The closest element will be used instead.",
                         keep_on_top=True,
