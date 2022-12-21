@@ -739,301 +739,6 @@ def make_tracked_main_window_with_synced_profiles(
     return window
 
 
-def popup_prompt_manager(
-    prompt_manager: PromptManager,
-    location: Tuple[Optional[int], Optional[int]] = (None, None),
-    alpha_channel: float = None,
-) -> Window:
-    """Pop up the prompt manager window.
-
-    Args:
-        location (Tuple[Optional[int], Optional[int]], optional):
-            The location for the prompt manager window. Defaults to
-            (None, None).
-        alpha_channel (float, optional): The alpha channel to set
-            for the prompt manager window. Defaults to None.
-
-    Returns:
-        sg.Window: The prompt manager window.
-    """
-    layout = [
-        [
-            sg.Table(
-                prompt_manager.saved_prompt_profiles_list,
-                headings=[" Profile ", " Prompt   "],
-                key=Keys.SAVED_PROMPTS_TABLE,
-                expand_x=True,
-                expand_y=True,
-                justification="center",
-                auto_size_columns=True,
-                max_col_width=100,
-                alternating_row_color="LightBlue3",
-                selected_row_colors="black on white",
-                select_mode=sg.TABLE_SELECT_MODE_BROWSE,
-                enable_events=True,
-            ),
-            sg.Column(
-                [
-                    [
-                        sg.Button(
-                            "Add Profile",
-                            key=Keys.OPEN_ADD_PROMPT_WINDOW,
-                            expand_x=True,
-                        )
-                    ],
-                    [
-                        sg.Button(
-                            "Edit Profile",
-                            key=Keys.OPEN_EDIT_PROMPT_WINDOW,
-                            expand_x=True,
-                        )
-                    ],
-                    [
-                        sg.Button(
-                            "Delete Profile",
-                            key=Keys.DELETE_PROMPT,
-                            expand_x=True,
-                        )
-                    ],
-                    [sg.Text("")],
-                    [sg.Text("")],
-                    [sg.Text("")],
-                    [sg.Text("")],
-                    [
-                        sg.Button(
-                            "Close",
-                            focus=True,
-                            bind_return_key=True,
-                            expand_x=True,
-                        )
-                    ],
-                ],
-                vertical_alignment="top",
-                expand_x=False,
-                pad=(0, 0),
-            ),
-        ]
-    ]
-
-    # Create the window
-    win = Window(
-        "Prompt Manager",
-        layout,
-        finalize=True,
-        resizable=True,
-        auto_size_buttons=True,
-        auto_size_text=True,
-        location=location,
-        alpha_channel=alpha_channel,
-    )
-
-    return win
-
-
-def reload_prompt_manager_window(
-    prompt_manager: PromptManager,
-    prompt_manager_window: sg.Window,
-    modal_window_manager: ModalWindowManager = None,
-    window_tracker: WindowTracker = None,
-) -> Optional[sg.Window]:
-    """Reload the prompt manager window and track the new window.
-
-    Args:
-        prompt_manager_window (sg.Window): The prompt manager window
-            to reload.
-        modal_window_manager (ModalWindowManager, optional): The new
-            prompt manager window
-            will be tracked and made modal by a modal window manager
-            if given. Defaults to None.
-        window_tracker (WindowTracker, optional): The new prompt
-            manager window will be tracked by a window tracker if
-            given. Defaults to None.
-
-    Returns:
-        Optional[sg.Window]: The new prompt manager window or None.
-    """
-
-    if prompt_manager_window:
-        # prompt_manager_window.close()
-        # new_prompt_manager_window = popup_prompt_manager()
-        x_pos, y_pos = prompt_manager_window.current_location(
-            more_accurate=True
-        )
-
-        if x_pos is None or y_pos is None:
-            sg.PopupError(
-                "Error reloading the prompt manager window",
-                (
-                    "Unable to get the current location of the current"
-                    " prompt manager window."
-                ),
-                "The offensive prompt manager window = ",
-                prompt_manager_window,
-                keep_on_top=True,
-                image=_random_error_emoji(),
-            )
-            return None
-
-        new_prompt_manager_window = popup_prompt_manager(
-            prompt_manager=prompt_manager,
-            location=(x_pos, y_pos),
-            alpha_channel=0,
-        )
-        new_prompt_manager_window.reappear()
-        prompt_manager_window.close()
-
-        if window_tracker:
-            window_tracker.track_window(new_prompt_manager_window)
-        if modal_window_manager:
-            modal_window_manager.update()
-            modal_window_manager.track_modal_window(prompt_manager_window)
-
-        return new_prompt_manager_window
-    else:
-        return None
-
-
-def popup_add_edit_prompt_profile(
-    title: str,
-    submit_event: str,
-    profile_name: str = "",
-    profile_prompt: str = "",
-) -> sg.Window:
-    """Pop up either the add or edit prompt profile window.
-
-    Args:
-        title (str): The title for the popup window.
-        submit_event (str): The event that occurs when new profile
-            values are submitted.
-        profile_name (str, optional): The editted profile's name
-            which prefills the profile name field in the window.
-            ONLY FOR PROFILE EDITS. Defaults to "".
-        prompt (str, optional): The editted profile's prompt which
-            prefills the profile prompt field in the window. ONLY
-            FOR PROFILE EDITS. Defaults to "".
-
-    Returns:
-        sg.Window: The add/edit prompt profile window.
-    """
-    layout = [
-        [
-            [sg.Text("Profile Name")],
-            [
-                sg.Input(
-                    profile_name,
-                    key=Keys.NEW_PROFILE_NAME,
-                    expand_x=True,
-                    metadata=profile_name,
-                )
-            ],
-            [sg.Text("Prompt")],
-            [
-                sg.Input(
-                    profile_prompt,
-                    key=Keys.NEW_PROFILE_PROMPT,
-                    expand_x=True,
-                    metadata=profile_prompt,
-                )
-            ],
-            [
-                sg.Button(
-                    "Save",
-                    key=submit_event,
-                    focus=True,
-                    bind_return_key=True,
-                    expand_x=True,
-                ),
-                sg.Button(
-                    "Cancel",
-                    expand_x=True,
-                ),
-            ],
-        ],
-    ]
-
-    # Create the window
-    win = Window(
-        title=title,
-        layout=layout,
-        finalize=True,
-        resizable=True,
-        auto_size_buttons=True,
-        auto_size_text=True,
-    )
-
-    return win
-
-
-def popup_add_prompt_profile(
-    title: str,
-    submit_event: str,
-) -> sg.Window:
-    """Pop up the add prompt profile window.
-
-    Args:
-        title (str): The title for the popup window.
-        submit_event (str): The event that occurs when new profile
-            values are submitted.
-
-    Returns:
-        sg.Window: The add prompt profile window.
-    """
-    return popup_add_edit_prompt_profile(
-        title=title, submit_event=submit_event
-    )
-
-
-def popup_edit_prompt_profile(
-    title: str,
-    submit_event: str,
-    profile_name: str = "",
-    profile_prompt: str = "",
-) -> sg.Window:
-    """Pop up either the edit prompt profile window.
-
-    Args:
-        title (str): The title for the popup window.
-        submit_event (str): The event that occurs when new profile
-            values are submitted.
-        profile_name (str, optional): The editted profile's name
-            which prefills the profile name field in the window.
-            ONLY FOR PROFILE EDITS. Defaults to "".
-        prompt (str, optional): The editted profile's prompt which
-            prefills the profile prompt field in the window. ONLY
-            FOR PROFILE EDITS. Defaults to "".
-
-    Returns:
-        sg.Window: The edit prompt profile window.
-    """
-    return popup_add_edit_prompt_profile(
-        title=title,
-        submit_event=submit_event,
-        profile_name=profile_name,
-        profile_prompt=profile_prompt,
-    )
-
-
-class LanguageSpecifier:
-    """Language specifier related info."""
-
-    class Options:
-        # Options used in the language specifier setting
-        LANG = "Language"
-        CODE = "Language Code"
-
-        @classmethod
-        def get_all_options(cls) -> Tuple[str, ...]:
-            """Return all language specifier options.
-
-            Returns:
-                Tuple[str, ...]: All language specifier options.
-            """
-            return (cls.LANG, cls.CODE)
-
-    EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
-    TO_EXAMPLE_TEXT = dict(zip(Options.get_all_options(), EXAMPLE_TEXTS))
-
-
 def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     """Create the main window for the GUI.
 
@@ -1496,6 +1201,301 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     window.reappear()
 
     return window
+
+
+def popup_prompt_manager(
+    prompt_manager: PromptManager,
+    location: Tuple[Optional[int], Optional[int]] = (None, None),
+    alpha_channel: float = None,
+) -> Window:
+    """Pop up the prompt manager window.
+
+    Args:
+        location (Tuple[Optional[int], Optional[int]], optional):
+            The location for the prompt manager window. Defaults to
+            (None, None).
+        alpha_channel (float, optional): The alpha channel to set
+            for the prompt manager window. Defaults to None.
+
+    Returns:
+        sg.Window: The prompt manager window.
+    """
+    layout = [
+        [
+            sg.Table(
+                prompt_manager.saved_prompt_profiles_list,
+                headings=[" Profile ", " Prompt   "],
+                key=Keys.SAVED_PROMPTS_TABLE,
+                expand_x=True,
+                expand_y=True,
+                justification="center",
+                auto_size_columns=True,
+                max_col_width=100,
+                alternating_row_color="LightBlue3",
+                selected_row_colors="black on white",
+                select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                enable_events=True,
+            ),
+            sg.Column(
+                [
+                    [
+                        sg.Button(
+                            "Add Profile",
+                            key=Keys.OPEN_ADD_PROMPT_WINDOW,
+                            expand_x=True,
+                        )
+                    ],
+                    [
+                        sg.Button(
+                            "Edit Profile",
+                            key=Keys.OPEN_EDIT_PROMPT_WINDOW,
+                            expand_x=True,
+                        )
+                    ],
+                    [
+                        sg.Button(
+                            "Delete Profile",
+                            key=Keys.DELETE_PROMPT,
+                            expand_x=True,
+                        )
+                    ],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [sg.Text("")],
+                    [
+                        sg.Button(
+                            "Close",
+                            focus=True,
+                            bind_return_key=True,
+                            expand_x=True,
+                        )
+                    ],
+                ],
+                vertical_alignment="top",
+                expand_x=False,
+                pad=(0, 0),
+            ),
+        ]
+    ]
+
+    # Create the window
+    win = Window(
+        "Prompt Manager",
+        layout,
+        finalize=True,
+        resizable=True,
+        auto_size_buttons=True,
+        auto_size_text=True,
+        location=location,
+        alpha_channel=alpha_channel,
+    )
+
+    return win
+
+
+def reload_prompt_manager_window(
+    prompt_manager: PromptManager,
+    prompt_manager_window: sg.Window,
+    modal_window_manager: ModalWindowManager = None,
+    window_tracker: WindowTracker = None,
+) -> Optional[sg.Window]:
+    """Reload the prompt manager window and track the new window.
+
+    Args:
+        prompt_manager_window (sg.Window): The prompt manager window
+            to reload.
+        modal_window_manager (ModalWindowManager, optional): The new
+            prompt manager window
+            will be tracked and made modal by a modal window manager
+            if given. Defaults to None.
+        window_tracker (WindowTracker, optional): The new prompt
+            manager window will be tracked by a window tracker if
+            given. Defaults to None.
+
+    Returns:
+        Optional[sg.Window]: The new prompt manager window or None.
+    """
+
+    if prompt_manager_window:
+        # prompt_manager_window.close()
+        # new_prompt_manager_window = popup_prompt_manager()
+        x_pos, y_pos = prompt_manager_window.current_location(
+            more_accurate=True
+        )
+
+        if x_pos is None or y_pos is None:
+            sg.PopupError(
+                "Error reloading the prompt manager window",
+                (
+                    "Unable to get the current location of the current"
+                    " prompt manager window."
+                ),
+                "The offensive prompt manager window = ",
+                prompt_manager_window,
+                keep_on_top=True,
+                image=_random_error_emoji(),
+            )
+            return None
+
+        new_prompt_manager_window = popup_prompt_manager(
+            prompt_manager=prompt_manager,
+            location=(x_pos, y_pos),
+            alpha_channel=0,
+        )
+        new_prompt_manager_window.reappear()
+        prompt_manager_window.close()
+
+        if window_tracker:
+            window_tracker.track_window(new_prompt_manager_window)
+        if modal_window_manager:
+            modal_window_manager.update()
+            modal_window_manager.track_modal_window(prompt_manager_window)
+
+        return new_prompt_manager_window
+    else:
+        return None
+
+
+def popup_add_edit_prompt_profile(
+    title: str,
+    submit_event: str,
+    profile_name: str = "",
+    profile_prompt: str = "",
+) -> sg.Window:
+    """Pop up either the add or edit prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+        profile_name (str, optional): The editted profile's name
+            which prefills the profile name field in the window.
+            ONLY FOR PROFILE EDITS. Defaults to "".
+        prompt (str, optional): The editted profile's prompt which
+            prefills the profile prompt field in the window. ONLY
+            FOR PROFILE EDITS. Defaults to "".
+
+    Returns:
+        sg.Window: The add/edit prompt profile window.
+    """
+    layout = [
+        [
+            [sg.Text("Profile Name")],
+            [
+                sg.Input(
+                    profile_name,
+                    key=Keys.NEW_PROFILE_NAME,
+                    expand_x=True,
+                    metadata=profile_name,
+                )
+            ],
+            [sg.Text("Prompt")],
+            [
+                sg.Input(
+                    profile_prompt,
+                    key=Keys.NEW_PROFILE_PROMPT,
+                    expand_x=True,
+                    metadata=profile_prompt,
+                )
+            ],
+            [
+                sg.Button(
+                    "Save",
+                    key=submit_event,
+                    focus=True,
+                    bind_return_key=True,
+                    expand_x=True,
+                ),
+                sg.Button(
+                    "Cancel",
+                    expand_x=True,
+                ),
+            ],
+        ],
+    ]
+
+    # Create the window
+    win = Window(
+        title=title,
+        layout=layout,
+        finalize=True,
+        resizable=True,
+        auto_size_buttons=True,
+        auto_size_text=True,
+    )
+
+    return win
+
+
+def popup_add_prompt_profile(
+    title: str,
+    submit_event: str,
+) -> sg.Window:
+    """Pop up the add prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+
+    Returns:
+        sg.Window: The add prompt profile window.
+    """
+    return popup_add_edit_prompt_profile(
+        title=title, submit_event=submit_event
+    )
+
+
+def popup_edit_prompt_profile(
+    title: str,
+    submit_event: str,
+    profile_name: str = "",
+    profile_prompt: str = "",
+) -> sg.Window:
+    """Pop up either the edit prompt profile window.
+
+    Args:
+        title (str): The title for the popup window.
+        submit_event (str): The event that occurs when new profile
+            values are submitted.
+        profile_name (str, optional): The editted profile's name
+            which prefills the profile name field in the window.
+            ONLY FOR PROFILE EDITS. Defaults to "".
+        prompt (str, optional): The editted profile's prompt which
+            prefills the profile prompt field in the window. ONLY
+            FOR PROFILE EDITS. Defaults to "".
+
+    Returns:
+        sg.Window: The edit prompt profile window.
+    """
+    return popup_add_edit_prompt_profile(
+        title=title,
+        submit_event=submit_event,
+        profile_name=profile_name,
+        profile_prompt=profile_prompt,
+    )
+
+
+class LanguageSpecifier:
+    """Language specifier related info."""
+
+    class Options:
+        # Options used in the language specifier setting
+        LANG = "Language"
+        CODE = "Language Code"
+
+        @classmethod
+        def get_all_options(cls) -> Tuple[str, ...]:
+            """Return all language specifier options.
+
+            Returns:
+                Tuple[str, ...]: All language specifier options.
+            """
+            return (cls.LANG, cls.CODE)
+
+    EXAMPLE_TEXTS = ("video.english.txt", "video.en.txt")
+    TO_EXAMPLE_TEXT = dict(zip(Options.get_all_options(), EXAMPLE_TEXTS))
 
 
 class Keys:
