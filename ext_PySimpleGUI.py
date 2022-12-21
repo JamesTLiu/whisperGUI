@@ -1059,9 +1059,6 @@ class ImageBase(sg.Image, SuperElement):
         else:
             self.update(source=new_source)
 
-        # widget: tk.Widget = self.widget
-        # widget.event_generate("<Configure>")
-
     def _set_up_auto_size_match_element(self, element: sg.Element) -> None:
         # Set up a binding so that this element updates when the size
         # match element resizes
