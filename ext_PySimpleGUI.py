@@ -959,6 +959,7 @@ class ImageBase(sg.Image, SuperElement):
 
         self._size_match_target = size_match_target
 
+        self.size_match_element = None
         if size_match_target:
             if isinstance(size_match_target, sg.Element):
                 self.size_match_element = size_match_target
