@@ -63,6 +63,7 @@ from ext_PySimpleGUI import (
     popup,
     popup_scrolled,
     popup_tracked,
+    save_checkbox_state,
     save_toggle_state,
     set_up_resize_event,
 )
@@ -199,7 +200,7 @@ def start_GUI() -> None:
             )
 
             if event in save_on_click_checkboxes:
-                save_toggle_state(window[event])
+                save_checkbox_state(window[event])
 
             # Delete the saved output directory from the settings file
             # when the option is off

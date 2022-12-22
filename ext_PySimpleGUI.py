@@ -1482,6 +1482,16 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
     )
 
 
+def save_checkbox_state(checkbox_element: FancyCheckbox) -> None:
+    """Save the checkbox's checked state to the config file.
+
+    Args:
+        checkbox_element (FancyCheckbox): The checkbox element whose
+            checked state is to be saved.
+    """
+    save_toggle_state(checkbox_element)
+
+
 def popup_tracked(
     *args: Any,
     popup_fn: Callable[..., Tuple[sg.Window, Optional[str]]],
