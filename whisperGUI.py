@@ -187,11 +187,7 @@ def start_GUI() -> None:
             # Save the choice to the config file
             sg.user_settings_set_entry(Keys.MODEL, values[Keys.MODEL])
         # User clicked a checkbox
-        elif (
-            window
-            and event in window.key_dict
-            and isinstance(window[event], FancyCheckbox)
-        ):
+        elif is_custom_checkbox_event(window=window, event=event):
             # Save the checkbox state to the config file for
             # save-on-click checkboxes
             save_on_click_checkboxes = (
@@ -1190,6 +1186,37 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     window.reappear()
 
     return window
+
+
+def is_custom_checkbox_event(
+    window: Optional[sg.Window], event: Optional[str]
+) -> bool:
+    """Return whether the event is for a custom checkbox.
+
+    Args:
+        window (Optional[sg.Window]): The window of the event.
+        event (Optional[str]): The event.
+
+    Returns:
+        bool: True if the event is for a custom checkbox.
+    """
+    # No window or event
+    if window is None or event is None:
+        return False
+
+    # Element lookup
+    try:
+        element = window[event]
+    except KeyError:
+        return False
+
+    # Check if the element is a custom checkbox
+    try:
+        element.checked
+    except AttributeError:
+        return False
+
+    return True
 
 
 def popup_prompt_manager(
