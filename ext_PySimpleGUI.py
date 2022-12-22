@@ -1476,9 +1476,8 @@ def save_toggle_state(toggle_element: ToggleImage) -> None:
         toggle_element (ToggleImage): The toggle element whose toggle
             state is to be saved.
     """
-    sg.user_settings_set_entry(
-        toggle_element.key,
-        toggle_element.is_toggled_on,
+    _save_binary_state(
+        element=toggle_element, state=toggle_element.is_toggled_on
     )
 
 
@@ -1489,7 +1488,22 @@ def save_checkbox_state(checkbox_element: FancyCheckbox) -> None:
         checkbox_element (FancyCheckbox): The checkbox element whose
             checked state is to be saved.
     """
-    save_toggle_state(checkbox_element)
+    _save_binary_state(
+        element=checkbox_element, state=checkbox_element.checked
+    )
+
+
+def _save_binary_state(element: sg.Element, state: bool) -> None:
+    """Save an element's binary state to the config file.
+
+    Args:
+        element (sg.Element): An element with a binary state.
+        state (bool): The state of the element.
+    """
+    sg.user_settings_set_entry(
+        element.key,
+        state,
+    )
 
 
 def popup_tracked(
