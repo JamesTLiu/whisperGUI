@@ -533,26 +533,45 @@ class Grid(sg.Column, SuperElement):
                 return
 
         for block in blocks:
-            if isinstance(block, Block):
+            try:
                 inner_element = block.inner_element
-                inner_element.widget.bind(
-                    "<<Resize>>",
-                    update_grid_on_element_resize,
-                    add="+",
-                )
-            else:
+            except AttributeError:
                 sg.PopupError(
-                    "Error in layout",
+                    (
+                        "Error in layout. The wrapper element does not have an"
+                        " inner element."
+                    ),
                     (
                         "The processed layout should contain rows whose"
                         " original elements are wrapped in Block elements."
                     ),
-                    f"Instead of a {Block}, the type found was {type(block)}",
+                    "The offensive element = ",
+                    f"{block}",
                     "The offensive layout = ",
                     self.Rows,
                     keep_on_top=True,
                     image=_random_error_emoji(),
                 )
+                continue
+
+            try:
+                inner_element.widget.bind(
+                    "<<Resize>>",
+                    update_grid_on_element_resize,
+                    add="+",
+                )
+            except AttributeError:
+                sg.PopupError(
+                    (
+                        "Error in layout. Failed to bind to an inner element's"
+                        " widget"
+                    ),
+                    "The offensive inner element = ",
+                    f"{inner_element}",
+                    keep_on_top=True,
+                    image=_random_error_emoji(),
+                )
+                continue
 
     def remove_all_block_paddings(self):
         for block in self.blocks:
