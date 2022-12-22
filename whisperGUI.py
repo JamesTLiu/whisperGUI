@@ -2493,7 +2493,7 @@ def element_with_size_matching_image(
 def bind_window_resize_to_print(window: sg.Window) -> None:
     def handle_window_resize(event: tk.Event):
         widget: tk.Widget = event.widget
-        if isinstance(widget, tk.Toplevel):
+        if isinstance(widget, (tk.Toplevel, tk.Tk)):
             print(f"Window resized. {repr(widget)}")
 
     window.TKroot.bind(
