@@ -2491,6 +2491,11 @@ def element_with_size_matching_image(
 
 
 def bind_window_resize_to_print(window: sg.Window) -> None:
+    """Add a bind to the window so that it prints on resize.
+
+    Args:
+        window (sg.Window): The window.
+    """
     def handle_window_resize(event: tk.Event):
         widget: tk.Widget = event.widget
         if isinstance(widget, (tk.Toplevel, tk.Tk)):
