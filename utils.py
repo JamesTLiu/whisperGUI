@@ -33,6 +33,8 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Mapping,
+    MutableMapping,
     Optional,
     Sequence,
     Set,
@@ -206,7 +208,7 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
             true_element_size_init_pad = get_element_true_size(
                 element, init_pad=True
             )[0]
-            original_pad = get_original_pad(element)
+            original_pad = get_element_original_pad(element)
             elements_with_width_pad.append(
                 (element, true_element_size_init_pad, original_pad)
             )
@@ -230,7 +232,11 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
         element.widget.pack_configure(padx=(pad.left, right_padding))
 
 
-def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
+class WidgetNotFoundError(Exception):
+    """The widget was not found for an element."""
+
+
+def get_element_placement_info(element: sg.Element) -> Dict:
     """Return the placement information for an Element or tkinter widget
     as a dict.
 
@@ -239,40 +245,90 @@ def get_placement_info(target: Union[sg.Element, tk.Widget]) -> Dict[str, Any]:
             widget.
 
     Raises:
-        TypeError: target argument is not an Element or tkinter widget.
+        GetWidgetPlacementInfoError: Error while getting the widget's
+            placement information.
+        WidgetNotFoundError: No widget was found for the element.
 
     Returns:
-        Dict[str, Any]: The placement information.
+        Dict: The placement information.
     """
-    if isinstance(target, sg.Element):
-        widget = target.widget
-    elif isinstance(target, tk.Widget):
-        widget = target
-    else:
-        raise TypeError("target must be an Element or a tkinter widget")
+    widget = element.widget
+    if widget is None:
+        raise WidgetNotFoundError
 
-    return widget.info()
+    return get_widget_placement_info(widget)
 
 
-def get_pad(target: Union[sg.Element, tk.Widget]) -> Pad:
+class GetWidgetPlacementInfoError(Exception):
+    """Error while getting the placement information of a widget."""
+
+
+def get_widget_placement_info(widget: tk.Widget) -> Dict:
+    """Return the placement information for an Element or tkinter widget
+    as a dict.
+
+    Args:
+        target (Union[sg.Element, tk.Widget]): An Element or tkinter
+            widget.
+
+    Raises:
+        GetWidgetPlacementInfoError: Error while getting the widget's
+            placement information.
+
+    Returns:
+        Dict: The placement information of the widget.
+    """
+    try:
+        placement_info = widget.info()
+    except Exception as e:
+        raise GetWidgetPlacementInfoError from e
+
+    return placement_info  # type: ignore[return-value]
+
+
+class GetElementPadError(Exception):
+    """Error while getting an element's pad."""
+
+
+def get_element_pad(element: sg.Element) -> Pad:
     """Get the padding of the element/widget.
 
     Args:
         target (Union[sg.Element, tk.Widget]): The element/widget to get
             the padding for.
 
+    Raises:
+        GetElementPadError: An error occurred while getting the
+            element's pad.
+
     Returns:
         Pad: The padding.
     """
-    info = get_placement_info(target)
-    padx = info["padx"]
-    pady = info["pady"]
+    try:
+        info = get_element_placement_info(element)
+    except (GetWidgetPlacementInfoError, WidgetNotFoundError) as e:
+        raise GetElementPadError from e
+
+    try:
+        padx = info["padx"]
+    except KeyError as e:
+        raise GetElementPadError(
+            "padx is not in the placement information."
+        ) from e
+
+    try:
+        pady = info["pady"]
+    except KeyError as e:
+        raise GetElementPadError(
+            "pady is not in the placement information."
+        ) from e
+
     return Pad(
         *process_pad_into_2_tuple(padx), *process_pad_into_2_tuple(pady)
     )
 
 
-def get_original_pad(element: sg.Element) -> Pad:
+def get_element_original_pad(element: sg.Element) -> Pad:
     """Return the original padding for the Element that's set by
     PySimpleGUI.
 
@@ -369,6 +425,9 @@ def get_element_true_size(
             using the initial padding for the element instead of the
             current padding. Defaults to False.
 
+    Raises:
+        GetElementPadError: Error while getting an element's pad.
+
     Returns:
         Tuple[int, int]: The element's true size.
     """
@@ -378,7 +437,10 @@ def get_element_true_size(
         popup_get_size_error(element=element)
         raise
 
-    pad = get_original_pad(element) if init_pad else get_pad(element)
+    if init_pad:
+        pad = get_element_original_pad(element)
+    else:
+        pad = get_element_pad(element)
 
     return (width + pad.left + pad.right, height + pad.top + pad.bottom)
 
