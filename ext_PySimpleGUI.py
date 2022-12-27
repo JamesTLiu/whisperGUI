@@ -66,6 +66,7 @@ from utils import (
     get_settings_file_path,
     function_details,
     get_widget_size,
+    popup_on_error,
     resize_window_relative_to_screen,
     set_resizable_axis,
     set_window_to_autosize,
@@ -499,30 +500,32 @@ class Grid(sg.Column, SuperElement):
             # )
 
             try:
-                # Only update the Grid if it's visible and has a layout
-                if not self._is_visible_with_layout():
-                    return
+                with popup_on_error(Exception):
+                    # Only update the Grid if it's visible and has a
+                    # layout
+                    if not self._is_visible_with_layout():
+                        return
 
-                # widget: tk.Widget = event.widget
-                # lookup = widget_to_element_with_window(widget)
-                # if not lookup or not lookup.element:
-                #     print(
-                #         "\tresized event widget is not tracked by "
-                #         "an active window"
-                #     )
-                # else:
-                #     wrapper_element = lookup.element
-                #     print(
-                #         "\tresized event element key: "
-                #         f"{wrapper_element.key}."
-                #     )
+                    # widget: tk.Widget = event.widget
+                    # lookup = widget_to_element_with_window(widget)
+                    # if not lookup or not lookup.element:
+                    #     print(
+                    #         "\tresized event widget is not tracked by "
+                    #         "an active window"
+                    #     )
+                    # else:
+                    #     wrapper_element = lookup.element
+                    #     print(
+                    #         "\tresized event element key: "
+                    #         f"{wrapper_element.key}."
+                    #     )
 
-                if self.uniform_block_sizes and self.ParentForm.Resizable:
-                    self._set_nonresizable_autosize_window()
+                    if self.uniform_block_sizes and self.ParentForm.Resizable:
+                        self._set_nonresizable_autosize_window()
 
-                self._update_layout()
-            except Exception as e:
-                print(e)
+                    self._update_layout()
+            # Abort updating the grid on error
+            except Exception:
                 return
 
         for block in blocks:
@@ -799,7 +802,7 @@ class Grid(sg.Column, SuperElement):
             return
 
         # Update the layout and bind the resizing of the elements to
-        # update the layout
+        # update the layout.
         if self._is_visible_with_layout():
             self._update_internals()
             self._bind_elements_resize_to_layout_update(block_wrapped_elements)
