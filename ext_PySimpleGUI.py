@@ -55,6 +55,7 @@ import set_env
 from utils import (
     GetWidgetSizeError,
     OutputRedirector,
+    WidgetNotFoundError,
     _random_error_emoji,
     close_connections,
     convert_to_bytes,
@@ -2257,10 +2258,10 @@ def forward_resize_event(event: tk.Event) -> None:
         )
         return
 
-    widget = get_event_widget(event)
-
     # The widget for the event cannot be retrieved. Ignore this event.
-    if widget is None:
+    try:
+        widget = get_event_widget(event)
+    except WidgetNotFoundError:
         return
 
     try:

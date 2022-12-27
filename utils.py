@@ -96,7 +96,7 @@ def function_details(func: Callable) -> Callable:
     return inner_func
 
 
-def get_event_widget(event: tk.Event) -> Optional[tk.Widget]:
+def get_event_widget(event: tk.Event) -> tk.Widget:
     """Return the event's widget.
 
     Args:
@@ -106,21 +106,20 @@ def get_event_widget(event: tk.Event) -> Optional[tk.Widget]:
         WidgetNotFoundError: Event's widget is None.
 
     Returns:
-        Optional[tk.Widget]: The event's widget or None if it's not
-            found.
+        tk.Widget: The event's widget.
     """
     widget = event.widget
 
     if widget is None:
         raise WidgetNotFoundError("Event's widget is None.")
 
-    # Ensure a widget
-    try:
+    # It's a widget
+    with suppress(AttributeError):
         widget.winfo_ismapped()
-    # Not a widget. A widget name was found instead.
-    except AttributeError:
-        widget = widget_name_to_widget(widget)
+        return widget
 
+    # Not a widget. A widget name was found instead.
+    widget = widget_name_to_widget(widget)
     return widget
 
 
@@ -131,8 +130,12 @@ def widget_name_to_widget(widget_name: str) -> tk.Widget:
     Args:
         widget_name (str): The Tcl name of a widget.
 
+    Raises:
+        WidgetNotFoundError: Unable to lookup a widget based on the
+            given widget name.
+
     Returns:
-        Optional[tk.Widget]: A widget or None if it's not found.
+        tk.Widget: A widget.
     """
     for window in sg.Window._active_windows:
         with suppress(KeyError):
