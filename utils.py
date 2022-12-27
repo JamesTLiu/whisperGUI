@@ -99,23 +99,29 @@ def get_event_widget(event: tk.Event) -> Optional[tk.Widget]:
     Args:
         event (tk.Event): An event.
 
+    Raises:
+        WidgetNotFoundError: Event's widget is None.
+
     Returns:
         Optional[tk.Widget]: The event's widget or None if it's not
             found.
     """
-    # widget = event.widget
     widget = event.widget
+
+    if widget is None:
+        raise WidgetNotFoundError("Event's widget is None.")
 
     # Ensure a widget
     try:
         widget.winfo_ismapped()
-    # A widget name was found
+    # Not a widget. A widget name was found instead.
     except AttributeError:
         widget = widget_name_to_widget(widget)
+
     return widget
 
 
-def widget_name_to_widget(widget_name: str) -> Optional[tk.Widget]:
+def widget_name_to_widget(widget_name: str) -> tk.Widget:
     """Return the widget in an active window based on a widget's Tcl
     name.
 
@@ -129,7 +135,13 @@ def widget_name_to_widget(widget_name: str) -> Optional[tk.Widget]:
         with suppress(KeyError):
             widget = window.TKroot.nametowidget(widget_name)
             return widget
-    return None
+    raise WidgetNotFoundError(
+        "Unable to lookup a widget based on the given widget name."
+    )
+
+
+class UpdateIdleTasksError(Exception):
+    """An error occurred while updating tkinter idle tasks."""
 
 
 def refresh_idletasks(window: sg.Window) -> sg.Window:
@@ -147,6 +159,10 @@ def refresh_idletasks(window: sg.Window) -> sg.Window:
         window (sg.Window): The window to refresh and process idle tasks
             for.
 
+    Raises:
+        UpdateIdleTasksError: An error occurred while updating tkinter
+            idle tasks.
+
     Returns:
         sg.Window: The window so that calls can be easily "chained".
     """
@@ -154,8 +170,11 @@ def refresh_idletasks(window: sg.Window) -> sg.Window:
         return window
     try:
         window.TKroot.update_idletasks()
-    except Exception:
-        pass
+    except Exception as e:
+        raise UpdateIdleTasksError(
+            "An error occurred while updating tkinter idle tasks."
+        ) from e
+
     return window
 
 
@@ -614,66 +633,54 @@ def convert_rows_to_columns_for_elements(
     return [columns]
 
 
+class InvalidLayoutError(Exception):
+    """An invalid layout was found."""
+
+
 def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
     """Ensure that the layout is valid (an Iterable[Iterable[Element]]).
 
     Args:
         layout (Sequence[Sequence[sg.Element]]): The layout to check.
+
+    Raises:
+        InvalidLayoutError: 1. Layout is not an iterable.
+                            2. Row is not an iterable.
+                            3. An item in a row is not an Element.
+                            4. Element in the layout is already in use.
     """
     try:
         iter(layout)
     except TypeError:
-        sg.PopupError(
+        raise InvalidLayoutError(
             "Error in layout",
             "Your layout is not an iterable (e.g. a list)",
-            "Instead of a list, the type found was {}".format(type(layout)),
+            f"Instead of a list, the type found was {type(layout)}",
             "The offensive layout = ",
             layout,
-            keep_on_top=True,
-            image=_random_error_emoji(),
-        )
-        return
+        ) from None
 
     for row in layout:
         try:
             iter(row)
         except TypeError:
-            sg.PopupError(
+            raise InvalidLayoutError(
                 "Error in layout",
                 "Your row is not an iterable (e.g. a list)",
-                "Instead of a list, the type found was {}".format(type(row)),
+                f"Instead of an iterable, the type found was {type(layout)}",
                 "The offensive row = ",
                 row,
                 "This item will be stripped from your layout",
-                keep_on_top=True,
-                image=_random_error_emoji(),
-            )
-            continue
+            ) from None
+
         for element in row:
-            if type(element) == list:
-                sg.PopupError(
-                    "Error in layout",
-                    "Layout has a LIST instead of an ELEMENT",
-                    "This means you have a badly placed ]",
-                    "The offensive list is:",
-                    element,
-                    "This list will be stripped from your layout",
-                    keep_on_top=True,
-                    image=_random_error_emoji(),
-                )
-                continue
-            elif callable(element) and not isinstance(element, sg.Element):
-                sg.PopupError(
-                    "Error in layout",
-                    "Layout has a FUNCTION instead of an ELEMENT",
-                    "This likely means you are missing () from your layout",
-                    "The offensive list is:",
-                    element,
-                    "This item will be stripped from your layout",
-                    keep_on_top=True,
-                    image=_random_error_emoji(),
-                )
-                continue
+            try:
+                element.ParentContainer
+            except AttributeError:
+                raise InvalidLayoutError(
+                    "An item in a row is not an Element."
+                ) from None
+
             if element.ParentContainer is not None:
                 sg.warnings.warn(
                     (
@@ -683,7 +690,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                     ),
                     UserWarning,
                 )
-                sg.PopupError(
+                raise InvalidLayoutError(
                     "Error in layout",
                     "The layout specified has already been used",
                     (
@@ -699,10 +706,7 @@ def ensure_valid_layout(layout: Sequence[Sequence[sg.Element]]) -> None:
                         "Hint - try printing your layout and matching the IDs"
                         ' "print(layout)"'
                     ),
-                    keep_on_top=True,
-                    image=_random_error_emoji(),
-                )
-                continue
+                ) from None
 
 
 @dataclass(frozen=True)
