@@ -101,20 +101,14 @@ class Multiline(sg.Multiline):
     """
 
     def write(self, txt: str) -> None:
-        """
-        Called by Python (not tkinter?) when stdout or stderr wants to
-        write
+        """Called by Python (not tkinter?) when stdout or stderr wants
+        to write. The text is formatted before being written.
 
         :param txt: text of output
         :type txt:  (str)
         """
-        _txt = self._format_text(txt)
-        try:
-            self.update(_txt, append=True)
-            if self.echo_stdout_stderr:
-                self.previous_stdout.write(_txt)
-        except Exception:
-            pass
+        formatted_txt = self._format_text(txt)
+        super().write(formatted_txt)
 
     def _format_text(self, text: str) -> str:
         """Return formatted text meant for console output.
