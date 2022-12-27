@@ -203,20 +203,14 @@ def vertically_align_elements(window: sg.Window, keys: Iterable[str]) -> None:
 
     # Get a list with each element paired with its width(including padx)
     # and pad
-    try:
-        for element in elements:
-            true_element_size_init_pad = get_element_true_size(
-                element, init_pad=True
-            )[0]
-            original_pad = get_element_original_pad(element)
-            elements_with_width_pad.append(
-                (element, true_element_size_init_pad, original_pad)
-            )
-    except GetWidgetSizeError:
-        popup_get_size_error(
-            "Error when vertically aligning elements", element=element
+    for element in elements:
+        true_element_size_init_pad = get_element_true_size(
+            element, init_pad=True
+        )[0]
+        original_pad = get_element_original_pad(element)
+        elements_with_width_pad.append(
+            (element, true_element_size_init_pad, original_pad)
         )
-        return
 
     longest_width_element_info = max(
         elements_with_width_pad, key=itemgetter(1)
@@ -245,8 +239,6 @@ def get_element_placement_info(element: sg.Element) -> Dict:
             widget.
 
     Raises:
-        GetWidgetPlacementInfoError: Error while getting the widget's
-            placement information.
         WidgetNotFoundError: No widget was found for the element.
 
     Returns:
@@ -286,10 +278,6 @@ def get_widget_placement_info(widget: tk.Widget) -> Dict:
     return placement_info  # type: ignore[return-value]
 
 
-class GetElementPadError(Exception):
-    """Error while getting an element's pad."""
-
-
 def get_element_pad(element: sg.Element) -> Pad:
     """Get the padding of the element/widget.
 
@@ -297,31 +285,13 @@ def get_element_pad(element: sg.Element) -> Pad:
         target (Union[sg.Element, tk.Widget]): The element/widget to get
             the padding for.
 
-    Raises:
-        GetElementPadError: An error occurred while getting the
-            element's pad.
-
     Returns:
         Pad: The padding.
     """
-    try:
-        info = get_element_placement_info(element)
-    except (GetWidgetPlacementInfoError, WidgetNotFoundError) as e:
-        raise GetElementPadError from e
+    info = get_element_placement_info(element)
 
-    try:
-        padx = info["padx"]
-    except KeyError as e:
-        raise GetElementPadError(
-            "padx is not in the placement information."
-        ) from e
-
-    try:
-        pady = info["pady"]
-    except KeyError as e:
-        raise GetElementPadError(
-            "pady is not in the placement information."
-        ) from e
+    padx = info["padx"]
+    pady = info["pady"]
 
     return Pad(
         *process_pad_into_2_tuple(padx), *process_pad_into_2_tuple(pady)
@@ -371,7 +341,7 @@ def process_pad_into_2_tuple(pad) -> Tuple:
     Returns:
         Tuple: The padding.
     """
-    # It's a 2-tuple
+    # It's a 2-tuple of numbers
     with suppress(TypeError):
         _, __ = pad
         _ + 1
@@ -382,10 +352,10 @@ def process_pad_into_2_tuple(pad) -> Tuple:
     try:
         pad + 1
         return pad, pad
-    except TypeError:
+    except TypeError as e:
         raise TypeError(
             "parameter must be a 2-tuple of numbers or a number"
-        ) from None
+        ) from e
 
 
 def process_pad(pad) -> Pad:
@@ -425,17 +395,10 @@ def get_element_true_size(
             using the initial padding for the element instead of the
             current padding. Defaults to False.
 
-    Raises:
-        GetElementPadError: Error while getting an element's pad.
-
     Returns:
         Tuple[int, int]: The element's true size.
     """
-    try:
-        width, height = get_element_size(element)
-    except GetWidgetSizeError:
-        popup_get_size_error(element=element)
-        raise
+    width, height = get_element_size(element)
 
     if init_pad:
         pad = get_element_original_pad(element)
