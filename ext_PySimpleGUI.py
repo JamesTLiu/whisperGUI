@@ -1052,7 +1052,7 @@ class ImageBase(sg.Image, SuperElement):
                 closest_element_type=self.size_match_element_type,
             )
 
-            # Set the size match element to the closest element
+            # Save the size match element as the closest element
             if self.size_match_element is None:
                 self.size_match_element = size_matched_pairs.get(self, None)
 
