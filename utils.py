@@ -8,6 +8,7 @@ import inspect
 import io
 import multiprocessing
 import platform
+from pprint import pformat
 import random
 import re
 import signal
@@ -15,7 +16,7 @@ import sys
 import threading
 import time
 import tkinter as tk
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
@@ -24,12 +25,14 @@ from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from operator import itemgetter
 from pathlib import Path
+import traceback
 from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
+    Generator,
     Iterable,
     Iterator,
     List,
@@ -1355,3 +1358,49 @@ class ClosestElementOfSpecifiedTypeNotFoundInWindow(Warning):
     """Unable to find closest element of the specified type in the
     window.
     """
+
+
+@contextmanager
+def popup_on_error(
+    *exceptions: Type[Exception], suppress_error: bool = False
+) -> Generator[None, None, None]:
+    """Return a context manager that creates an error popup if any of
+    the given exceptions occur.
+
+    Args:
+        suppress_error (bool, optional): If True, the given exceptions
+            will be suppressed if they occur. Defaults to False.
+
+    Yields:
+        Generator[None, None, None]: _description_
+    """
+    try:
+        yield
+    except exceptions as e:
+        sg.PopupError(
+            get_traceback(e),
+            keep_on_top=True,
+            image=_random_error_emoji(),
+        )
+        if not suppress_error:
+            raise
+
+
+def get_traceback(ex: Exception) -> str:
+    """Return a formatted exception string.
+
+    Args:
+        ex (Exception): An exception.
+
+    Returns:
+        str: Formatted stack trace and exception information.
+    """
+    tb_lines = traceback.format_exception(ex.__class__, ex, ex.__traceback__)
+
+    if len(ex.args) > 1:
+        tb_lines[-1] = tb_lines[-1].split(maxsplit=1)[0]
+        for arg in ex.args:
+            tb_lines.append("\n\t" + pformat(arg))
+
+    tb_text = "".join(tb_lines)
+    return tb_text
