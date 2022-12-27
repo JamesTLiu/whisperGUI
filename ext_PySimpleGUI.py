@@ -420,8 +420,6 @@ class Grid(sg.Column, SuperElement):
     ):
         self.uniform_block_sizes = uniform_block_sizes
 
-        ensure_valid_layout(layout)
-
         # processed_layout = self._process_layout(layout=layout)
 
         # Lookup the block that a widget is in
