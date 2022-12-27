@@ -1027,11 +1027,11 @@ class ImageBase(sg.Image, SuperElement):
                 self.size_match_element is None
                 and self._size_match_element_key
             ):
-                try:
+                if self._size_match_element_key in window.key_dict:
                     self.size_match_element = window[
                         self._size_match_element_key
                     ]
-                except KeyError:
+                else:
                     sg.PopupError(
                         "Invalid key for size match element of this Image.",
                         (
