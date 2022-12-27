@@ -1205,9 +1205,10 @@ def is_custom_checkbox_event(
         return False
 
     # Element lookup
-    try:
+    if event in window.key_dict:
         element = window[event]
-    except KeyError:
+    # Event is not for an element in the window
+    else:
         return False
 
     # Check if the element is a custom checkbox
