@@ -81,6 +81,7 @@ from utils import (
     get_event_widget,
     get_settings_file_path,
     function_details,
+    get_traceback,
     get_widget_size,
     resize_window_relative_to_screen,
     set_resizable_axis,
@@ -2095,7 +2096,13 @@ def transcribe_audio_video_files(
         # Handle a possible Exception in the process
         if isinstance(result, Exception):
             window.write_event_value(
-                fail_event, "An error occurred while transcribing the file."
+                fail_event,
+                "\n".join(
+                    (
+                        "An error occurred while transcribing the file.",
+                        get_traceback(result),
+                    )
+                ),
             )
             close_connections((read_connection, write_connection))
             return
@@ -2497,6 +2504,7 @@ def bind_window_resize_to_print(window: sg.Window) -> None:
     Args:
         window (sg.Window): The window.
     """
+
     def handle_window_resize(event: tk.Event):
         widget: tk.Widget = event.widget
         if isinstance(widget, (tk.Toplevel, tk.Tk)):
