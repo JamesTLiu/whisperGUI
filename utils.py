@@ -1250,7 +1250,7 @@ def setup_height_matched_images(
         # contains the required subkey.
         valid_image_key = (
             image_element is None
-            and isinstance(element, sg.Image)
+            and is_image_element(element)
             and image_subkey in str(element.key)
         )
 
@@ -1407,3 +1407,20 @@ def get_traceback(ex: Exception) -> str:
 
     tb_text = "".join(tb_lines)
     return tb_text
+
+
+def is_image_element(element: sg.Element) -> bool:
+    """Test if an element is an Image element.
+
+    Args:
+        element (sg.Element): The element to test.
+
+    Returns:
+        bool: True if element is an Image element.
+    """
+    try:
+        element.key
+        element.update(source=element.Source)
+    except (AttributeError, TypeError):
+        return False
+    return True
