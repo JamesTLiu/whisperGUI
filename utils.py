@@ -1077,8 +1077,8 @@ class OutputRedirector(io.StringIO):
     def __init__(
         self,
         write_conn: Union[Connection, PipeConnection],
-        reroute_stdout=True,
-        reroute_stderr=True,
+        reroute_stdout: bool = True,
+        reroute_stderr: bool = True,
     ) -> None:
         """
         Args:
@@ -1090,8 +1090,12 @@ class OutputRedirector(io.StringIO):
                 to the connection. Defaults to True.
         """
         self._write_conn = write_conn
+        self._previous_stdout: Optional[TextIO] = None
+        self._previous_stderr: Optional[TextIO] = None
+
         if reroute_stdout:
             self.reroute_stdout_to_here()
+
         if reroute_stderr:
             self.reroute_stderr_to_here()
 
@@ -1111,7 +1115,7 @@ class OutputRedirector(io.StringIO):
         """
         if self._previous_stdout:
             sys.stdout = self._previous_stdout
-            self.previous_stdout = None  # indicate no longer routed here
+            self._previous_stdout = None  # indicate no longer routed here
 
     def restore_stderr(self) -> None:
         """Restore a previously re-reouted stderr back to the original
@@ -1119,7 +1123,7 @@ class OutputRedirector(io.StringIO):
         """
         if self._previous_stderr:
             sys.stderr = self._previous_stderr
-            self.previous_stderr = None  # indicate no longer routed here
+            self._previous_stderr = None  # indicate no longer routed here
 
     def write(self, txt: str) -> int:
         """
@@ -1130,7 +1134,7 @@ class OutputRedirector(io.StringIO):
         :type txt:  (str)
         """
         # Send text through the write connection and ignore OSError that
-        # occurs when the process is killed.
+        # occurs if the process is killed.
         try:
             self._write_conn.send(txt)
         except OSError:
@@ -1141,27 +1145,18 @@ class OutputRedirector(io.StringIO):
     def flush(self) -> None:
         """Handle Flush parameter passed into a print statement.
 
-        For now doing nothing.  Not sure what action should be taken to
-        ensure a flush happens regardless.
+        For now, flushing the previous stdout and stderr.
         """
-        try:
-            self._previous_stdout.flush()
-        except Exception:
-            pass
+        with suppress(AttributeError):
+            self._previous_stdout.flush()  # type: ignore[union-attr]
+
+        with suppress(AttributeError):
+            self._previous_stderr.flush()  # type: ignore[union-attr]
 
     def __del__(self) -> None:
         """Restore the old stdout, stderr if this object is deleted"""
-        # These trys are here because found that if the init fails, then
-        # the variables holding the old stdout won't exist and will get
-        # an error.
-        try:
-            self.restore_stdout()
-        except Exception:
-            pass
-        try:
-            self.restore_stderr()
-        except Exception:
-            pass
+        self.restore_stdout()
+        self.restore_stderr()
 
 
 def close_connections(
