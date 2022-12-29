@@ -1131,8 +1131,10 @@ class OutputRedirector(io.StringIO):
         """
         # Send text through the write connection and ignore OSError that
         # occurs when the process is killed.
-        with suppress(OSError):
+        try:
             self._write_conn.send(txt)
+        except OSError:
+            return 0
 
         return len(txt)
 
