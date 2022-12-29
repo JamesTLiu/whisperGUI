@@ -728,9 +728,7 @@ class ElementWindow:
     window: Optional[sg.Window] = None
 
     def __bool__(self) -> bool:
-        if self.element and self.window:
-            return True
-        return False
+        return True if self.element and self.window else False
 
 
 def widget_to_element_with_window(
