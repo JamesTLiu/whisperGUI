@@ -766,10 +766,13 @@ def detect_all_widget_events(
     @function_details
     def event_handler(event: tk.Event):
         widget: tk.Widget = event.widget
-        lookup = widget_to_element_with_window(widget)
-        if not lookup or not lookup.element or not lookup.window:
+        element_window = widget_to_element_with_window(widget)
+
+        # Unable to get the element and window for the widget
+        if not element_window:
             return
-        element = lookup.element
+
+        element = element_window.element
         print(
             f"event_handler called for element with key: {element.key}",
             end="\n\n",
