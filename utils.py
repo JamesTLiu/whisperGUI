@@ -720,15 +720,12 @@ class ElementWindow:
     """An element and it's window.
 
     Attributes:
-        element (Optional[sg.Element]): The element.
-        window (Optional[sg.Window]): The window that the element is in.
+        element (sg.Element): The element.
+        window (sg.Window): The window that the element is in.
     """
 
-    element: Optional[sg.Element] = None
-    window: Optional[sg.Window] = None
-
-    def __bool__(self) -> bool:
-        return True if self.element and self.window else False
+    element: sg.Element
+    window: sg.Window
 
 
 def widget_to_element_with_window(
