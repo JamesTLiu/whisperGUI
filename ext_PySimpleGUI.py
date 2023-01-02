@@ -3,28 +3,11 @@
 
 from __future__ import annotations
 
-import base64
-import decimal
-import inspect
-import io
-import multiprocessing
 import platform
-import random
 import re
-import signal
-import sys
-import threading
-import time
 import tkinter as tk
 from contextlib import suppress
 from dataclasses import dataclass
-from decimal import Decimal
-from enum import Enum
-from itertools import islice, zip_longest
-from multiprocessing.connection import Connection
-from multiprocessing.synchronize import Event as EventClass
-from operator import itemgetter
-from pathlib import Path
 from types import EllipsisType
 from typing import (
     TYPE_CHECKING,
@@ -44,15 +27,8 @@ from typing import (
     Union,
 )
 
-import PIL.Image
 import PySimpleGUI as sg
-import whisper
-from codetiming import Timer, TimerError
-from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
-from whisper.tokenizer import TO_LANGUAGE_CODE
-from whisper.utils import write_srt, write_txt, write_vtt
 
-import set_env
 from utils import (
     GetWidgetSizeError,
     OutputRedirector,
