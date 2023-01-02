@@ -1923,27 +1923,28 @@ class PromptManager:
 
 
 class TranscriptionManager:
-    """A manager for a transcription task (may be multiple files)."""
+    """A manager for transcription tasks."""
 
     def __init__(self) -> None:
         self.is_transcribing = False
         self._transcription_timer = CustomTimer()
 
     def start_timer(self) -> None:
-        """Start the timer for a new transcription task."""
+        """Start the timer for a new set of transcription tasks."""
         self._transcription_timer.start()
 
     def stop_timer(self, log_time: bool = False) -> float:
-        """Stop the timer for the current transcription task and
+        """Stop the timer for the current set of transcription tasks and
         optionally report the elapsed time.
 
         Args:
             log_time (bool, optional): If True, prints the elapsed time
-                for the current transcription task. Defaults to False.
+                for the current set of transcription tasks. Defaults to
+                False.
 
         Returns:
-            float: The elapsed time in seconds for the current
-                transcription task.
+            float: The elapsed time in seconds for the current set of
+                transcription tasks.
         """
         return self._transcription_timer.stop(log_time=log_time)
 
