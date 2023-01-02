@@ -76,6 +76,7 @@ from utils import (
     function_details,
     get_traceback,
     get_widget_size,
+    popup_on_error,
     resize_window_relative_to_screen,
     set_resizable_axis,
     set_window_to_autosize,
@@ -131,9 +132,6 @@ def start_GUI() -> None:
     # holds paths for the users selected audio video files
     audio_video_file_paths = []
 
-    # stop flag for the thread
-    stop_flag = threading.Event()
-
     while True:
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
@@ -143,7 +141,7 @@ def start_GUI() -> None:
                 # Tell the thread to end the ongoing transcription
                 if trsb_manager.transcribe_thread:
                     print("Window closed but transcription is in progress.")
-                    stop_flag.set()
+                    trsb_manager.stop_transcribing()
                 break
             elif window is add_new_prompt_window:
                 add_new_prompt_window = None
@@ -501,7 +499,7 @@ def start_GUI() -> None:
                         "progress_event": GenEvents.TRANSCRIBE_PROGRESS,
                         "process_stopped_event": GenEvents.TRANSCRIBE_STOPPED,
                         "print_event": GenEvents.PRINT_ME,
-                        "stop_flag": stop_flag,
+                        "stop_flag": trsb_manager.stop_transcriptions_flag,
                         "translate_to_english": translate_to_english,
                         "use_language_code": use_language_code,
                         "initial_prompt": initial_prompt,
@@ -524,7 +522,13 @@ def start_GUI() -> None:
             trsb_manager.num_tasks_done += 1
         # All transcriptions completed
         elif event == GenEvents.TRANSCRIBE_SUCCESS:
-            transcription_time = trsb_manager.stop_timer(log_time=True)
+            transcription_time = "TIMER_ERROR"
+
+            with popup_on_error(TimerError):
+                transcription_time_float = trsb_manager.stop_timer(
+                    log_time=True
+                )
+                transcription_time = f"{transcription_time_float:.4f}"
 
             # Show output file paths in a popup
             output_paths = values[GenEvents.TRANSCRIBE_SUCCESS]
@@ -532,7 +536,7 @@ def start_GUI() -> None:
             popup_window = popup_tracked(
                 (
                     "Status: COMPLETE\n\nTime taken:"
-                    f" {transcription_time:.4f} secs\n\nOutput locations:"
+                    f" {transcription_time} secs\n\nOutput locations:"
                     f" \n\n{output_paths_formatted}"
                 ),
                 popup_fn=popup_scrolled,
@@ -545,7 +549,6 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
         elif event == GenEvents.TRANSCRIBE_ERROR:
-            trsb_manager.stop_timer(log_time=False)
             sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
 
             error_msg = values[GenEvents.TRANSCRIBE_ERROR]
@@ -562,8 +565,6 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
         elif event == GenEvents.TRANSCRIBE_STOPPED:
-            trsb_manager.stop_timer(log_time=False)
-            stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
         # Clear selection highlighting if a dropdown option was selected
@@ -576,14 +577,13 @@ def start_GUI() -> None:
 
         # Transcriptions complete. Enable the main window for the user.
         if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
-            trsb_manager.transcribe_thread = None
-            trsb_manager.is_transcribing = False
+            trsb_manager.clear()
 
         # Transcriptions in progress
         if trsb_manager.is_transcribing:
             # Update the progress meter unless the user has clicked the
             # cancel button already
-            if not stop_flag.is_set():
+            if not trsb_manager.is_waiting_for_tasks_stop():
                 # Get the current file being worked on
                 if trsb_manager.num_tasks_done < trsb_manager.num_tasks:
                     current_file = audio_video_file_paths[
@@ -617,8 +617,7 @@ def start_GUI() -> None:
                 else:
                     # Close the progress window
                     sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
-                    # Flag the thread to stop
-                    stop_flag.set()
+                    trsb_manager.stop_transcribing()
 
         # Set as modal the most recent non-closed tracked modal window
         modal_window_manager.update()
@@ -1922,6 +1921,9 @@ class TranscriptionManager:
         # thread that runs transcriptions as new processes
         self.transcribe_thread: Optional[threading.Thread] = None
 
+        # stop flag for the thread
+        self.stop_transcriptions_flag = threading.Event()
+
     def start_timer(self) -> None:
         """Start the timer for a new set of transcription tasks."""
         self._transcription_timer.start()
@@ -1935,11 +1937,32 @@ class TranscriptionManager:
                 for the current set of transcription tasks. Defaults to
                 False.
 
+        Raises:
+            TimerError: Timer is not running.
+
         Returns:
             float: The elapsed time in seconds for the current set of
                 transcription tasks.
         """
         return self._transcription_timer.stop(log_time=log_time)
+
+    def stop_transcribing(self) -> None:
+        """Signal the thread to stop transcribing."""
+        self.stop_transcriptions_flag.set()
+
+    def clear(self) -> None:
+        """Set the manager to wait for new tasks."""
+        with suppress(TimerError):
+            self.stop_timer(log_time=False)
+
+        self.is_transcribing = False
+        self.num_tasks = 0
+        self.num_tasks_done = 0
+        self.transcribe_thread = None
+        self.stop_transcriptions_flag.clear()
+
+    def is_waiting_for_tasks_stop(self) -> bool:
+        return self.stop_transcriptions_flag.is_set()
 
 
 class CustomTimer(Timer):

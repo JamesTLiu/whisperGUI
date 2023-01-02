@@ -487,8 +487,8 @@ class Grid(sg.Column, SuperElement):
                     # lookup = widget_to_element_with_window(widget)
                     # if not lookup or not lookup.element:
                     #     print(
-                    #         "\tresized event widget is not tracked by "
-                    #         "an active window"
+                    #         "\tresized event widget is not tracked by"
+                    #         " an active window"
                     #     )
                     # else:
                     #     wrapper_element = lookup.element
