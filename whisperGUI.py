@@ -257,10 +257,7 @@ def start_GUI() -> None:
                 )
                 modal_window_manager.track_modal_window(popup_window)
         # Handle adding or editing of a prompt profile
-        elif event in (
-            Keys.ADD_PROMPT_PROFILE,
-            Keys.EDIT_PROMPT_PROFILE,
-        ):
+        elif event in (Keys.ADD_PROMPT_PROFILE, Keys.EDIT_PROMPT_PROFILE):
             # Get the name and prompt to be saved
             new_profile_name = values[Keys.NEW_PROFILE_NAME]
             new_profile_prompt = values[Keys.NEW_PROFILE_PROMPT]
