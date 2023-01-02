@@ -120,13 +120,15 @@ def start_GUI() -> None:
 
     prompt_manager = PromptManager(Keys.SAVED_PROMPTS_SETTINGS)
 
+    modal_window_manager = ModalWindowManager()
+
+    transcription_manager = TranscriptionManager()
+
     window_tracker = WindowTracker()
 
     prompt_manager_window = None
 
     add_new_prompt_window = None
-
-    modal_window_manager = ModalWindowManager()
 
     main_window = make_tracked_main_window_with_synced_profiles(
         window_tracker=window_tracker,
@@ -134,11 +136,8 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
-    # timer for transcription task
-    transcription_timer = CustomTimer()
-
     # tracks if transcription is in progress
-    is_transcribing = False
+    transcription_manager.is_transcribing = False
 
     # holds paths for the users selected audio video files
     audio_video_file_paths = []
@@ -491,7 +490,7 @@ def start_GUI() -> None:
 
                 # Ensure timer is not running
                 with suppress(TimerError):
-                    transcription_timer.stop()
+                    transcription_manager.timer.stop()
 
                 # Clear the console output element
                 window[Keys.MULTILINE].update("")
@@ -506,7 +505,7 @@ def start_GUI() -> None:
                 num_tasks_done = 0
                 num_tasks = len(audio_video_file_paths)
 
-                transcription_timer.start()
+                transcription_manager.timer.start()
 
                 # Start transcription
                 transcribe_thread = threading.Thread(
@@ -530,7 +529,7 @@ def start_GUI() -> None:
                     daemon=True,
                 )
                 transcribe_thread.start()
-                is_transcribing = True
+                transcription_manager.is_transcribing = True
             else:
                 popup_window = popup_tracked(
                     "Please select audio/video file(s) and an output folder.",
@@ -545,7 +544,7 @@ def start_GUI() -> None:
             num_tasks_done += 1
         # All transcriptions completed
         elif event == GenEvents.TRANSCRIBE_SUCCESS:
-            transcription_time = transcription_timer.stop()
+            transcription_time = transcription_manager.timer.stop()
 
             # Show output file paths in a popup
             output_paths = values[GenEvents.TRANSCRIBE_SUCCESS]
@@ -566,7 +565,7 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
         elif event == GenEvents.TRANSCRIBE_ERROR:
-            transcription_timer.stop(log_time=False)
+            transcription_manager.timer.stop(log_time=False)
             sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
 
             error_msg = values[GenEvents.TRANSCRIBE_ERROR]
@@ -583,7 +582,7 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
         elif event == GenEvents.TRANSCRIBE_STOPPED:
-            transcription_timer.stop(log_time=False)
+            transcription_manager.timer.stop(log_time=False)
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
@@ -598,10 +597,10 @@ def start_GUI() -> None:
         # Transcriptions complete. Enable the main window for the user.
         if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
             transcribe_thread = None
-            is_transcribing = False
+            transcription_manager.is_transcribing = False
 
         # Transcriptions in progress
-        if is_transcribing:
+        if transcription_manager.is_transcribing:
             # Update the progress meter unless the user has clicked the
             # cancel button already
             if not stop_flag.is_set():
@@ -1927,6 +1926,14 @@ class PromptManager:
                 self._dropdown_window.write_event_value(
                     self._dropdown_key, new_selected_profile
                 )
+
+
+class TranscriptionManager:
+    """A manager for a transcription task (may be multiple files)."""
+
+    def __init__(self) -> None:
+        self.is_transcribing = False
+        self.timer = CustomTimer()
 
 
 class CustomTimer(Timer):
