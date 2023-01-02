@@ -128,9 +128,6 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
-    # tracks if transcription is in progress
-    transcription_manager.is_transcribing = False
-
     # holds paths for the users selected audio video files
     audio_video_file_paths = []
 
