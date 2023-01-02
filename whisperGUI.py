@@ -129,9 +129,6 @@ def start_GUI() -> None:
         prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
     )
 
-    # holds paths for the users selected audio video files
-    audio_video_file_paths = []
-
     while True:
         # Display and interact with the Window
         window, event, values = sg.read_all_windows(timeout=1)
@@ -466,31 +463,29 @@ def start_GUI() -> None:
                 # in this task
                 initial_prompt = values[Keys.INITIAL_PROMPT_INPUT]
 
-                # Ensure timer is not running
-                with suppress(TimerError):
-                    trsb_manager.stop_timer(log_time=True)
-
                 # Clear the console output element
                 window[Keys.MULTILINE].update("")
                 window.refresh()
 
                 # Convert string with file paths into a list
-                audio_video_file_paths = list(
-                    str_to_file_paths(audio_video_file_paths_str)
+                trsb_manager.audio_video_file_paths = str_to_file_paths(
+                    audio_video_file_paths_str
                 )
 
                 # Setup for task progress
-                trsb_manager.num_tasks_done = 0
-                trsb_manager.num_tasks = len(audio_video_file_paths)
+                trsb_manager.num_tasks = len(
+                    trsb_manager.audio_video_file_paths
+                )
 
-                trsb_manager.start_timer()
+                with popup_on_error(TimerError):
+                    trsb_manager.start_timer()
 
                 # Start transcription
                 trsb_manager.transcribe_thread = threading.Thread(
                     target=transcribe_audio_video_files,
                     kwargs={
                         "window": window,
-                        "audio_video_file_paths": audio_video_file_paths,
+                        "audio_video_file_paths": trsb_manager.audio_video_file_paths,
                         "output_dir_path": output_dir_path,
                         "language": language_selected,
                         "model": model_selected,
@@ -586,7 +581,7 @@ def start_GUI() -> None:
             if not trsb_manager.is_waiting_for_tasks_stop():
                 # Get the current file being worked on
                 if trsb_manager.num_tasks_done < trsb_manager.num_tasks:
-                    current_file = audio_video_file_paths[
+                    current_file = trsb_manager.audio_video_file_paths[
                         trsb_manager.num_tasks_done
                     ]
                 else:
@@ -1918,14 +1913,21 @@ class TranscriptionManager:
         self.num_tasks = 0
         self.num_tasks_done = 0
 
-        # thread that runs transcriptions as new processes
+        # Paths for the users selected audio video files to transcribe
+        self.audio_video_file_paths: Tuple = tuple()
+
+        # Thread that runs transcriptions as new processes
         self.transcribe_thread: Optional[threading.Thread] = None
 
-        # stop flag for the thread
+        # Stop flag for the thread
         self.stop_transcriptions_flag = threading.Event()
 
     def start_timer(self) -> None:
-        """Start the timer for a new set of transcription tasks."""
+        """Start the timer for a new set of transcription tasks.
+
+        Raises:
+            TimerError: Timer is already running.
+        """
         self._transcription_timer.start()
 
     def stop_timer(self, log_time: bool = False) -> float:
