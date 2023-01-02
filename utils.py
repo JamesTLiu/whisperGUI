@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: disable-error-code=union-attr
 
 from __future__ import annotations
 
@@ -1148,10 +1149,10 @@ class OutputRedirector(io.StringIO):
         For now, flushing the previous stdout and stderr.
         """
         with suppress(AttributeError):
-            self._previous_stdout.flush()  # type: ignore[union-attr]
+            self._previous_stdout.flush()
 
         with suppress(AttributeError):
-            self._previous_stderr.flush()  # type: ignore[union-attr]
+            self._previous_stderr.flush()
 
     def __del__(self) -> None:
         """Restore the old stdout, stderr if this object is deleted"""
