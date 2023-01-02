@@ -58,6 +58,7 @@ from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
 import set_env
+from whisperGUI import GUI_Settings, start_GUI
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
@@ -1420,3 +1421,429 @@ def is_image_element(element: sg.Element) -> bool:
     except (AttributeError, TypeError):
         return False
     return True
+
+
+def function_details_legacy(func: Callable) -> Callable:
+    # Issue: It uses up iterators when printing function details.
+
+    # Getting the argument names of the called function
+    argnames = func.__code__.co_varnames[: func.__code__.co_argcount]
+
+    # Getting the Function name of the called function
+    fname = func.__name__
+
+    def inner_func(*args, **kwargs):
+        print(fname, "(", end="")
+
+        # printing the function arguments
+        print(
+            ", ".join(
+                "% s = % r" % entry
+                for entry in zip(argnames, args[: len(argnames)])
+            ),
+            end=", ",
+        )
+
+        # Printing the variable length Arguments
+        print("args =", list(args[len(argnames):]), end=", ")
+
+        # Printing the variable length keyword arguments
+        print("kwargs =", kwargs, end="")
+        print(")")
+
+        return func(*args, **kwargs)
+
+    return inner_func
+
+
+def get_abs_resource_path(relative_path: str) -> str:
+    """Get the absolute path to the resource.
+
+    Works when used in a frozen application for Windows made using a
+    tool like Pyinstaller.
+
+    Args:
+        relative_path (str): Relative file path for the resource.
+
+    Returns:
+        str: Absolute file path for the resource.
+    """
+    import os
+
+    base_path = getattr(
+        sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))
+    )
+    return os.path.join(base_path, relative_path)
+
+
+def convert_audio_video_to_audio(
+    audio_video_file_path: Union[str, Path],
+    output_dir_path: Union[str, Path],
+    shell_output_window: Optional[sg.Window] = None,
+) -> Tuple[int, str, str]:
+    """Convert an audio/video file into an audio file using ffmpeg.
+
+    Args:
+        audio_video_file_path (Union[str, Path]): The file path for
+            the audio/video file.
+        output_dir_path (Union[str, Path]): The output directory path.
+        shell_output_window (Optional[sg.Window], optional): The
+            window that the shell command writes console output should
+            to. Defaults to None.
+
+    Returns:
+        Tuple[int, str, str]: A Tuple with the return value from
+            executing a subprocess, a copy of the console output by
+            the shell command, and the absolute file path for the
+            converted audio file.
+    """
+    video_path = Path(audio_video_file_path)
+
+    output_directory_path = Path(output_dir_path)
+
+    audio_file_name = f"{video_path.stem}.mp3"
+
+    audio_output_path = output_directory_path / audio_file_name
+
+    cmd = (
+        f'ffmpeg -i "{video_path.resolve()}" -y -q:a 0 -map a'
+        f' "{audio_output_path}"'
+    )
+
+    retval, shell_output = run_shell_cmd(
+        cmd=cmd,
+        window=shell_output_window,
+    )
+    return retval, shell_output, str(audio_output_path.resolve())
+
+
+def run_shell_cmd(
+    cmd: str,
+    timeout: Optional[float] = None,
+    window: Optional[sg.Window] = None,
+) -> Tuple[int, str]:
+    """Run shell command.
+    @param cmd: command to execute.
+    @param timeout: timeout for command execution.
+    @param window: the PySimpleGUI window that the output is going to
+        (needed to do refresh on).
+    @return: (return code from command, command output).
+    """
+    import subprocess
+    import shlex
+
+    p = subprocess.Popen(
+        shlex.split(cmd),
+        shell=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    shell_output = ""
+    if p.stdout:
+        for line in p.stdout:
+            print(f"sys.version_info= {sys.version_info}")
+            if sys.version_info < (3, 5):
+                errors = "replace"
+            else:
+                errors = "backslashreplace"
+            decoded_line = line.decode(errors=errors).rstrip()
+            shell_output += decoded_line
+            print(decoded_line)
+            if window:
+                window.refresh()
+    retval = p.wait(timeout)
+    return (retval, shell_output)
+
+
+class NotAFileError(Exception):
+    """Operation only works on files."""
+
+
+def del_existing_file(file_path: Union[str, Path]):
+    """Delete an existing file.
+
+    Args:
+        file_path (Union[str, Path]): The file path for the file to
+            delete.
+
+    Raises:
+        NotAFileError: The path does not lead to a file.
+    """
+    p = Path(file_path)
+    if p.exists():
+        if not p.is_file():
+            raise NotAFileError
+        p.unlink()
+
+
+def combo_configure(event: tk.Event) -> None:
+    """Set the width of the dropdown list to fit all options.
+
+    Does not change the entry box width.
+
+    Usage:
+        window[combo_key].widget.bind(
+            "<ButtonPress>", combo_configure
+        )
+    """
+    import tkinter.font as tkfont
+    import tkinter.ttk as ttk
+
+    combo = event.widget
+    style = ttk.Style()
+
+    long = max(combo.cget("values"), key=len)
+
+    # font = tkfont.nametofont(str(combo.cget('font')))
+    font = tkfont.Font(font=combo.cget("font"))
+    width = max(
+        0,
+        font.measure(long.strip() + "0") - combo.winfo_width(),
+    )
+
+    style_name = "TCombobox"
+
+    style.configure(style_name, postoffset=(0, 0, width, 0))
+    combo.configure(style=style_name)
+
+
+def get_combo_values(combo: sg.Combo) -> Tuple:
+    """Get the values for the Combo element.
+
+    Args:
+        combo (sg.Combo): The Combo element.
+
+    Returns:
+        Tuple: A Tuple with the values for the Combo element.
+    """
+    return combo.widget.cget("values")
+
+
+def set_combo_input_justify(combo: sg.Combo, justify: str) -> None:
+    """Align the text in the combo input field.
+
+    Args:
+        combo (sg.Combo): The Combo element to update.
+        justify (str): Specifies how the text is aligned within the
+            Combo's input field. One of "left", "center", or "right".
+
+    Raises:
+        ValueError: justify parameter must be 'left', 'center', or
+            'right'
+    """
+    if justify not in ("left", "center", "right"):
+        raise ValueError(
+            f"Invalid justify parameter value: {justify}. "
+            "justify parameter must be 'left', 'center', or 'right'"
+        )
+
+    combo.widget.configure(justify=justify)
+
+
+def format_multiline_text(
+    element: sg.Multiline, is_multiline_rstripping_on_update: bool
+) -> None:
+    """Update the text in a multiline element.
+
+    Replaces \r with \n. Replaces progress characters between |s in
+    progress bars with proper █s.
+
+    Args:
+        element (sg.ErrorElement): A Multiline element.
+        is_multiline_rstripping_on_update (bool): If True, the
+            Multiline is stripping whitespace from the end of each
+            string that is appended to its text.
+    """
+    # Get the text in the Multiline element
+    text = element.get()
+
+    # remove the auto appended '\n' by every Multiline.get() call when
+    # rstrip=False option is set for Multiline
+    if not is_multiline_rstripping_on_update:
+        text = text[:-1]
+
+    # Replace all \r with \n
+    processed_text = re.sub(r"\r", "\n", text)
+
+    def repl_progress_bars(m: re.Match):
+        return "█" * len(m.group())
+
+    processed_text = re.sub(
+        r"(?<=\|)\S+(?=\s*\|)", repl_progress_bars, processed_text
+    )
+
+    element.update(processed_text)
+
+
+def cycle_gui_through_themes() -> None:
+    """Cycles through the GUI with every built-in theme. Close the
+    current GUI for the GUI with the next theme to pop up.
+    """
+    themes = [
+        "Black",
+        "BlueMono",
+        "BluePurple",
+        "BrightColors",
+        "BrownBlue",
+        "Dark",
+        "Dark2",
+        "DarkAmber",
+        "DarkBlack",
+        "DarkBlack1",
+        "DarkBlue",
+        "DarkBlue1",
+        "DarkBlue10",
+        "DarkBlue11",
+        "DarkBlue12",
+        "DarkBlue13",
+        "DarkBlue14",
+        "DarkBlue15",
+        "DarkBlue16",
+        "DarkBlue17",
+        "DarkBlue2",
+        "DarkBlue3",
+        "DarkBlue4",
+        "DarkBlue5",
+        "DarkBlue6",
+        "DarkBlue7",
+        "DarkBlue8",
+        "DarkBlue9",
+        "DarkBrown",
+        "DarkBrown1",
+        "DarkBrown2",
+        "DarkBrown3",
+        "DarkBrown4",
+        "DarkBrown5",
+        "DarkBrown6",
+        "DarkBrown7",
+        "DarkGreen",
+        "DarkGreen1",
+        "DarkGreen2",
+        "DarkGreen3",
+        "DarkGreen4",
+        "DarkGreen5",
+        "DarkGreen6",
+        "DarkGreen7",
+        "DarkGrey",
+        "DarkGrey1",
+        "DarkGrey10",
+        "DarkGrey11",
+        "DarkGrey12",
+        "DarkGrey13",
+        "DarkGrey14",
+        "DarkGrey15",
+        "DarkGrey2",
+        "DarkGrey3",
+        "DarkGrey4",
+        "DarkGrey5",
+        "DarkGrey6",
+        "DarkGrey7",
+        "DarkGrey8",
+        "DarkGrey9",
+        "DarkPurple",
+        "DarkPurple1",
+        "DarkPurple2",
+        "DarkPurple3",
+        "DarkPurple4",
+        "DarkPurple5",
+        "DarkPurple6",
+        "DarkPurple7",
+        "DarkRed",
+        "DarkRed1",
+        "DarkRed2",
+        "DarkTanBlue",
+        "DarkTeal",
+        "DarkTeal1",
+        "DarkTeal10",
+        "DarkTeal11",
+        "DarkTeal12",
+        "DarkTeal2",
+        "DarkTeal3",
+        "DarkTeal4",
+        "DarkTeal5",
+        "DarkTeal6",
+        "DarkTeal7",
+        "DarkTeal8",
+        "DarkTeal9",
+        "Default",
+        "Default1",
+        "DefaultNoMoreNagging",
+        "GrayGrayGray",
+        "Green",
+        "GreenMono",
+        "GreenTan",
+        "HotDogStand",
+        "Kayak",
+        "LightBlue",
+        "LightBlue1",
+        "LightBlue2",
+        "LightBlue3",
+        "LightBlue4",
+        "LightBlue5",
+        "LightBlue6",
+        "LightBlue7",
+        "LightBrown",
+        "LightBrown1",
+        "LightBrown10",
+        "LightBrown11",
+        "LightBrown12",
+        "LightBrown13",
+        "LightBrown2",
+        "LightBrown3",
+        "LightBrown4",
+        "LightBrown5",
+        "LightBrown6",
+        "LightBrown7",
+        "LightBrown8",
+        "LightBrown9",
+        "LightGray1",
+        "LightGreen",
+        "LightGreen1",
+        "LightGreen10",
+        "LightGreen2",
+        "LightGreen3",
+        "LightGreen4",
+        "LightGreen5",
+        "LightGreen6",
+        "LightGreen7",
+        "LightGreen8",
+        "LightGreen9",
+        "LightGrey",
+        "LightGrey1",
+        "LightGrey2",
+        "LightGrey3",
+        "LightGrey4",
+        "LightGrey5",
+        "LightGrey6",
+        "LightPurple",
+        "LightTeal",
+        "LightYellow",
+        "Material1",
+        "Material2",
+        "NeutralBlue",
+        "Purple",
+        "Python",
+        "PythonPlus",
+        "Reddit",
+        "Reds",
+        "SandyBeach",
+        "SystemDefault",
+        "SystemDefault1",
+        "SystemDefaultForReal",
+        "Tan",
+        "TanBlue",
+        "TealMono",
+        "Topanga",
+    ]
+
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    s_handler = logging.StreamHandler()
+    logger.addHandler(s_handler)
+
+    for theme in themes:
+        logger.info(f"theme={theme}")
+        GUI_Settings.THEME = theme
+        start_GUI()

@@ -2297,3 +2297,58 @@ def forward_resize_event(event: tk.Event) -> None:
         widget.event_generate(
             "<<Resize>>",
         )
+
+
+def bind_window_resize_to_print(window: sg.Window) -> None:
+    """Add a bind to the window so that it prints on resize.
+
+    Args:
+        window (sg.Window): The window.
+    """
+
+    def handle_window_resize(event: tk.Event):
+        widget: tk.Widget = event.widget
+        if isinstance(widget, (tk.Toplevel, tk.Tk)):
+            print(f"Window resized. {repr(widget)}")
+
+    window.TKroot.bind(
+        "<<Resize>>",
+        handle_window_resize,
+        add="+",
+    )
+
+
+def add_print_for_widget_resizes(window: sg.Window) -> None:
+    """Add the printing of callback details for the resizing of all
+    widgets in the window (including the window).
+
+    Args:
+        window (sg.Window): The window.
+    """
+
+    @function_details
+    def resize_handler(e):
+        ...
+
+    window.TKroot.bind_all("<<Resize>>", resize_handler, add="+")
+
+
+def element_with_size_matching_image(
+    size_match_element: sg.Element, image_element: ImageBase
+) -> Tuple[sg.Element, ImageBase]:
+    """Return the element and the image element that's set to size match
+    it.
+
+    Args:
+        size_match_element (sg.Element): The element that the image
+            element will size match.
+        image_element (ImageBase): The image element that will be set to
+            size match the given element.
+
+    Returns:
+        List[sg.Element]: A list with the element and the image element
+            set to size match it.
+    """
+    image_element.size_match = True
+    image_element.size_match_element = size_match_element
+    return (size_match_element, image_element)
