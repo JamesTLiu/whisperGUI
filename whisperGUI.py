@@ -131,15 +131,6 @@ def start_GUI() -> None:
     # holds paths for the users selected audio video files
     audio_video_file_paths = []
 
-    # current transcription task being worked on
-    trsb_manager.num_tasks_done = 0
-
-    # total number of transcription tasks
-    trsb_manager.num_tasks = 0
-
-    # thread that runs transcriptions as processes
-    transcribe_thread = None
-
     # stop flag for the thread
     stop_flag = threading.Event()
 
@@ -150,7 +141,7 @@ def start_GUI() -> None:
         if event in (sg.WIN_CLOSED, "Exit", "Close", "Cancel", "OK"):
             if window is main_window:
                 # Tell the thread to end the ongoing transcription
-                if transcribe_thread:
+                if trsb_manager.transcribe_thread:
                     print("Window closed but transcription is in progress.")
                     stop_flag.set()
                 break
@@ -497,7 +488,7 @@ def start_GUI() -> None:
                 trsb_manager.start_timer()
 
                 # Start transcription
-                transcribe_thread = threading.Thread(
+                trsb_manager.transcribe_thread = threading.Thread(
                     target=transcribe_audio_video_files,
                     kwargs={
                         "window": window,
@@ -517,7 +508,7 @@ def start_GUI() -> None:
                     },
                     daemon=True,
                 )
-                transcribe_thread.start()
+                trsb_manager.transcribe_thread.start()
                 trsb_manager.is_transcribing = True
             else:
                 popup_window = popup_tracked(
@@ -585,7 +576,7 @@ def start_GUI() -> None:
 
         # Transcriptions complete. Enable the main window for the user.
         if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
-            transcribe_thread = None
+            trsb_manager.transcribe_thread = None
             trsb_manager.is_transcribing = False
 
         # Transcriptions in progress
@@ -1927,6 +1918,9 @@ class TranscriptionManager:
         self._transcription_timer = CustomTimer()
         self.num_tasks = 0
         self.num_tasks_done = 0
+
+        # thread that runs transcriptions as new processes
+        self.transcribe_thread: Optional[threading.Thread] = None
 
     def start_timer(self) -> None:
         """Start the timer for a new set of transcription tasks."""
