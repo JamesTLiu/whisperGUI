@@ -482,7 +482,7 @@ def start_GUI() -> None:
 
                 # Ensure timer is not running
                 with suppress(TimerError):
-                    transcription_manager.timer.stop()
+                    transcription_manager.stop_timer(log_time=True)
 
                 # Clear the console output element
                 window[Keys.MULTILINE].update("")
@@ -497,7 +497,7 @@ def start_GUI() -> None:
                 num_tasks_done = 0
                 num_tasks = len(audio_video_file_paths)
 
-                transcription_manager.timer.start()
+                transcription_manager.start_timer()
 
                 # Start transcription
                 transcribe_thread = threading.Thread(
@@ -536,7 +536,9 @@ def start_GUI() -> None:
             num_tasks_done += 1
         # All transcriptions completed
         elif event == GenEvents.TRANSCRIBE_SUCCESS:
-            transcription_time = transcription_manager.timer.stop()
+            transcription_time = transcription_manager.stop_timer(
+                log_time=True
+            )
 
             # Show output file paths in a popup
             output_paths = values[GenEvents.TRANSCRIBE_SUCCESS]
@@ -557,7 +559,7 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # Error while transcribing
         elif event == GenEvents.TRANSCRIBE_ERROR:
-            transcription_manager.timer.stop(log_time=False)
+            transcription_manager.stop_timer(log_time=False)
             sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
 
             error_msg = values[GenEvents.TRANSCRIBE_ERROR]
@@ -574,7 +576,7 @@ def start_GUI() -> None:
             modal_window_manager.track_modal_window(popup_window)
         # User cancelled transcription
         elif event == GenEvents.TRANSCRIBE_STOPPED:
-            transcription_manager.timer.stop(log_time=False)
+            transcription_manager.stop_timer(log_time=False)
             stop_flag.clear()
             print("\nTranscription cancelled by user.")
 
@@ -1925,7 +1927,25 @@ class TranscriptionManager:
 
     def __init__(self) -> None:
         self.is_transcribing = False
-        self.timer = CustomTimer()
+        self._transcription_timer = CustomTimer()
+
+    def start_timer(self) -> None:
+        """Start the timer for a new transcription task."""
+        self._transcription_timer.start()
+
+    def stop_timer(self, log_time: bool = False) -> float:
+        """Stop the timer for the current transcription task and
+        optionally report the elapsed time.
+
+        Args:
+            log_time (bool, optional): If True, prints the elapsed time
+                for the current transcription task. Defaults to False.
+
+        Returns:
+            float: The elapsed time in seconds for the current
+                transcription task.
+        """
+        return self._transcription_timer.stop(log_time=log_time)
 
 
 class CustomTimer(Timer):
@@ -1933,12 +1953,12 @@ class CustomTimer(Timer):
     time.
     """
 
-    def stop(self, log_time: bool = True) -> float:
+    def stop(self, log_time: bool = False) -> float:
         """Stop the timer, and optionally report the elapsed time.
 
         Args:
             log_time (bool, optional): If True, prints the elapsed time.
-                Defaults to True.
+                Defaults to False.
 
         Raises:
             TimerError: Timer is not running.
