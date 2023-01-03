@@ -102,7 +102,7 @@ def main():
     start_GUI()
 
 
-def start_GUI() -> None:
+def start_GUI() -> None:  # noqa: C901
     """Start the GUI.
 
     Raises:
