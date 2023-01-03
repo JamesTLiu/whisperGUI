@@ -2603,4 +2603,6 @@ if __name__ == "__main__":
 
     # The only method that works on both Windows and Linux is "spawn"
     multiprocessing.set_start_method("spawn")
-    main()
+
+    with popup_on_error(Exception):
+        main()
