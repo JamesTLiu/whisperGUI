@@ -64,6 +64,7 @@ from ext_PySimpleGUI import (
 import set_env
 from transcriber import GenEvents, Transcriber
 from utils import (
+    Font,
     GetWidgetSizeError,
     OutputRedirector,
     _random_error_emoji,
@@ -608,8 +609,8 @@ def set_global_GUI_settings():
         scaling=sg.user_settings_get_entry(
             Keys.SCALING_INPUT_SETTING, GUI_Settings.DEFAULT_GLOBAL_SCALING
         ),
-        font=GUI_Settings.DEFAULT_FONT,
-        tooltip_font=GUI_Settings.DEFAULT_FONT,
+        font=GUI_Settings.DEFAULT_FONT.as_tuple(),
+        tooltip_font=GUI_Settings.DEFAULT_FONT.as_tuple(),
         force_modal_windows=True,
     )
 
@@ -631,7 +632,7 @@ class GUI_Settings:
     MAX_SCALING = 3
 
     # Default global font for the GUI
-    DEFAULT_FONT = ("Arial", 20)
+    DEFAULT_FONT = Font(family="Arial", size=20)
 
     SETTINGS_FILE_NAME = "whisperGUI.config"
 
@@ -853,6 +854,18 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     # new text to append
     is_multiline_rstripping_on_update = False
 
+    installed_fonts = sg.Text.fonts_installed_list()
+
+    # List of mono fonts for the multiline element ordered by preference
+    mono_fonts = ("Consolas", "Courier New", "Courier")
+
+    # Use the most preferred installed font
+    multiline_font = None
+    for font in mono_fonts:
+        if font in installed_fonts:
+            multiline_font = (font, GUI_Settings.DEFAULT_FONT.size)
+            break
+
     # main tab
     tab1_layout = [
         [sg.Text("Select Audio/Video File(s)")],
@@ -903,6 +916,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 key=Keys.MULTILINE,
                 background_color="black",
                 text_color="white",
+                font=multiline_font,
                 auto_refresh=True,
                 autoscroll=True,
                 reroute_stderr=True,
@@ -1056,7 +1070,11 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
 
     # settings tab
     tab2_layout = [
-        [sg.Text("Program Settings", font=(GUI_Settings.DEFAULT_FONT[0], 30))],
+        [
+            sg.Text(
+                "Program Settings", font=(GUI_Settings.DEFAULT_FONT.family, 30)
+            )
+        ],
         [sg.Column(layout=tab2_settings_layout, pad=0)],
     ]
 

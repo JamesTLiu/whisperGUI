@@ -1699,3 +1699,13 @@ class CustomTimer(Timer):
             self.timers.add(self.name, self.last)
 
         return self.last
+
+
+@dataclass
+class Font:
+    family: str
+    size: int
+    style: str = "normal"
+
+    def as_tuple(self):
+        return (self.family, self.size, self.style)
