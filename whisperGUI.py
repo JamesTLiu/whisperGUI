@@ -2258,8 +2258,8 @@ def transcribe_audio_video(
     """Transcribe an audio/video file.
 
     Args:
-        language (Optional[str]): The language of the file to
-            transcribe.
+        language (Optional[str]): The language of the file(s) to
+            transcribe. If None, it will be autodetected per file.
         model (str): The whisper model to use for transcription.
         audio_video_path (str): An audio/video file path.
         queue (multiprocessing.Queue): The queue that the results of the
