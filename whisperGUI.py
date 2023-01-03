@@ -115,7 +115,7 @@ def start_GUI() -> None:
 
     modal_window_manager = ModalWindowManager()
 
-    trsb_manager = TranscriptionManager()
+    transcriber = Transcriber()
 
     window_tracker = WindowTracker()
 
@@ -136,9 +136,9 @@ def start_GUI() -> None:
         if event in (sg.WIN_CLOSED, "Exit", "Close", "Cancel", "OK"):
             if window is main_window:
                 # Tell the thread to end the ongoing transcription
-                if trsb_manager.transcribe_thread:
+                if transcriber.transcribe_thread:
                     print("Window closed but transcription is in progress.")
-                    trsb_manager.stop_transcribing()
+                    transcriber.stop_transcribing()
                 break
             elif window is add_new_prompt_window:
                 add_new_prompt_window = None
@@ -468,24 +468,24 @@ def start_GUI() -> None:
                 window.refresh()
 
                 # Convert string with file paths into a list
-                trsb_manager.audio_video_file_paths = str_to_file_paths(
+                transcriber.audio_video_file_paths = str_to_file_paths(
                     audio_video_file_paths_str
                 )
 
                 # Setup for task progress
-                trsb_manager.num_tasks = len(
-                    trsb_manager.audio_video_file_paths
+                transcriber.num_tasks = len(
+                    transcriber.audio_video_file_paths
                 )
 
                 with popup_on_error(TimerError):
-                    trsb_manager.start_timer()
+                    transcriber.start_timer()
 
                 # Start transcription
-                trsb_manager.transcribe_thread = threading.Thread(
+                transcriber.transcribe_thread = threading.Thread(
                     target=transcribe_audio_video_files,
                     kwargs={
                         "window": window,
-                        "audio_video_file_paths": trsb_manager.audio_video_file_paths,
+                        "audio_video_file_paths": transcriber.audio_video_file_paths,
                         "output_dir_path": output_dir_path,
                         "language": language_selected,
                         "model": model_selected,
@@ -494,15 +494,15 @@ def start_GUI() -> None:
                         "progress_event": GenEvents.TRANSCRIBE_PROGRESS,
                         "process_stopped_event": GenEvents.TRANSCRIBE_STOPPED,
                         "print_event": GenEvents.PRINT_ME,
-                        "stop_flag": trsb_manager.stop_transcriptions_flag,
+                        "stop_flag": transcriber.stop_transcriptions_flag,
                         "translate_to_english": translate_to_english,
                         "use_language_code": use_language_code,
                         "initial_prompt": initial_prompt,
                     },
                     daemon=True,
                 )
-                trsb_manager.transcribe_thread.start()
-                trsb_manager.is_transcribing = True
+                transcriber.transcribe_thread.start()
+                transcriber.is_transcribing = True
             else:
                 popup_window = popup_tracked(
                     "Please select audio/video file(s) and an output folder.",
@@ -514,13 +514,13 @@ def start_GUI() -> None:
                 modal_window_manager.track_modal_window(popup_window)
         # 1 transcription completed
         elif event == GenEvents.TRANSCRIBE_PROGRESS:
-            trsb_manager.num_tasks_done += 1
+            transcriber.num_tasks_done += 1
         # All transcriptions completed
         elif event == GenEvents.TRANSCRIBE_SUCCESS:
             transcription_time = "TIMER_ERROR"
 
             with popup_on_error(TimerError):
-                transcription_time_float = trsb_manager.stop_timer(
+                transcription_time_float = transcriber.stop_timer(
                     log_time=True
                 )
                 transcription_time = f"{transcription_time_float:.4f}"
@@ -572,17 +572,17 @@ def start_GUI() -> None:
 
         # Transcriptions complete. Enable the main window for the user.
         if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
-            trsb_manager.clear()
+            transcriber.clear()
 
         # Transcriptions in progress
-        if trsb_manager.is_transcribing:
+        if transcriber.is_transcribing:
             # Update the progress meter unless the user has clicked the
             # cancel button already
-            if not trsb_manager.is_waiting_for_tasks_stop():
+            if not transcriber.is_waiting_for_tasks_stop():
                 # Get the current file being worked on
-                if trsb_manager.num_tasks_done < trsb_manager.num_tasks:
-                    current_file = trsb_manager.audio_video_file_paths[
-                        trsb_manager.num_tasks_done
+                if transcriber.num_tasks_done < transcriber.num_tasks:
+                    current_file = transcriber.audio_video_file_paths[
+                        transcriber.num_tasks_done
                     ]
                 else:
                     current_file = "None"
@@ -590,8 +590,8 @@ def start_GUI() -> None:
                 # Update the progress window
                 meter_updated = sg.one_line_progress_meter(
                     "Progress",
-                    trsb_manager.num_tasks_done,
-                    trsb_manager.num_tasks,
+                    transcriber.num_tasks_done,
+                    transcriber.num_tasks,
                     f"Current file: \n{current_file}",
                     key=Keys.PROGRESS,
                     size=(30, 20),
@@ -612,7 +612,7 @@ def start_GUI() -> None:
                 else:
                     # Close the progress window
                     sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
-                    trsb_manager.stop_transcribing()
+                    transcriber.stop_transcribing()
 
         # Set as modal the most recent non-closed tracked modal window
         modal_window_manager.update()
@@ -1904,7 +1904,7 @@ class PromptManager:
                 )
 
 
-class TranscriptionManager:
+class Transcriber:
     """A manager for transcription tasks."""
 
     def __init__(self) -> None:
