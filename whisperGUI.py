@@ -558,12 +558,7 @@ def start_GUI() -> None:
             # the transcriptions
             if not transcriber.is_stopping():
                 # Get the current file being worked on
-                if transcriber.num_tasks_done < transcriber.num_tasks:
-                    current_file = transcriber.audio_video_file_paths[
-                        transcriber.num_tasks_done
-                    ]
-                else:
-                    current_file = "None"
+                current_file = transcriber.current_file
 
                 # Update the progress window
                 meter_updated = sg.one_line_progress_meter(
@@ -2032,6 +2027,19 @@ class Transcriber:
                 stopping.
         """
         return self.stop_transcriptions_flag.is_set()
+
+    @property
+    def current_file(self) -> str:
+        """The current file being transcribed."""
+        current_file = "None"
+
+        if self.num_tasks_done < self.num_tasks:
+            current_file = self.audio_video_file_paths[self.num_tasks_done]
+
+        # if self.num_tasks_done <= self.num_tasks:
+        #     current_file = self.audio_video_file_paths[self.num_tasks_done]
+
+        return current_file
 
 
 class CustomTimer(Timer):
