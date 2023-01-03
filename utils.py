@@ -11,6 +11,7 @@ from pprint import pformat
 import random
 import re
 import sys
+import time
 import tkinter as tk
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
@@ -43,6 +44,7 @@ from typing import (
 
 import PIL.Image
 import PySimpleGUI as sg
+from codetiming import Timer, TimerError
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
@@ -1653,3 +1655,47 @@ def format_multiline_text(
     )
 
     element.update(processed_text)
+
+
+class CustomTimer(Timer):
+    """codetiming.Timer with a stop() that optionally prints the elapsed
+    time.
+    """
+
+    def stop(self, log_time: bool = False) -> float:
+        """Stop the timer, and optionally report the elapsed time.
+
+        Args:
+            log_time (bool, optional): If True, prints the elapsed time.
+                Defaults to False.
+
+        Raises:
+            TimerError: Timer is not running.
+
+        Returns:
+            float: The elapsed time in seconds.
+        """
+        if self._start_time is None:
+            raise TimerError("Timer is not running. Use .start() to start it")
+
+        # Calculate elapsed time
+        self.last = time.perf_counter() - self._start_time
+        self._start_time = None
+
+        # Report elapsed time
+        if self.logger and log_time:
+            if callable(self.text):
+                text = self.text(self.last)
+            else:
+                attributes = {
+                    "name": self.name,
+                    "milliseconds": self.last * 1000,
+                    "seconds": self.last,
+                    "minutes": self.last / 60,
+                }
+                text = self.text.format(self.last, **attributes)
+            self.logger(text)
+        if self.name:
+            self.timers.add(self.name, self.last)
+
+        return self.last
