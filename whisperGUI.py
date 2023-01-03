@@ -138,7 +138,7 @@ def start_GUI() -> None:
                 # Tell the thread to end the ongoing transcription
                 if transcriber.transcribe_thread:
                     print("Window closed but transcription is in progress.")
-                    transcriber.stop_transcribing()
+                    transcriber.stop()
                 break
             elif window is add_new_prompt_window:
                 add_new_prompt_window = None
@@ -434,11 +434,12 @@ def start_GUI() -> None:
 
             # Require audio/video file(s) and output folder
             if audio_video_file_paths_str and output_dir_path:
-                # Get user selected language and model
+                # Get user selected language
                 language_selected = values[Keys.LANGUAGE]
                 if language_selected not in TO_LANGUAGE_CODE:
                     language_selected = None
 
+                # Get user selected model
                 model_selected = values[Keys.MODEL]
 
                 # Get the user's choice of whether to translate the
@@ -463,46 +464,25 @@ def start_GUI() -> None:
                 # in this task
                 initial_prompt = values[Keys.INITIAL_PROMPT_INPUT]
 
+                # Convert string with file paths into a file paths list
+                audio_video_file_paths = str_to_file_paths(
+                    audio_video_file_paths_str
+                )
+
                 # Clear the console output element
                 window[Keys.MULTILINE].update("")
                 window.refresh()
 
-                # Convert string with file paths into a list
-                transcriber.audio_video_file_paths = str_to_file_paths(
-                    audio_video_file_paths_str
+                transcriber.start(
+                    window=window,
+                    audio_video_file_paths=audio_video_file_paths,
+                    output_dir_path=output_dir_path,
+                    language=language_selected,
+                    model=model_selected,
+                    translate_to_english=translate_to_english,
+                    use_language_code=use_language_code,
+                    initial_prompt=initial_prompt,
                 )
-
-                # Setup for task progress
-                transcriber.num_tasks = len(
-                    transcriber.audio_video_file_paths
-                )
-
-                with popup_on_error(TimerError):
-                    transcriber.start_timer()
-
-                # Start transcription
-                transcriber.transcribe_thread = threading.Thread(
-                    target=transcribe_audio_video_files,
-                    kwargs={
-                        "window": window,
-                        "audio_video_file_paths": transcriber.audio_video_file_paths,
-                        "output_dir_path": output_dir_path,
-                        "language": language_selected,
-                        "model": model_selected,
-                        "success_event": GenEvents.TRANSCRIBE_SUCCESS,
-                        "fail_event": GenEvents.TRANSCRIBE_ERROR,
-                        "progress_event": GenEvents.TRANSCRIBE_PROGRESS,
-                        "process_stopped_event": GenEvents.TRANSCRIBE_STOPPED,
-                        "print_event": GenEvents.PRINT_ME,
-                        "stop_flag": transcriber.stop_transcriptions_flag,
-                        "translate_to_english": translate_to_english,
-                        "use_language_code": use_language_code,
-                        "initial_prompt": initial_prompt,
-                    },
-                    daemon=True,
-                )
-                transcriber.transcribe_thread.start()
-                transcriber.is_transcribing = True
             else:
                 popup_window = popup_tracked(
                     "Please select audio/video file(s) and an output folder.",
@@ -519,10 +499,8 @@ def start_GUI() -> None:
         elif event == GenEvents.TRANSCRIBE_SUCCESS:
             transcription_time = "TIMER_ERROR"
 
-            with popup_on_error(TimerError):
-                transcription_time_float = transcriber.stop_timer(
-                    log_time=True
-                )
+            with popup_on_error(TimerError, suppress_error=True):
+                transcription_time_float = transcriber.done(success=True)
                 transcription_time = f"{transcription_time_float:.4f}"
 
             # Show output file paths in a popup
@@ -571,14 +549,14 @@ def start_GUI() -> None:
             window[event].widget.selection_clear()
 
         # Transcriptions complete. Enable the main window for the user.
-        if event in GenEvents.TRANSCRIBE_DONE_EVENTS:
-            transcriber.clear()
+        if event in GenEvents.TRANSCRIBE_DONE_NO_SUCCESS_EVENTS:
+            transcriber.done(success=False)
 
         # Transcriptions in progress
         if transcriber.is_transcribing:
-            # Update the progress meter unless the user has clicked the
-            # cancel button already
-            if not transcriber.is_waiting_for_tasks_stop():
+            # Update the progress meter unless the user has cancelled
+            # the transcriptions
+            if not transcriber.is_stopping():
                 # Get the current file being worked on
                 if transcriber.num_tasks_done < transcriber.num_tasks:
                     current_file = transcriber.audio_video_file_paths[
@@ -612,7 +590,7 @@ def start_GUI() -> None:
                 else:
                     # Close the progress window
                     sg.one_line_progress_meter_cancel(key=Keys.PROGRESS)
-                    transcriber.stop_transcribing()
+                    transcriber.stop()
 
         # Set as modal the most recent non-closed tracked modal window
         modal_window_manager.update()
@@ -1564,8 +1542,7 @@ class GenEvents:
     PRINT_ME = "-PRINT-ME-"
 
     # Events that indicate that transcription has ended
-    TRANSCRIBE_DONE_EVENTS = (
-        TRANSCRIBE_SUCCESS,
+    TRANSCRIBE_DONE_NO_SUCCESS_EVENTS = (
         TRANSCRIBE_ERROR,
         TRANSCRIBE_STOPPED,
     )
@@ -1913,6 +1890,8 @@ class Transcriber:
         self.num_tasks = 0
         self.num_tasks_done = 0
 
+        self.translate_to_english = False
+
         # Paths for the users selected audio video files to transcribe
         self.audio_video_file_paths: Tuple = tuple()
 
@@ -1922,7 +1901,7 @@ class Transcriber:
         # Stop flag for the thread
         self.stop_transcriptions_flag = threading.Event()
 
-    def start_timer(self) -> None:
+    def _start_timer(self) -> None:
         """Start the timer for a new set of transcription tasks.
 
         Raises:
@@ -1930,7 +1909,7 @@ class Transcriber:
         """
         self._transcription_timer.start()
 
-    def stop_timer(self, log_time: bool = False) -> float:
+    def _stop_timer(self, log_time: bool = False) -> float:
         """Stop the timer for the current set of transcription tasks and
         optionally report the elapsed time.
 
@@ -1948,22 +1927,110 @@ class Transcriber:
         """
         return self._transcription_timer.stop(log_time=log_time)
 
-    def stop_transcribing(self) -> None:
-        """Signal the thread to stop transcribing."""
+    def start(
+        self,
+        window: sg.Window,
+        audio_video_file_paths: Iterable[str],
+        output_dir_path: str,
+        language: Optional[str],
+        model: str,
+        translate_to_english: bool,
+        use_language_code: bool,
+        initial_prompt: str,
+    ) -> None:
+        """Start transcribing the audio / video files.
+
+        Args:
+            audio_video_file_paths (Iterable[str]): File paths of the
+                audio / video files selected by the user for
+                transcription.
+            window (sg.Window): The window the transcription thread will
+                send events (including events with redirected stdout /
+                stderr output) to.
+            output_dir_path (str): The directory path where
+                transcriptions will be written.
+            language (Optional[str]): The language of the
+                file(s) to transcribe. If None, it will be autodetected
+                per file.
+            model (str): The whisper model to use for
+                transcription.
+            translate_to_english (bool): If True, each transcription
+                will be translated to English. Otherwise, no translation
+                will occur.
+            use_language_code (bool): If True, the detected language's
+                language code will be used in the output file name if
+                possible. Otherwise, the detected language's name will
+                be used in the output file name if possible.
+            initial_prompt (str): User provided text that guides the
+                transcription to a certain dialect/language/style.
+                Defaults to None.
+        """
+        self.audio_video_file_paths = tuple(audio_video_file_paths)
+        self.num_tasks = len(self.audio_video_file_paths)
+
+        # Start transcription in separate thread
+        self.transcribe_thread = threading.Thread(
+            target=transcribe_audio_video_files,
+            kwargs={
+                "window": window,
+                "audio_video_file_paths": self.audio_video_file_paths,
+                "output_dir_path": output_dir_path,
+                "language": language,
+                "model": model,
+                "success_event": GenEvents.TRANSCRIBE_SUCCESS,
+                "fail_event": GenEvents.TRANSCRIBE_ERROR,
+                "progress_event": GenEvents.TRANSCRIBE_PROGRESS,
+                "process_stopped_event": GenEvents.TRANSCRIBE_STOPPED,
+                "print_event": GenEvents.PRINT_ME,
+                "stop_flag": self.stop_transcriptions_flag,
+                "translate_to_english": translate_to_english,
+                "use_language_code": use_language_code,
+                "initial_prompt": initial_prompt,
+            },
+            daemon=True,
+        )
+
+        with popup_on_error(TimerError):
+            self._start_timer()
+
+        self.transcribe_thread.start()
+        self.is_transcribing = True
+
+    def stop(self) -> None:
+        """Signal the thread to stop transcribing. It may take some time
+        for transcription to stop."""
         self.stop_transcriptions_flag.set()
 
-    def clear(self) -> None:
-        """Set the manager to wait for new tasks."""
-        with suppress(TimerError):
-            self.stop_timer(log_time=False)
+    def done(self, success: bool) -> float:
+        """Set the manager to wait for new tasks.
 
+        Args:
+            success (bool): If True, transcriptions succeeded.
+
+        Raises:
+            TimerError: Timer is not running.
+
+        Returns:
+            float: The elapsed time in seconds for the completed set of
+                transcriptions.
+        """
         self.is_transcribing = False
         self.num_tasks = 0
         self.num_tasks_done = 0
         self.transcribe_thread = None
         self.stop_transcriptions_flag.clear()
 
-    def is_waiting_for_tasks_stop(self) -> bool:
+        elapsed_time = self._stop_timer(log_time=success)
+        return elapsed_time
+
+    def is_stopping(self) -> bool:
+        """Return whether the transcriptions are in the process of
+        stopping.
+
+        Returns:
+            bool: True if the transcriptions are in the process of
+                stopping.
+        """
         return self.stop_transcriptions_flag.is_set()
 
 
@@ -2015,7 +2082,7 @@ def transcribe_audio_video_files(
     window: sg.Window,
     audio_video_file_paths: Iterable[str],
     output_dir_path: str,
-    language: str,
+    language: Optional[str],
     model: str,
     success_event: str,
     fail_event: str,
@@ -2033,11 +2100,15 @@ def transcribe_audio_video_files(
     and .srt extensions.
 
     Args:
-        window (sg.Window): The window to send events to.
-        audio_video_file_paths (Iterable[str]): An Iterable with the
-            audio/vidoe file paths.
-        output_dir_path (str): The output directory path.
-        language (str): The language of the file(s) to transcribe.
+        window (sg.Window): The window to send events (including events
+            with redirected stdout / stderr output) to.
+        audio_video_file_paths (Iterable[str]): File paths of the
+            audio / video files selected by the user for
+            transcription.
+        output_dir_path (str): The directory path where transcriptions
+            will be written.
+        language (Optional[str]): The language of the file(s) to
+            transcribe. If None, it will be autodetected per file.
         model (str): The whisper model to use for transcription.
         success_event (str): The event to send to the window when all
             transcriptions are successful.
@@ -2166,7 +2237,7 @@ def transcribe_audio_video_files(
 
 
 def transcribe_audio_video(
-    language: str,
+    language: Optional[str],
     model: str,
     audio_video_path: str,
     queue: multiprocessing.Queue,
@@ -2178,7 +2249,8 @@ def transcribe_audio_video(
     """Transcribe an audio/video file.
 
     Args:
-        language (str): The language of the file to transcribe.
+        language (Optional[str]): The language of the file to
+            transcribe.
         model (str): The whisper model to use for transcription.
         audio_video_path (str): An audio/video file path.
         queue (multiprocessing.Queue): The queue that the results of the
