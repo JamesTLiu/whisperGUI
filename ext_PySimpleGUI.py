@@ -503,7 +503,8 @@ class Grid(sg.Column, SuperElement):
 
                     self._update_layout()
             # Abort updating the grid on error
-            except Exception:
+            except Exception as e:
+                logger.exception(e)
                 return
 
         for block in blocks:

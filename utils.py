@@ -995,7 +995,8 @@ def convert_to_bytes(
     else:
         try:
             img = PIL.Image.open(io.BytesIO(base64.b64decode(file_or_bytes)))
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             dataBytesIO = io.BytesIO(file_or_bytes)
             img = PIL.Image.open(dataBytesIO)
 
@@ -1366,7 +1367,10 @@ def popup_on_error(
             keep_on_top=True,
             image=_random_error_emoji(),
         )
-        if not suppress_error:
+
+        if suppress_error:
+            logger.exception(e)
+        else:
             raise
 
 

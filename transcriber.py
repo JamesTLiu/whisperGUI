@@ -463,6 +463,7 @@ def transcribe_audio_video(
             initial_prompt=initial_prompt,
         )
     except Exception as e:
+        logger.exception(e)
         queue.put(e)
         raise
 
