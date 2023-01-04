@@ -710,6 +710,9 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
     # list of available whisper models
     models = whisper.available_models()
 
+    with suppress(ValueError):
+        models.remove("large")
+
     # default to base model
     DEFAULT_MODEL = models[3]
 
