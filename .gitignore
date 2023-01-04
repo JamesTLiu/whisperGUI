@@ -144,3 +144,4 @@ releases/
 
 # .dist-info folders
 *.dist-info
+log.txt
