@@ -28,6 +28,7 @@ from typing import (
 )
 
 import PySimpleGUI as sg
+
 from loggers import logger
 from utils import (
     GetWidgetSizeError,
@@ -38,10 +39,10 @@ from utils import (
     convert_to_bytes,
     ensure_valid_layout,
     find_closest_element,
+    function_details,
     get_element_size,
     get_event_widget,
     get_settings_file_path,
-    function_details,
     get_widget_size,
     popup_on_error,
     resize_window_relative_to_screen,

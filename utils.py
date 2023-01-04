@@ -7,12 +7,12 @@ import base64
 import inspect
 import io
 import platform
-from pprint import pformat
 import random
 import re
 import sys
 import time
 import tkinter as tk
+import traceback
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from enum import Enum
@@ -20,7 +20,7 @@ from itertools import islice, zip_longest
 from multiprocessing.connection import Connection
 from operator import itemgetter
 from pathlib import Path
-import traceback
+from pprint import pformat
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -41,10 +41,12 @@ from typing import (
     TypeAlias,
     Union,
 )
-from loggers import logger
+
 import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
+
+from loggers import logger
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
@@ -1511,8 +1513,8 @@ def run_shell_cmd(
         (needed to do refresh on).
     @return: (return code from command, command output).
     """
-    import subprocess
     import shlex
+    import subprocess
 
     p = subprocess.Popen(
         shlex.split(cmd),

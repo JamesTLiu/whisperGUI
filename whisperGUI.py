@@ -37,14 +37,14 @@ from typing import (
     Union,
 )
 
-from loggers import logger
-
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError
 from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
+
+import set_env
 from ext_PySimpleGUI import (
     FancyCheckbox,
     FancyToggle,
@@ -62,8 +62,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-
-import set_env
+from loggers import logger
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -74,10 +73,10 @@ from utils import (
     convert_to_bytes,
     ensure_valid_layout,
     find_closest_element,
+    function_details,
     get_element_size,
     get_event_widget,
     get_settings_file_path,
-    function_details,
     get_traceback,
     get_widget_size,
     popup_on_error,
