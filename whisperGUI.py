@@ -79,6 +79,7 @@ from utils import (
     get_settings_file_path,
     get_traceback,
     get_widget_size,
+    log_unhandled_exceptions,
     popup_on_error,
     resize_window_relative_to_screen,
     set_resizable_axis,
@@ -101,6 +102,7 @@ if TYPE_CHECKING:
 
 
 def main():
+    log_unhandled_exceptions(logger)
     set_env.set_env_vars()
     start_GUI()
 
