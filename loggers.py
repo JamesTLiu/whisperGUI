@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-f_handler = logging.FileHandler("log.txt")
+f_handler = logging.FileHandler("log.txt", mode="a")
 f_handler.setLevel(logging.WARNING)
 
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
