@@ -6,6 +6,7 @@ from __future__ import annotations
 import base64
 import inspect
 import io
+from logging import Logger
 import platform
 import random
 import re
@@ -1715,3 +1716,27 @@ class Font:
 
     def as_tuple(self):
         return (self.family, self.size, self.style)
+
+
+def log_unhandled_exceptions(logger: Logger) -> None:
+    """Log all uncaught exceptions to the specified logger.
+
+    Args:
+        logger (Logger): The logger to log all uncaught exceptions to.
+    """
+
+    def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            # Will call default excepthook
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+
+        # Create a critical level log message with info from the except
+        # hook.
+        logger.critical(
+            "Unhandled exception",
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
+
+    # Assign the handler to the excepthook
+    sys.excepthook = handle_unhandled_exception
