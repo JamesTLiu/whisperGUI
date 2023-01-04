@@ -37,6 +37,8 @@ from typing import (
     Union,
 )
 
+from loggers import logger
+
 import PySimpleGUI as sg
 import whisper
 from codetiming import Timer, TimerError

@@ -28,7 +28,7 @@ from typing import (
 )
 
 import PySimpleGUI as sg
-
+from loggers import logger
 from utils import (
     GetWidgetSizeError,
     OutputRedirector,

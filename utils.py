@@ -41,7 +41,7 @@ from typing import (
     TypeAlias,
     Union,
 )
-
+from loggers import logger
 import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
