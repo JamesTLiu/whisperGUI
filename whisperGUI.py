@@ -891,7 +891,7 @@ def make_main_window(prompt_manager: PromptManager) -> sg.Window:
                 initial_folder=sg.user_settings_get_entry(Keys.OUT_DIR),
             ),
         ],
-        [Grid(layout=tab1_options_layout, uniform_block_sizes=False)],
+        [Grid(layout=tab1_options_layout, uniform_block_sizes=False, pad=0)],
         [
             sg.pin(
                 sg.Table(
