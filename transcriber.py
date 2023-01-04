@@ -8,7 +8,6 @@ import inspect
 import io
 import multiprocessing
 import platform
-from pprint import pformat
 import random
 import re
 import signal
@@ -16,6 +15,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+import traceback
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from enum import Enum
@@ -24,7 +24,7 @@ from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
 from operator import itemgetter
 from pathlib import Path
-import traceback
+from pprint import pformat
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -54,6 +54,8 @@ from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
+from loggers import logger
+
 if TYPE_CHECKING:
     from types import FrameType
 
@@ -63,7 +65,6 @@ else:
     from multiprocessing.connection import (  # type: ignore
         Connection as PipeConnection,
     )
-
 
 from utils import (
     CustomTimer,
