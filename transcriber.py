@@ -54,7 +54,8 @@ from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
-from loggers import logger
+# import loggers
+# from loggers import process_safe_logging
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -296,6 +297,8 @@ def transcribe_audio_video_files(
             Defaults to None.
     """
 
+    # logger = process_safe_logging.get_logger()
+    # logger.info("in transcribe_audio_video_files()")
     # Paths for the transcription result files
     all_output_paths: List[str] = []
 
@@ -463,7 +466,7 @@ def transcribe_audio_video(
             initial_prompt=initial_prompt,
         )
     except Exception as e:
-        logger.exception(e)
+        # logger.exception(e)
         queue.put(e)
         raise
 

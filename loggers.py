@@ -11,7 +11,7 @@ import logging
 from typing import Union
 
 
-class ProcessSafeLogging:
+class ProcessSafeSharedLogging:
     """Process safe logging to a file."""
 
     PROCESS_SAFE_LOGGER_NAME = "app"
@@ -112,4 +112,4 @@ class ProcessSafeLogging:
         return self._file
 
 
-process_safe_logging = ProcessSafeLogging()
+# process_safe_logging = ProcessSafeSharedLogging()

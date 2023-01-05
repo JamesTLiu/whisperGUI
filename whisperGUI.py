@@ -62,7 +62,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-from loggers import logger
+import loggers
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -102,7 +102,7 @@ if TYPE_CHECKING:
 
 
 def main():
-    log_unhandled_exceptions(logger)
+    # log_unhandled_exceptions(logger)
     set_env.set_env_vars()
     start_GUI()
 

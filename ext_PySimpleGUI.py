@@ -29,7 +29,7 @@ from typing import (
 
 import PySimpleGUI as sg
 
-from loggers import logger
+# import loggers
 from utils import (
     GetWidgetSizeError,
     OutputRedirector,
@@ -504,7 +504,7 @@ class Grid(sg.Column, SuperElement):
                     self._update_layout()
             # Abort updating the grid on error
             except Exception as e:
-                logger.exception(e)
+                # logger.exception(e)
                 return
 
         for block in blocks:
