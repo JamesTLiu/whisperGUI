@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import decimal
+from logging import Logger
 import multiprocessing
 import platform
 import signal
@@ -102,10 +103,28 @@ if TYPE_CHECKING:
     from types import FrameType
 
 
+process_safe_logging: loggers.ProcessSafeSharedLogging
+logger: Logger
+
+
 def main():
-    # log_unhandled_exceptions(logger)
+    global process_safe_logging
+    process_safe_logging = loggers.ProcessSafeSharedLogging()
+    global logger
+    logger = process_safe_logging.get_logger()
+
+    log_unhandled_exceptions(logger)
+
     set_env.set_env_vars()
+
+    try:
+        raise Exception(f"{__file__}")
+    except Exception as e:
+        logger.exception(e)
+
     start_GUI()
+
+    del process_safe_logging
 
 
 def start_GUI() -> None:  # noqa: C901
