@@ -74,6 +74,7 @@ from utils import (
     ensure_valid_layout,
     find_closest_element,
     function_details,
+    get_console_logger,
     get_element_size,
     get_event_widget,
     get_settings_file_path,
@@ -2044,12 +2045,7 @@ def cycle_gui_through_themes() -> None:
         "Topanga",
     ]
 
-    import logging
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    s_handler = logging.StreamHandler()
-    logger.addHandler(s_handler)
+    logger = get_console_logger()
 
     for theme in themes:
         logger.info(f"theme={theme}")
