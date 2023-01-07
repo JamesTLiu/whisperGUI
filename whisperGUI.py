@@ -63,7 +63,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-from loggers import process_safe_logging
+from loggers import get_console_logger, process_safe_logging
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -75,7 +75,6 @@ from utils import (
     ensure_valid_layout,
     find_closest_element,
     function_details,
-    get_console_logger,
     get_element_size,
     get_event_widget,
     get_settings_file_path,
