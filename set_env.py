@@ -3,10 +3,6 @@ from pathlib import Path
 import platform
 
 
-def main():
-    set_env_vars()
-
-
 def set_env_vars() -> None:
     """Set needed environment variables.
 
@@ -76,7 +72,3 @@ def get_script_cwd() -> Path:
         Path: file path for the directory containing the current script.
     """
     return Path(__file__).parent
-
-
-if __name__ == "__main__":
-    main()
