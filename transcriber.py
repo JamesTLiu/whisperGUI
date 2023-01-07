@@ -54,8 +54,6 @@ from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
-# import loggers
-# from loggers import process_safe_logging
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -74,6 +72,14 @@ from utils import (
     get_traceback,
     popup_on_error,
 )
+
+from loggers import (
+    ProcessSafeLogging,
+    get_logger_for_queue,
+    process_safe_logging,
+)
+
+logger = process_safe_logging.get_logger()
 
 
 class Transcriber:
@@ -324,6 +330,7 @@ def transcribe_audio_video_files(
                 "process_done_flag": process_done_flag,
                 "translate_to_english": translate_to_english,
                 "initial_prompt": initial_prompt,
+                "shared_logging_queue": process_safe_logging._shared_queue,
             },
             daemon=True,
         )
@@ -360,6 +367,7 @@ def transcribe_audio_video_files(
             while read_connection.poll():
                 send_piped_output_to_window(window, read_connection)
 
+        # Finish sending piped output from the process to the window
         while read_connection.poll():
             send_piped_output_to_window(window, read_connection)
 
@@ -409,6 +417,7 @@ def transcribe_audio_video(
     queue: multiprocessing.Queue,
     write_connection: Union[Connection, PipeConnection],
     process_done_flag: EventClass,
+    shared_logging_queue: multiprocessing.Queue,
     translate_to_english: bool = False,
     initial_prompt: str = None,
 ) -> None:
@@ -431,6 +440,9 @@ def transcribe_audio_video(
             the transcription to a certain dialect/language/style.
             Defaults to None.
     """
+    global logger
+    logger = get_logger_for_queue(shared_logging_queue)
+
     redirector = OutputRedirector(write_connection)
 
     # Clean up when this process is told to terminate
@@ -453,6 +465,13 @@ def transcribe_audio_video(
         task = "translate"
     else:
         task = "transcribe"
+
+    try:
+        raise Exception(f"{__file__}")
+    except Exception as e:
+        logger.exception(e)
+
+    test()
 
     # Transcribe the file
     try:
@@ -480,6 +499,20 @@ def transcribe_audio_video(
 
     # Signal process completion to the parent thread
     process_done_flag.set()
+
+
+def test():
+    try:
+        raise Exception(f"{__file__}")
+    except Exception as e:
+        logger.exception(e)
+
+    logger.debug("TEST DEBUG")
+    logger.info("TEST INFO")
+    logger.warning("TEST WARNING")
+    logger.error("TEST ERROR")
+    logger.critical("TEST CRITICAL")
+
 
 
 def write_transcript_to_files(

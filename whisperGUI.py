@@ -63,7 +63,10 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-from loggers import get_console_logger, process_safe_logging
+from loggers import (
+    get_console_logger,
+    process_safe_logging,
+)
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -117,6 +120,12 @@ def main():
         raise Exception(f"{__file__}")
     except Exception as e:
         logger.exception(e)
+
+    logger.debug("TEST DEBUG IN whisperGUI")
+    logger.info("TEST INFO IN whisperGUI")
+    logger.warning("TEST WARNING IN whisperGUI")
+    logger.error("TEST ERROR IN whisperGUI")
+    logger.critical("TEST CRITICAL IN whisperGUI")
 
     start_GUI()
 

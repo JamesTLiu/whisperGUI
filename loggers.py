@@ -4,9 +4,7 @@ from pathlib import Path
 from random import random
 import sys
 from time import sleep
-from multiprocessing import current_process
-from multiprocessing import Process
-from multiprocessing import Queue
+from multiprocessing import current_process, Process, Queue, Manager
 from logging.handlers import QueueHandler
 import logging
 from typing import Iterable, Union
@@ -52,6 +50,10 @@ class ProcessSafeLogging:
                 ().
         """
         self._handlers = tuple(handlers)
+        # self._manager = Manager()
+        # self._manager.Queue()
+        # self._manager.start()
+
         self._shared_queue: Queue = Queue()
 
     def _logger_process(
@@ -66,6 +68,11 @@ class ProcessSafeLogging:
             handlers (Iterable[logging.Handler]): Handlers to add to the
                 queue processing logger.
         """
+        # temp_logger = get_console_logger()
+        # temp_logger.info(
+        #     f"inside of queue handling process:\n{self._shared_queue}"
+        # )
+
         # create a logger
         logger = logging.getLogger(f"queue_processor{self._queue_process_id}")
 
@@ -108,7 +115,7 @@ class ProcessSafeLogging:
         # configure a file handler
         f_handler = logging.FileHandler(f"log{log_num}.txt", mode="a")
         f_handler.setFormatter(f_format)
-        f_handler.setLevel(logging.WARNING)
+        f_handler.setLevel(logging.DEBUG)
         return f_handler
 
     def get_logger(
@@ -152,6 +159,10 @@ class ProcessSafeLogging:
         """Start the process that consumes log messages in the shared
         queue.
         """
+        # temp_logger = get_console_logger()
+        # temp_logger.info(
+        #     f"outside of queue handling process:\n{self._shared_queue}"
+        # )
 
         # start the logger process
         logger_p = Process(
@@ -167,6 +178,44 @@ class ProcessSafeLogging:
         logger.info("ProcessSafeSharedLogging instance deleted.")
         print("blah", file=sys.__stderr__, flush=True)
         self._shared_queue.put(None)
+
+
+def get_logger_for_queue(
+    queue: Queue, logging_level: Union[int, str, None] = None
+) -> logging.Logger:
+    """Return a process safe logger. All process safe loggers'
+    messages are put in a queue for processing.
+
+    Note: Multiple calls in the same process will return the same
+    logger and set the logging level each call.
+
+    Args:
+        logging_level (Union[int, str, None], optional): The logging
+            level of the returned logger. If None, the logging level
+            will not be changed. If None and the logger is created,
+            the logging level of logging.DEBUG will be used.
+            Defaults to None.
+
+    Returns:
+        logging.Logger: A process safe logger.
+    """
+    # create a logger
+    logger = logging.getLogger(f"logger_{queue}")
+
+    # new logger
+    if not logger.handlers:
+        # add a handler that uses a shared queue
+        logger.addHandler(QueueHandler(queue))
+
+        # use the debug logging level if no logging level is given
+        if logging_level is None:
+            logging_level = logging.DEBUG
+
+    # set a new logging level
+    if logging_level is not None:
+        logger.setLevel(logging_level)
+
+    return logger
 
 
 process_safe_logging = ProcessSafeLogging()
