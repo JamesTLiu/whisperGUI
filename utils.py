@@ -48,7 +48,9 @@ import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
 
-# import loggers
+from loggers import process_safe_logging
+
+logger = process_safe_logging.get_logger()
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore
@@ -998,7 +1000,7 @@ def convert_to_bytes(
         try:
             img = PIL.Image.open(io.BytesIO(base64.b64decode(file_or_bytes)))
         except Exception as e:
-            # logger.exception(e)
+            logger.exception(e)
             dataBytesIO = io.BytesIO(file_or_bytes)
             img = PIL.Image.open(dataBytesIO)
 
@@ -1371,8 +1373,7 @@ def popup_on_error(
         )
 
         if suppress_error:
-            # logger.exception(e)
-            ...
+            logger.exception(e)
         else:
             raise
 

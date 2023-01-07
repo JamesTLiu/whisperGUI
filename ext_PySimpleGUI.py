@@ -29,7 +29,6 @@ from typing import (
 
 import PySimpleGUI as sg
 
-# import loggers
 from utils import (
     GetWidgetSizeError,
     OutputRedirector,
@@ -64,6 +63,10 @@ else:
 
 if TYPE_CHECKING:
     from types import FrameType
+
+from loggers import process_safe_logging
+
+logger = process_safe_logging.get_logger()
 
 
 class PostInit:
@@ -504,7 +507,7 @@ class Grid(sg.Column, SuperElement):
                     self._update_layout()
             # Abort updating the grid on error
             except Exception as e:
-                # logger.exception(e)
+                logger.exception(e)
                 return
 
         for block in blocks:
