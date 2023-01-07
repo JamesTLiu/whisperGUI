@@ -63,7 +63,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-from loggers import (
+from custom_logging import (
     get_console_logger,
     process_safe_logging,
 )

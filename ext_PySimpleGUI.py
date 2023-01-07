@@ -64,7 +64,7 @@ else:
 if TYPE_CHECKING:
     from types import FrameType
 
-from loggers import process_safe_logging
+from custom_logging import process_safe_logging
 
 logger = process_safe_logging.get_logger()
 

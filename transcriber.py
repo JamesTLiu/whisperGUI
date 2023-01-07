@@ -73,7 +73,7 @@ from utils import (
     popup_on_error,
 )
 
-from loggers import (
+from custom_logging import (
     ProcessSafeLogging,
     get_logger_for_queue,
     process_safe_logging,

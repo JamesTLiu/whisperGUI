@@ -48,7 +48,7 @@ import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
 
-from loggers import process_safe_logging
+from custom_logging import process_safe_logging
 
 logger = process_safe_logging.get_logger()
 
