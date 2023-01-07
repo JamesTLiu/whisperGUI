@@ -63,7 +63,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-import loggers
+from loggers import process_safe_logging
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -103,15 +103,12 @@ if TYPE_CHECKING:
     from types import FrameType
 
 
-process_safe_logging: loggers.ProcessSafeSharedLogging
-logger: Logger
+logger = process_safe_logging.get_logger()
 
 
 def main():
     global process_safe_logging
-    process_safe_logging = loggers.ProcessSafeSharedLogging()
-    global logger
-    logger = process_safe_logging.get_logger()
+    process_safe_logging.start_queue_handling_logger_process()
 
     log_unhandled_exceptions(logger)
 
@@ -124,7 +121,11 @@ def main():
 
     start_GUI()
 
-    del process_safe_logging
+    # del process_safe_logging
+    # process_safe_logging.close()
+    # process_safe_logging.__del__()
+
+    ...
 
 
 def start_GUI() -> None:  # noqa: C901
@@ -2080,7 +2081,7 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     # The only method that works on both Windows and Linux is "spawn"
-    multiprocessing.set_start_method("spawn")
+    multiprocessing.set_start_method("spawn", force=True)
 
     with popup_on_error(Exception):
         main()

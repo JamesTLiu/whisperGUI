@@ -2,6 +2,7 @@
 # mypy: disable-error-code=union-attr
 from pathlib import Path
 from random import random
+import sys
 from time import sleep
 from multiprocessing import current_process
 from multiprocessing import Process
@@ -13,12 +14,22 @@ from typing import Iterable, Union
 from utils import get_console_logger
 
 
-class ProcessSafeSharedLogging:
+class ProcessSafeLoggingError(Exception):
+    """An error occurred during process safe logging."""
+
+
+class QueueHandlingProcessLoggerHasHandlers(ProcessSafeLoggingError):
+    """The logger for handling the shared queue already has handlers but
+    should not. Check if an existing logger was accidentally retrieved.
+    """
+
+
+class ProcessSafeLogging:
     """Process safe logging to a file."""
 
     LOGGER_NAME = "app"
 
-    _default_log_num = 1
+    _queue_process_id = 1
 
     def __init__(self, handlers: Iterable[logging.Handler] = ()) -> None:
         """Process safe logging to a file.
@@ -29,7 +40,8 @@ class ProcessSafeSharedLogging:
                 given, a default filehandler will be used. Defaults to
                 ().
         """
-        self._shared_queue = self._start_logger_process(handlers)
+        self._handlers = tuple(handlers)
+        self._shared_queue: Queue = Queue()
 
     def _logger_process(
         self, queue: Queue, handlers: Iterable[logging.Handler]
@@ -44,13 +56,17 @@ class ProcessSafeSharedLogging:
                 queue processing logger.
         """
         # create a logger
-        logger = logging.getLogger(self.LOGGER_NAME)
+        logger = logging.getLogger(f"queue_processor{self._queue_process_id}")
+
+        # a logger with handlers was returned
+        if logger.hasHandlers():
+            raise QueueHandlingProcessLoggerHasHandlers
 
         # add the handlers to the logger
         for handler in handlers:
             logger.addHandler(handler)
 
-        # The logger has no handlers. Add the default handler.
+        # No handlers were given. Add the default handler.
         if not logger.hasHandlers():
             logger.addHandler(self._get_default_handler())
 
@@ -68,6 +84,7 @@ class ProcessSafeSharedLogging:
 
             # log the message
             logger.handle(message)
+            # print(f"_logger_process got msg:\n{message}")
 
     def _get_default_handler(self) -> logging.FileHandler:
         # configure a formatter
@@ -75,8 +92,7 @@ class ProcessSafeSharedLogging:
         f_format = logging.Formatter(log_format)
 
         # Get the default log file number
-        log_num = self._default_log_num if self._default_log_num > 1 else ""
-        self._default_log_num += 1
+        log_num = self._queue_process_id if self._queue_process_id > 1 else ""
 
         # configure a file handler
         f_handler = logging.FileHandler(f"log{log_num}.txt", mode="a")
@@ -121,30 +137,25 @@ class ProcessSafeSharedLogging:
 
         return logger
 
-    def _start_logger_process(
-        self, handlers: Iterable[logging.Handler]
-    ) -> Queue:
+    def start_queue_handling_logger_process(self) -> None:
         """Start the process that consumes log messages in the shared
         queue.
-
-        Args:
-            handlers (Iterable[logging.Handler]): Handlers to add to the
-                queue processing logger.
-
-        Returns:
-            Queue: The shared queue.
         """
-        # create the shared queue
-        queue: Queue = Queue()
 
         # start the logger process
-        logger_p = Process(target=self._logger_process, args=(queue, handlers))
+        logger_p = Process(
+            target=self._logger_process,
+            args=(self._shared_queue, self._handlers),
+            daemon=True,
+        )
         logger_p.start()
-
-        return queue
+        self._queue_process_id += 1
 
     def __del__(self):
         logger = get_console_logger()
         logger.info("ProcessSafeSharedLogging instance deleted.")
-        # print("blah", file=sys.stderr, flush=True)
+        print("blah", file=sys.__stderr__, flush=True)
         self._shared_queue.put(None)
+
+
+process_safe_logging = ProcessSafeLogging()
