@@ -216,6 +216,7 @@ class Transcriber:
         return current_file
 
 
+@logger.catch(reraise=True)
 def transcribe_audio_video_files(
     window: sg.Window,
     audio_video_file_paths: Iterable[str],
@@ -377,6 +378,7 @@ def transcribe_audio_video_files(
     window.write_event_value(success_event, all_output_paths)
 
 
+@logger.catch(reraise=True)
 def transcribe_audio_video(
     language: Optional[str],
     model: str,
