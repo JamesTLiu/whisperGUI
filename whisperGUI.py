@@ -59,21 +59,7 @@ logger.add(
 @logger.catch(reraise=True)
 def main():
     set_env.set_env_vars()
-
-    try:
-        raise Exception(f"{__file__}")
-    except Exception as e:
-        logger.exception(e)
-
-    logger.debug("TEST DEBUG IN whisperGUI")
-    logger.info("TEST INFO IN whisperGUI")
-    logger.warning("TEST WARNING IN whisperGUI")
-    logger.error("TEST ERROR IN whisperGUI")
-    logger.critical("TEST CRITICAL IN whisperGUI")
-
     start_GUI()
-
-    raise Exception("Uncaught exception here!")
 
 
 def start_GUI() -> None:  # noqa: C901

@@ -429,13 +429,6 @@ def transcribe_audio_video(
     else:
         task = "transcribe"
 
-    try:
-        raise Exception(f"{__file__}")
-    except Exception as e:
-        logger.exception(e)
-
-    test()
-
     # Transcribe the file
     try:
         result = whisper_model.transcribe(
@@ -462,19 +455,6 @@ def transcribe_audio_video(
 
     # Signal process completion to the parent thread
     process_done_flag.set()
-
-
-def test():
-    try:
-        raise Exception(f"{__file__}")
-    except Exception as e:
-        logger.exception(e)
-
-    logger.debug("TEST DEBUG")
-    logger.info("TEST INFO")
-    logger.warning("TEST WARNING")
-    logger.error("TEST ERROR")
-    logger.critical("TEST CRITICAL")
 
 
 def write_transcript_to_files(
