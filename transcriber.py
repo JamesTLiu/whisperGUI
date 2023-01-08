@@ -272,9 +272,6 @@ def transcribe_audio_video_files(
             the transcription to a certain dialect/language/style.
             Defaults to None.
     """
-
-    test()
-
     # logger.info("in transcribe_audio_video_files()")
     # Paths for the transcription result files
     all_output_paths: List[str] = []
