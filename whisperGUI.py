@@ -130,7 +130,7 @@ def main():
     start_GUI()
 
     # del process_safe_logging
-    # process_safe_logging.close()
+    process_safe_logging.close()
     # process_safe_logging.__del__()
 
     ...

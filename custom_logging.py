@@ -173,11 +173,14 @@ class ProcessSafeLogging:
         logger_p.start()
         self._queue_process_id += 1
 
-    def __del__(self):
+    def __del__(self) -> None:
+        """Shut down the queue handling process."""
         logger = get_console_logger()
         logger.info("ProcessSafeSharedLogging instance deleted.")
         print("blah", file=sys.__stderr__, flush=True)
         self._shared_queue.put(None)
+
+    close = __del__
 
 
 def get_logger_for_queue(
