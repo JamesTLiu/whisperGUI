@@ -3,53 +3,31 @@
 
 from __future__ import annotations
 
-import base64
-import inspect
-import io
 import multiprocessing
 import platform
-import random
-import re
 import signal
 import sys
 import threading
-import time
-import tkinter as tk
-import traceback
-from contextlib import contextmanager, suppress
-from dataclasses import dataclass
-from enum import Enum
-from itertools import islice, zip_longest
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
-from operator import itemgetter
 from pathlib import Path
-from pprint import pformat
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
-    Generator,
     Iterable,
     Iterator,
     List,
-    Mapping,
-    MutableMapping,
     Optional,
-    Sequence,
-    Set,
     TextIO,
     Tuple,
-    Type,
-    TypeAlias,
     Union,
 )
 
-import PIL.Image
 import PySimpleGUI as sg
 import whisper
-from codetiming import Timer, TimerError
+from codetiming import TimerError
 from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
@@ -235,9 +213,6 @@ class Transcriber:
 
         if self.num_tasks_done < self.num_tasks:
             current_file = self.audio_video_file_paths[self.num_tasks_done]
-
-        # if self.num_tasks_done <= self.num_tasks:
-        #     current_file = self.audio_video_file_paths[self.num_tasks_done]
 
         return current_file
 

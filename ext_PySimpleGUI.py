@@ -3,14 +3,12 @@
 
 from __future__ import annotations
 
-import platform
 import re
 import tkinter as tk
 from contextlib import suppress
 from dataclasses import dataclass
 from types import EllipsisType
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -20,7 +18,6 @@ from typing import (
     Optional,
     Sequence,
     Set,
-    TextIO,
     Tuple,
     Type,
     TypeAlias,
@@ -31,38 +28,18 @@ import PySimpleGUI as sg
 
 from utils import (
     GetWidgetSizeError,
-    OutputRedirector,
     WidgetNotFoundError,
     _random_error_emoji,
-    close_connections,
-    convert_to_bytes,
-    ensure_valid_layout,
-    find_closest_element,
     function_details,
     get_element_size,
     get_event_widget,
-    get_settings_file_path,
-    get_widget_size,
     popup_on_error,
-    resize_window_relative_to_screen,
     set_resizable_axis,
     set_window_to_autosize,
     setup_height_matched_images,
-    str_to_file_paths,
-    vertically_align_elements,
     widget_resized,
 )
 
-if platform.system() == "Windows":
-    from multiprocessing.connection import PipeConnection  # type: ignore
-else:
-    from multiprocessing.connection import (  # type: ignore
-        Connection as PipeConnection,
-    )
-
-
-if TYPE_CHECKING:
-    from types import FrameType
 
 from loguru import logger
 
