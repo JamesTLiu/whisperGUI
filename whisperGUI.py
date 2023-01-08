@@ -44,6 +44,7 @@ from codetiming import Timer, TimerError
 from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
+from logging_utils import get_console_logger
 
 import set_env
 from ext_PySimpleGUI import (
@@ -64,7 +65,6 @@ from ext_PySimpleGUI import (
     set_up_resize_event,
 )
 from custom_logging import (
-    get_console_logger,
     process_safe_logging,
 )
 from transcriber import GenEvents, Transcriber
@@ -103,7 +103,6 @@ else:
 
 if TYPE_CHECKING:
     from types import FrameType
-
 
 logger = process_safe_logging.get_logger()
 

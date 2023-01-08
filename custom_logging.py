@@ -9,18 +9,7 @@ from logging.handlers import QueueHandler
 import logging
 from typing import Iterable, Union
 
-
-def get_console_logger() -> logging.Logger:
-    """Return a logger for the actual sys.stderr. Works even if
-    sys.stderr was redirected.
-
-    Returns:
-        logging.Logger: A logger for the original sys.stderr.
-    """
-    logger = logging.getLogger("ConsoleLogging")
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler(sys.__stderr__))
-    return logger
+from logging_utils import get_console_logger
 
 
 class ProcessSafeLoggingError(Exception):
