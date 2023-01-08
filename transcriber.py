@@ -47,6 +47,7 @@ from loguru import logger
 from utils import (
     CustomTimer,
     OutputRedirector,
+    CustomThread,
     close_connections,
     get_traceback,
     popup_on_error,
@@ -141,7 +142,7 @@ class Transcriber:
         self.num_tasks = len(self.audio_video_file_paths)
 
         # Start transcription in separate thread
-        self.transcribe_thread = threading.Thread(
+        self.transcribe_thread = CustomThread(
             target=transcribe_audio_video_files,
             kwargs={
                 "window": window,
@@ -216,7 +217,7 @@ class Transcriber:
         return current_file
 
 
-@logger.catch(reraise=True)
+# @logger.catch(reraise=True)
 def transcribe_audio_video_files(
     window: sg.Window,
     audio_video_file_paths: Iterable[str],
@@ -272,7 +273,8 @@ def transcribe_audio_video_files(
             Defaults to None.
     """
 
-    # logger = process_safe_logging.get_logger()
+    test()
+
     # logger.info("in transcribe_audio_video_files()")
     # Paths for the transcription result files
     all_output_paths: List[str] = []

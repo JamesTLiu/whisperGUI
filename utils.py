@@ -11,6 +11,7 @@ import platform
 import random
 import re
 import sys
+import threading
 import time
 import tkinter as tk
 import traceback
@@ -1747,3 +1748,9 @@ def get_console_logger() -> logging.Logger:
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler(sys.__stderr__))
     return logger
+
+
+class CustomThread(threading.Thread):
+    @logger.catch(reraise=True)
+    def run(self):
+        super().run()
