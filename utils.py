@@ -6,6 +6,7 @@ from __future__ import annotations
 import base64
 import inspect
 import io
+import logging
 import platform
 import random
 import re
@@ -1733,3 +1734,16 @@ def log_unhandled_exceptions(logger: Logger) -> None:
 
     # Assign the handler to the excepthook
     sys.excepthook = handle_unhandled_exception
+
+
+def get_console_logger() -> logging.Logger:
+    """Return a logger for the actual sys.stderr. Works even if
+    sys.stderr was redirected.
+
+    Returns:
+        logging.Logger: A logger for the original sys.stderr.
+    """
+    logger = logging.getLogger("ConsoleLogging")
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler(sys.__stderr__))
+    return logger
