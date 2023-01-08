@@ -7,6 +7,7 @@ import base64
 import inspect
 import io
 import logging
+import multiprocessing
 import platform
 import random
 import re
@@ -1751,6 +1752,12 @@ def get_console_logger() -> logging.Logger:
 
 
 class CustomThread(threading.Thread):
+    @logger.catch(reraise=True)
+    def run(self):
+        super().run()
+
+
+class CustomProcess(multiprocessing.Process):
     @logger.catch(reraise=True)
     def run(self):
         super().run()

@@ -45,6 +45,7 @@ else:
 from loguru import logger
 
 from utils import (
+    CustomProcess,
     CustomTimer,
     OutputRedirector,
     CustomThread,
@@ -287,7 +288,7 @@ def transcribe_audio_video_files(
         process_done_flag = multiprocessing.Event()
 
         # Start transcription of the file in a process
-        process = multiprocessing.Process(
+        process = CustomProcess(
             target=transcribe_audio_video,
             kwargs={
                 "language": language,
@@ -377,7 +378,6 @@ def transcribe_audio_video_files(
     window.write_event_value(success_event, all_output_paths)
 
 
-@logger.catch(reraise=True)
 def transcribe_audio_video(
     language: Optional[str],
     model: str,
