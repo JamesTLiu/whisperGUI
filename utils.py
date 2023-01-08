@@ -48,9 +48,7 @@ import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
 
-from custom_logging import process_safe_logging
-
-logger = process_safe_logging.get_logger()
+from loguru import logger
 
 if platform.system() == "Windows":
     from multiprocessing.connection import PipeConnection  # type: ignore

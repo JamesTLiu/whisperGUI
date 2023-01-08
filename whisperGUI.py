@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import decimal
 from logging import Logger
+import logging
 import multiprocessing
 import platform
 import signal
@@ -64,9 +65,7 @@ from ext_PySimpleGUI import (
     save_toggle_state,
     set_up_resize_event,
 )
-from custom_logging import (
-    process_safe_logging,
-)
+
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -104,15 +103,22 @@ else:
 if TYPE_CHECKING:
     from types import FrameType
 
-logger = process_safe_logging.get_logger()
+from loguru import logger
 
 
+logger.remove()
+logger.add(
+    "debug.log",
+    mode="a",
+    level=logging.DEBUG,
+    enqueue=True,
+    backtrace=True,
+    diagnose=True,
+)
+
+
+@logger.catch(reraise=True)
 def main():
-    global process_safe_logging
-    process_safe_logging.start_queue_handling_logger_process()
-
-    log_unhandled_exceptions(logger)
-
     set_env.set_env_vars()
 
     try:
@@ -128,11 +134,7 @@ def main():
 
     start_GUI()
 
-    # del process_safe_logging
-    process_safe_logging.close()
-    # process_safe_logging.__del__()
-
-    ...
+    raise Exception("Uncaught exception here!")
 
 
 def start_GUI() -> None:  # noqa: C901
@@ -2072,7 +2074,7 @@ def cycle_gui_through_themes() -> None:
         "Topanga",
     ]
 
-    logger = get_console_logger()
+    # logger = get_console_logger()
 
     for theme in themes:
         logger.info(f"theme={theme}")

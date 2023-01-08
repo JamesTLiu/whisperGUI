@@ -73,13 +73,7 @@ from utils import (
     popup_on_error,
 )
 
-from custom_logging import (
-    ProcessSafeLogging,
-    get_logger_for_queue,
-    process_safe_logging,
-)
-
-logger = process_safe_logging.get_logger()
+from loguru import logger
 
 
 class Transcriber:
@@ -330,7 +324,6 @@ def transcribe_audio_video_files(
                 "process_done_flag": process_done_flag,
                 "translate_to_english": translate_to_english,
                 "initial_prompt": initial_prompt,
-                "shared_logging_queue": process_safe_logging._shared_queue,
             },
             daemon=True,
         )
@@ -417,7 +410,6 @@ def transcribe_audio_video(
     queue: multiprocessing.Queue,
     write_connection: Union[Connection, PipeConnection],
     process_done_flag: EventClass,
-    shared_logging_queue: multiprocessing.Queue,
     translate_to_english: bool = False,
     initial_prompt: str = None,
 ) -> None:
@@ -440,9 +432,6 @@ def transcribe_audio_video(
             the transcription to a certain dialect/language/style.
             Defaults to None.
     """
-    global logger
-    logger = get_logger_for_queue(shared_logging_queue)
-
     redirector = OutputRedirector(write_connection)
 
     # Clean up when this process is told to terminate
