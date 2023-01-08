@@ -6,7 +6,6 @@ from __future__ import annotations
 import base64
 import inspect
 import io
-from logging import Logger
 import platform
 import random
 import re
@@ -18,6 +17,7 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from enum import Enum
 from itertools import islice, zip_longest
+from logging import Logger
 from multiprocessing.connection import Connection
 from operator import itemgetter
 from pathlib import Path
@@ -40,7 +40,6 @@ from typing import (
 import PIL.Image
 import PySimpleGUI as sg
 from codetiming import Timer, TimerError
-
 from loguru import logger
 
 if platform.system() == "Windows":

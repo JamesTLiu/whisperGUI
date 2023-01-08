@@ -10,17 +10,12 @@ from contextlib import suppress
 from decimal import Decimal
 from operator import itemgetter
 from types import EllipsisType
-from typing import (
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import Dict, List, Optional, Tuple, Union
 
 import PySimpleGUI as sg
 import whisper
 from codetiming import TimerError
+from loguru import logger
 from whisper.tokenizer import TO_LANGUAGE_CODE
 
 import set_env
@@ -39,7 +34,6 @@ from ext_PySimpleGUI import (
     save_checkbox_state,
     set_up_resize_event,
 )
-
 from transcriber import GenEvents, Transcriber
 from utils import (
     Font,
@@ -50,10 +44,6 @@ from utils import (
     str_to_file_paths,
     vertically_align_elements,
 )
-
-
-from loguru import logger
-
 
 logger.remove()
 logger.add(

@@ -25,6 +25,7 @@ from typing import (
 )
 
 import PySimpleGUI as sg
+from loguru import logger
 
 from utils import (
     GetWidgetSizeError,
@@ -39,9 +40,6 @@ from utils import (
     setup_height_matched_images,
     widget_resized,
 )
-
-
-from loguru import logger
 
 
 class PostInit:

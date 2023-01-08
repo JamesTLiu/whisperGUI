@@ -32,7 +32,6 @@ from whisper.tokenizer import LANGUAGES as TO_LANGUAGE
 from whisper.tokenizer import TO_LANGUAGE_CODE
 from whisper.utils import write_srt, write_txt, write_vtt
 
-
 if TYPE_CHECKING:
     from types import FrameType
 
@@ -43,6 +42,8 @@ else:
         Connection as PipeConnection,
     )
 
+from loguru import logger
+
 from utils import (
     CustomTimer,
     OutputRedirector,
@@ -50,8 +51,6 @@ from utils import (
     get_traceback,
     popup_on_error,
 )
-
-from loguru import logger
 
 
 class Transcriber:
