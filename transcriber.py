@@ -514,7 +514,6 @@ def test():
     logger.critical("TEST CRITICAL")
 
 
-
 def write_transcript_to_files(
     transcribe_result: Dict[str, Union[dict, Any, str]],
     audio_path: str,
