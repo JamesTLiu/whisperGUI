@@ -250,6 +250,20 @@ pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.10/site-packag
     This is the first version of Python to default to the 64-bit installer on Windows. The installer now also actively disallows installation on Windows 7. Python 3.9 is incompatible with this unsupported version of Windows.
     ```
 
+## Building compressed files
+### Windows
+Use a tool like 7-Zip with high compression settings.
+![image](https://user-images.githubusercontent.com/21352182/223277748-67012d17-3540-43cd-8d85-dddd74957181.png)
+
+### Linux
+Navigate to the project directory's dist folder `whisperGUI/dist` (it contains the `whisperGUI` folder created by the `pyinstaller` command) and then run the following.
+```bash
+tar -cf - whisperGUI/ | xz -9 --threads=0 - > whisperGUI_Linux.tar.xz
+```
+* -9 is highest compression level. use -9e for xz if you need even more compression (extreme) at the cost of higher (~2x) compression time.
+* Use -T0 or --threads=0 to makes xz use as many threads as there are CPU cores on the system
+
+
 ## Models
 You can directly download all of the models if you need them.
 
