@@ -291,6 +291,28 @@ PermissionError: [Errno 13] Permission denied: 'ffmpeg'
 whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and no option to use CPU is given.
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
 
+pyinstaller builds successfully but running the executable results in an error in `transformers\utils\logging.py`'s `_configure_library_root_logger` function with the message `Failed to execute script 'whisperGUI' due to unhandled exception: 'NoneType' object has no attribute 'flush'`.
+![image](https://user-images.githubusercontent.com/21352182/223229439-f6c99e30-df90-47b2-95cc-f484ab825545.png)
+1. Open the following file in the `site-packages` directory `.\transformers\utils\logging.py`.
+    * The `site-packages` directory path can be found by running the following in the terminal.
+        ```bash
+        python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+        ```
+2. Go to the function definition for `_configure_library_root_logger` and replace the following code inside of it.
+
+    Original Code
+    ```python
+    _default_handler = logging.StreamHandler()  # Set sys.stderr as stream.
+    _default_handler.flush = sys.stderr.flush
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223228785-f0d81b1b-dbc5-46a8-984f-a57c8e1f92ea.png)
+    New Code
+    ```python
+    _default_handler = sys.stderr
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223228931-b3ecce09-d6f2-4797-82d9-e73e758749e1.png)
+3. Save the `logging.py` file and rebuild using pyinstaller.
+
 ## Credits
 This GUI would not be possible without openai whisper. Read more about it at https://openai.com/blog/whisper/.
 
