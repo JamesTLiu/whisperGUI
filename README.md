@@ -1,6 +1,10 @@
 # whisperGUI
 A Graphical User Interface (GUI) for audio/video file transcription powered by openai whisper.
 
+## Python
+This application is built using python 3.10. Other versions of python may or may not work.
+
+
 ## Developer Setup
 
 The video tutorial (Windows) that I initially followed to get set up for whisper on command line (where the ffmpeg and whisper terminal commands come from) at https://www.youtube.com/watch?v=msj3wuYf3d8.
@@ -231,7 +235,7 @@ pyinstaller -D -w --uac-admin --python-option="u" --paths="./venv/Lib/site-packa
 ```
 Linux
 ```bash
-pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.8/site-packages/" --hidden-import=pytorch --collect-data torch --copy-metadata torch --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --copy-metadata importlib_metadata --add-binary="ffmpeg/linux:ffmpeg/linux" --collect-data "whisper" --runtime-hook=set_env.py whisperGUI.py --noconfirm
+pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.10/site-packages/" --hidden-import=pytorch --collect-data torch --copy-metadata torch --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --copy-metadata importlib_metadata --add-binary="ffmpeg/linux:ffmpeg/linux" --collect-data "whisper" --runtime-hook=set_env.py whisperGUI.py --noconfirm
 ```
 * Use `/` in path strings to avoid needing to use `\\`
 * Use `-D` / `--onedir` instead of `-F` / `--onefile` option for creating a directory with the exe instead of a single exe file.
