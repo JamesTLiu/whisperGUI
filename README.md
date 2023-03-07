@@ -1,13 +1,12 @@
 # whisperGUI
 A Graphical User Interface (GUI) for audio/video file transcription powered by openai whisper.
 
-## Python
-This application is built using python 3.10. Other versions of python may or may not work.
-
-
 ## Developer Setup
 
-The video tutorial (Windows) that I initially followed to get set up for whisper on command line (where the ffmpeg and whisper terminal commands come from) at https://www.youtube.com/watch?v=msj3wuYf3d8.
+The video tutorial (Windows) that I initially followed to get set up for whisper on the command line (where the ffmpeg and whisper terminal commands come from) is at https://www.youtube.com/watch?v=msj3wuYf3d8.
+
+### Python
+This application is built using python 3.10. Other versions of python may or may not work with the project.
 
 Install `python`. A good guide at https://realpython.com/installing-python/.
 * Remember to install your desired version of python, it's corresponding pip, and venv.
@@ -44,6 +43,7 @@ Install `python` version X on Linux
     pythonX -m pip install --upgrade pip
     ```
 
+### Virtual Environment
 Create a virtual environment (`venv` will be used throughout this document).
 * Example using `venv`
     ```bash
@@ -64,24 +64,25 @@ alias de='deactivate'
 These aliases only work if you create virtual environment directories that are always called `venv` in each project folder.
 These aliases must be used in a project directory that contains a `venv` virtual environment directory.
 
-Install `ffmpeg` (if NOT using ffmpeg static binary)
+### FFMPEG
+Install `ffmpeg` (if NOT using a ffmpeg static binary)
 ```bash
 sudo apt update && sudo apt install ffmpeg
 ```
 * Installing ffmpeg is not needed. We use a static binary for ffmpeg to avoid installing it.
 
+### Installing python packages
 Update `pip` if you haven't already done so.
 ```bash
 python3 -m pip install --upgrade pip
 ```
 
-Installing python packages
-* Install packages using the `requirements.txt` file with whichever tool you prefer.
-    * Example using `pip-tools`
-        ```bash
-        pip3 install pip-tools
-        pip-sync
-        ```
+Install packages using the `requirements.txt` file with whichever tool you prefer.
+* Example using `pip-tools`
+    ```bash
+    pip3 install pip-tools
+    pip-sync
+    ```
 
 If you see installation errors during the pip install command for `whisper`, install `rust` with:
 ```bash
