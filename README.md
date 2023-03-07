@@ -331,6 +331,17 @@ pyinstaller builds successfully but running the executable results in an error i
     ![image](https://user-images.githubusercontent.com/21352182/223228931-b3ecce09-d6f2-4797-82d9-e73e758749e1.png)
 3. Save the `logging.py` file and rebuild using pyinstaller.
 
+When the application is finally running, the download model is always stuck. This is because the window is closed. Some codes use functions that need to get print messages from cmd or display them in cmd. Therefore, it should be when whisper is downloading the model. It is caused by using tqdm to display the progress bar, so find this code in whisper's `__init__.py` file and comment out the two lines of code as shown in the figure below.
+
+* Search for this Code
+    ```python
+    with tqdm(total=int(source.info().get("Content-Length")), ncols=80, unit='iB', unit_scale=True, unit_divisor=1024) as loop:
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223517549-e03fea53-8740-43e4-9ee3-649900e6f3d1.png)
+    Commented Code
+    ![image](https://user-images.githubusercontent.com/21352182/223517744-e30be3af-800c-4537-baa2-2464dc35e0a8.png)
+
+
 ## Credits
 This GUI would not be possible without openai whisper. Read more about it at https://openai.com/blog/whisper/.
 
