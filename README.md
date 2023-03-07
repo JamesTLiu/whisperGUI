@@ -240,8 +240,7 @@ pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.10/site-packag
 * Use `/` in path strings to avoid needing to use `\\`
 * Use `-D` / `--onedir` instead of `-F` / `--onefile` option for creating a directory with the exe instead of a single exe file.
 * For `--paths` option, use the path to your `site-packages` directory. It will differ depending on your operating system and where you installed python packages (in a virtual environment or globally).
-    * The above OS-specific commands use a `site-packages` directory in a virtual environment subdirectory called `venv` in project directory.
-    * python 3.8 was used
+    * The above OS-specific commands use a `site-packages` directory in a virtual environment subdirectory called `venv` with python 3.10 in the project directory.
 * A static binary for `ffmpeg` is used so we must include it with `--add-binary`.
 * Our runtime hook enables the use of `ffmpeg` on the command line which will run our included static ffmpeg binary.
 * Use `--noconfirm` to automatically overwrite the build and dist directories.
