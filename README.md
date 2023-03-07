@@ -243,10 +243,7 @@ pip3 install -r requirements.txt
 Install additional packages
 ```bash
 python -m pip install --upgrade pip
-pip install six
-pip install pyinstaller
-pip install importlib_metadata
-pip install wheel
+pip install six pyinstaller importlib_metadata  wheel
 ```
 
 Build with `pyinstaller`
