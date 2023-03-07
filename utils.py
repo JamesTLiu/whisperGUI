@@ -459,19 +459,6 @@ def widget_resized(widget: tk.Widget) -> bool:
     Returns:
         bool: True if widget has resized.
     """
-    # lookup = widget_to_element_with_window(widget)
-    # if not lookup or not lookup.element or not lookup.window:
-    #     print(
-    #         "\tchecking if widget resized. widget is not tracked by "
-    #         "an active window"
-    #     )
-    # else:
-    #     wrapper_element = lookup.element
-    #     print(
-    #         "\tchecking if widget resized for element w/ key:"
-    #         f" {wrapper_element.key}"
-    #     )
-
     last_size = get_widget_last_size(widget)
 
     widget_width, widget_height = get_widget_size(widget)

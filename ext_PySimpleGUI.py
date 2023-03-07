@@ -442,37 +442,12 @@ class Grid(sg.Column, SuperElement):
                 event (tk.Event): The event that triggered this event
                     handler function.
             """
-            # widget: tk.Widget = event.widget
-            # lookup = widget_to_element_with_window(widget)
-            # if not lookup or not lookup.element or not lookup.window:
-            #     print("\twidget is not tracked by an active window")
-            #     return
-            # wrapper_element = lookup.element
-            # print(
-            #     "\tupdate_grid_on_element_resize called for element "
-            #     f"with key: {wrapper_element.key}"
-            # )
-
             try:
                 with popup_on_error(Exception):
                     # Only update the Grid if it's visible and has a
                     # layout
                     if not self._is_visible_with_layout():
                         return
-
-                    # widget: tk.Widget = event.widget
-                    # lookup = widget_to_element_with_window(widget)
-                    # if not lookup or not lookup.element:
-                    #     print(
-                    #         "\tresized event widget is not tracked by"
-                    #         " an active window"
-                    #     )
-                    # else:
-                    #     wrapper_element = lookup.element
-                    #     print(
-                    #         "\tresized event element key: "
-                    #         f"{wrapper_element.key}."
-                    #     )
 
                     if self.uniform_block_sizes and self.ParentForm.Resizable:
                         self._set_nonresizable_autosize_window()
@@ -592,13 +567,6 @@ class Grid(sg.Column, SuperElement):
         self.uniform_block_width = max(
             {block_col.width for block_col in self.block_columns}
         )
-
-        # print(
-        #     "updated uniform size:"
-        #     f" {self.uniform_block_width, self.uniform_block_height}"
-        # )
-
-        ...
 
     @property
     def block_columns(self) -> Tuple[BlockColumn, ...]:
@@ -1196,9 +1164,9 @@ class InfoImage(Image):
     or a PNG only.
     """
 
-    _source_default: Union[
-        str, bytes, None
-    ] = b"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"  # noqa: E501
+    _source_default: Union[str, bytes, None] = (
+        b"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"  # noqa: E501
+    )
 
 
 class EmptyImage(Image):
@@ -1207,9 +1175,9 @@ class EmptyImage(Image):
     PNG only.
     """
 
-    _source_default: Union[
-        str, bytes, None
-    ] = b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC"  # noqa: E501
+    _source_default: Union[str, bytes, None] = (
+        b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAANSURBVBhXY2BgYGAAAAAFAAGKM+MAAAAAAElFTkSuQmCC"  # noqa: E501
+    )
 
 
 class ToggleImage(ImageBase):
@@ -2236,18 +2204,6 @@ def forward_resize_event(event: tk.Event) -> None:
         return
 
     if has_widget_resized:
-        # print(f"forwarding resize event.")
-        # lookup = widget_to_element_with_window(widget)
-        # if not lookup or not lookup.element or not lookup.window:
-        #     print("\tevent widget is not tracked by an active window")
-        #     ...
-        # else:
-        #     wrapper_element = lookup.element
-        #     print(
-        #         f"\tevent element key: {wrapper_element.key}. size:"
-        #         f" {event.width, event.height}."
-        #     )
-
         widget.event_generate(
             "<<Resize>>",
         )

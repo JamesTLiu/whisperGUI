@@ -368,12 +368,12 @@ def start_GUI() -> None:  # noqa: C901
             del window_tracker.windows
 
             # Remake the main window and go back to the settings tab
-            window = (
-                main_window
-            ) = make_tracked_main_window_with_synced_profiles(
-                window_tracker=window_tracker,
-                prompt_manager=prompt_manager,
-                prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
+            window = main_window = (
+                make_tracked_main_window_with_synced_profiles(
+                    window_tracker=window_tracker,
+                    prompt_manager=prompt_manager,
+                    prompt_profile_dropdown_key=Keys.PROMPT_PROFILE_DROPDOWN,
+                )
             )
             window[Keys.SETTINGS_TAB].select()
         # User pressed toggle button for the table
@@ -1559,10 +1559,10 @@ class PromptManager:
         """A dict with the saved prompt profiles names and their prompt
         values.
         """
-        self._saved_prompt_profiles: Dict[
-            str, str
-        ] = sg.user_settings_get_entry(
-            self._saved_prompts_settings_key, self._saved_prompt_profiles
+        self._saved_prompt_profiles: Dict[str, str] = (
+            sg.user_settings_get_entry(
+                self._saved_prompts_settings_key, self._saved_prompt_profiles
+            )
         )
         return self._saved_prompt_profiles
 
