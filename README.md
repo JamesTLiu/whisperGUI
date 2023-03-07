@@ -1,6 +1,29 @@
 # whisperGUI
 A Graphical User Interface (GUI) for audio/video file transcription powered by openai whisper.
 
+* Speech-to-text for audio/video files. Easily get subtitle files.
+    * Creates .txt, .vtt, and .srt files for each transcribed file.
+* Speech-to-text in English for audio/video files.
+* Choose multiple files to transcribe them all.
+* Language: Use autodetection for the file(s) or choose a language if it's known.
+    * The selection applies to all files selected for transcription.
+* GPU acceleration will automatically be used if possible.
+* Choose a transcription model based on your needs and PC hardware.
+    * A bigger model gives better results but takes more time.
+    * It's recommended to use the English-only models if it's known that the files only have English audio.
+    * When using a model for the first time, it will need to be downloaded. This can be avoided by downloading all of the models before use. See the [Models](#models) section for details.
+* Initial prompt: Give a hint to the transcriber about the dialect/style of a language or punctuation.
+    * Does NOT guarantee the result will follow the initial prompt.
+    * Initial prompt will NOT be included in the result.
+    * Try a larger model if the result does not follow the initial prompt.
+* Prompt Profiles: Use prompt profiles to save initial prompts and switch between them.
+
+![image](https://user-images.githubusercontent.com/21352182/223523322-f54a4b21-58c4-4530-bb43-b61c25f2e84d.png)
+![image](https://user-images.githubusercontent.com/21352182/223524412-1b52a57c-20de-49e5-bc78-eb87b9738448.png)
+![image](https://user-images.githubusercontent.com/21352182/223525441-6a0d052a-be5b-4f2c-a59b-a72d3a4b4df7.png)
+![image](https://user-images.githubusercontent.com/21352182/223534705-85e277a9-8eed-40f5-a4bd-d0d834bee74d.png)
+![image](https://user-images.githubusercontent.com/21352182/223524752-bb42c878-5b46-4879-9eac-12699e2a994a.png)
+
 ## Developer Setup
 
 The video tutorial (Windows) that I initially followed to get set up for whisper on the command line (where the ffmpeg and whisper terminal commands come from) is at https://www.youtube.com/watch?v=msj3wuYf3d8.
