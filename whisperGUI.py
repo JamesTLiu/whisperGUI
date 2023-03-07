@@ -532,6 +532,14 @@ def start_GUI() -> None:  # noqa: C901
                     orientation="h",
                 )
 
+                # Enable the progress window to be closed using the X in
+                # the titlebar.
+                with suppress(KeyError):
+                    meter: sg.QuickMeter = sg.QuickMeter.active_meters[
+                        Keys.PROGRESS
+                    ]
+                    meter.window.DisableClose = False
+
                 # Track the meter window in case it was remade to ensure
                 # it's modal
                 if meter_updated:
