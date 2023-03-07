@@ -1,9 +1,35 @@
 # whisperGUI
 A Graphical User Interface (GUI) for audio/video file transcription powered by openai whisper.
 
+* Speech-to-text for audio/video files. Easily get subtitle files.
+    * Creates .txt, .vtt, and .srt files for each transcribed file.
+* Speech-to-text in English for audio/video files.
+* Choose multiple files to transcribe them all.
+* Language: Use autodetection for the file(s) or choose a language if it's known.
+    * The selection applies to all files selected for transcription.
+* GPU acceleration will automatically be used if possible.
+* Choose a transcription model based on your needs and PC hardware.
+    * A bigger model gives better results but takes more time.
+    * It's recommended to use the English-only models if it's known that the files only have English audio.
+    * When using a model for the first time, it will need to be downloaded. This can be avoided by downloading all of the models before use. See the [Models](#models) section for details.
+* Initial prompt: Give a hint to the transcriber about the dialect/style of a language or punctuation.
+    * Does NOT guarantee the result will follow the initial prompt.
+    * Initial prompt will NOT be included in the result.
+    * Try a larger model if the result does not follow the initial prompt.
+* Prompt Profiles: Use prompt profiles to save initial prompts and switch between them.
+
+![image](https://user-images.githubusercontent.com/21352182/223523322-f54a4b21-58c4-4530-bb43-b61c25f2e84d.png)
+![image](https://user-images.githubusercontent.com/21352182/223524412-1b52a57c-20de-49e5-bc78-eb87b9738448.png)
+![image](https://user-images.githubusercontent.com/21352182/223525441-6a0d052a-be5b-4f2c-a59b-a72d3a4b4df7.png)
+![image](https://user-images.githubusercontent.com/21352182/223534705-85e277a9-8eed-40f5-a4bd-d0d834bee74d.png)
+![image](https://user-images.githubusercontent.com/21352182/223524752-bb42c878-5b46-4879-9eac-12699e2a994a.png)
+
 ## Developer Setup
 
-The video tutorial (Windows) that I initially followed to get set up for whisper on command line (where the ffmpeg and whisper terminal commands come from) at https://www.youtube.com/watch?v=msj3wuYf3d8.
+The video tutorial (Windows) that I initially followed to get set up for whisper on the command line (where the ffmpeg and whisper terminal commands come from) is at https://www.youtube.com/watch?v=msj3wuYf3d8.
+
+### Python
+This application is built using python 3.10. Other versions of python may or may not work with the project.
 
 Install `python`. A good guide at https://realpython.com/installing-python/.
 * Remember to install your desired version of python, it's corresponding pip, and venv.
@@ -40,6 +66,7 @@ Install `python` version X on Linux
     pythonX -m pip install --upgrade pip
     ```
 
+### Virtual Environment
 Create a virtual environment (`venv` will be used throughout this document).
 * Example using `venv`
     ```bash
@@ -60,24 +87,25 @@ alias de='deactivate'
 These aliases only work if you create virtual environment directories that are always called `venv` in each project folder.
 These aliases must be used in a project directory that contains a `venv` virtual environment directory.
 
-Install `ffmpeg` (if NOT using ffmpeg static binary)
+### FFMPEG
+Install `ffmpeg` (if NOT using a ffmpeg static binary)
 ```bash
 sudo apt update && sudo apt install ffmpeg
 ```
 * Installing ffmpeg is not needed. We use a static binary for ffmpeg to avoid installing it.
 
+### Installing python packages
 Update `pip` if you haven't already done so.
 ```bash
 python3 -m pip install --upgrade pip
 ```
 
-Installing python packages
-* Install packages using the `requirements.txt` file with whichever tool you prefer.
-    * Example using `pip-tools`
-        ```bash
-        pip3 install pip-tools
-        pip-sync
-        ```
+Install packages using the `requirements.txt` file with whichever tool you prefer.
+* Example using `pip-tools`
+    ```bash
+    pip3 install pip-tools
+    pip-sync
+    ```
 
 If you see installation errors during the pip install command for `whisper`, install `rust` with:
 ```bash
@@ -215,10 +243,7 @@ pip3 install -r requirements.txt
 Install additional packages
 ```bash
 python -m pip install --upgrade pip
-pip install six
-pip install pyinstaller
-pip install importlib_metadata
-pip install wheel
+pip install six pyinstaller importlib_metadata  wheel
 ```
 
 Build with `pyinstaller`
@@ -231,13 +256,12 @@ pyinstaller -D -w --uac-admin --python-option="u" --paths="./venv/Lib/site-packa
 ```
 Linux
 ```bash
-pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.8/site-packages/" --hidden-import=pytorch --collect-data torch --copy-metadata torch --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --copy-metadata importlib_metadata --add-binary="ffmpeg/linux:ffmpeg/linux" --collect-data "whisper" --runtime-hook=set_env.py whisperGUI.py --noconfirm
+pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.10/site-packages/" --hidden-import=pytorch --collect-data torch --copy-metadata torch --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --copy-metadata importlib_metadata --add-binary="ffmpeg/linux:ffmpeg/linux" --collect-data "whisper" --runtime-hook=set_env.py whisperGUI.py --noconfirm
 ```
 * Use `/` in path strings to avoid needing to use `\\`
 * Use `-D` / `--onedir` instead of `-F` / `--onefile` option for creating a directory with the exe instead of a single exe file.
 * For `--paths` option, use the path to your `site-packages` directory. It will differ depending on your operating system and where you installed python packages (in a virtual environment or globally).
-    * The above OS-specific commands use a `site-packages` directory in a virtual environment subdirectory called `venv` in project directory.
-    * python 3.8 was used
+    * The above OS-specific commands use a `site-packages` directory in a virtual environment subdirectory called `venv` with python 3.10 in the project directory.
 * A static binary for `ffmpeg` is used so we must include it with `--add-binary`.
 * Our runtime hook enables the use of `ffmpeg` on the command line which will run our included static ffmpeg binary.
 * Use `--noconfirm` to automatically overwrite the build and dist directories.
@@ -245,6 +269,20 @@ pyinstaller -D -w --python-option="u" --paths="./venv/lib/python3.8/site-package
     ```
     This is the first version of Python to default to the 64-bit installer on Windows. The installer now also actively disallows installation on Windows 7. Python 3.9 is incompatible with this unsupported version of Windows.
     ```
+
+## Building compressed files
+### Windows
+Use a tool like 7-Zip with high compression settings.
+![image](https://user-images.githubusercontent.com/21352182/223277748-67012d17-3540-43cd-8d85-dddd74957181.png)
+
+### Linux
+Navigate to the project directory's dist folder `whisperGUI/dist` (it contains the `whisperGUI` folder created by the `pyinstaller` command) and then run the following.
+```bash
+tar -cf - whisperGUI/ | xz -9 --threads=0 - > whisperGUI_Linux.tar.xz
+```
+* -9 is highest compression level. use -9e for xz if you need even more compression (extreme) at the cost of higher (~2x) compression time.
+* Use -T0 or --threads=0 to makes xz use as many threads as there are CPU cores on the system
+
 
 ## Models
 You can directly download all of the models if you need them.
@@ -290,3 +328,41 @@ PermissionError: [Errno 13] Permission denied: 'ffmpeg'
 
 whisper (either through cmd line or whisper python package) uses CPU when a CUDA GPU is installed and no option to use CPU is given.
 * Restart your computer. Sometimes the torch detects the GPU as unavailable for some reason.
+
+pyinstaller builds successfully but running the executable results in an error in `transformers\utils\logging.py`'s `_configure_library_root_logger` function with the message `Failed to execute script 'whisperGUI' due to unhandled exception: 'NoneType' object has no attribute 'flush'`.
+![image](https://user-images.githubusercontent.com/21352182/223229439-f6c99e30-df90-47b2-95cc-f484ab825545.png)
+1. Open the following file in the `site-packages` directory `.\transformers\utils\logging.py`.
+    * The `site-packages` directory path can be found by running the following in the terminal.
+        ```bash
+        python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+        ```
+2. Go to the function definition for `_configure_library_root_logger` and replace the following code inside of it.
+
+    Original Code
+    ```python
+    _default_handler = logging.StreamHandler()  # Set sys.stderr as stream.
+    _default_handler.flush = sys.stderr.flush
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223228785-f0d81b1b-dbc5-46a8-984f-a57c8e1f92ea.png)
+    New Code
+    ```python
+    _default_handler = sys.stderr
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223228931-b3ecce09-d6f2-4797-82d9-e73e758749e1.png)
+3. Save the `logging.py` file and rebuild using pyinstaller.
+
+When the application is finally running, the download model is always stuck. This is because the window is closed. Some codes use functions that need to get print messages from cmd or display them in cmd. Therefore, it should be when whisper is downloading the model. It is caused by using tqdm to display the progress bar, so find this code in whisper's `__init__.py` file and comment out the two lines of code as shown in the figure below.
+
+* Search for this Code
+    ```python
+    with tqdm(total=int(source.info().get("Content-Length")), ncols=80, unit='iB', unit_scale=True, unit_divisor=1024) as loop:
+    ```
+    ![image](https://user-images.githubusercontent.com/21352182/223517549-e03fea53-8740-43e4-9ee3-649900e6f3d1.png)
+    Commented Code
+    ![image](https://user-images.githubusercontent.com/21352182/223517744-e30be3af-800c-4537-baa2-2464dc35e0a8.png)
+
+
+## Credits
+This GUI would not be possible without openai whisper. Read more about it at https://openai.com/blog/whisper/.
+
+Icon - <a href="https://www.flaticon.com/free-icons/text-to-speech" title="text to speech icons">Text to speech icons created by Freepik - Flaticon</a>
