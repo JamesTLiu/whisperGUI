@@ -16,6 +16,9 @@ A Graphical User Interface (GUI) for audio/video file transcription powered by o
     * Does NOT guarantee the result will follow the initial prompt.
     * Initial prompt will NOT be included in the result.
     * Try a larger model if the result does not follow the initial prompt.
+    * Example initial prompts
+        * Chinese traditional: 以下是普通話的句子。
+        * Chinese simplified:  以下是普通话的句子。
 * Prompt Profiles: Use prompt profiles to save initial prompts and switch between them.
 
 ![image](https://user-images.githubusercontent.com/21352182/223523322-f54a4b21-58c4-4530-bb43-b61c25f2e84d.png)
@@ -176,6 +179,9 @@ For English-only applications, the `.en` models tend to perform better, especial
 
 Whisper's performance varies widely depending on the language.
 
+Update: openai whisper released a new large model named large-v2. The old large model has been renamed to large-v1.The large-v2 model performs better on average than the large-v1 model but not always.Check the result for each file and use large-v1 instead if needed.
+* large-v2 has been known to sometimes generate text which does not match the audio or is missing some text.
+
 ## Command line usage of whisper
 
 whisper converts your input with ffmpeg (effectively the console command `ffmpeg -i \<recording> -ar 16000 -ac 1 -c:a pcm_s16le \<output>.wav`) and pre-processes it before doing any speech recognition.
@@ -303,7 +309,7 @@ _MODELS = {
 
 * Above is from `.../site-packages/whisper/__init__.py` and may change.
 * Tip: To avoid the GUI needing to download a model when using it for the first time, download the models and place them all in the directory that whisper auto downloads models into.
-* Models auto downloaded by whisper will be in `~/.cache/whisper/` on Linux and `C:\Users\<username>\.cache\whisper\` on Windows.
+* Models auto downloaded by whisper will be in `~/.cache/whisper/` on Linux and `%USERPROFILE%\.cache\whisper\` on Windows.
 
 ## Common development issues
 Running process X results in the program getting killed with the message 'Killed'.
