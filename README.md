@@ -17,8 +17,8 @@ A Graphical User Interface (GUI) for audio/video file transcription powered by o
     * Initial prompt will NOT be included in the result.
     * Try a larger model if the result does not follow the initial prompt.
     * Example initial prompts
-        * Chinese traditional: 以下是普通話的句子。
-        * Chinese simplified:  以下是普通话的句子。
+        * Chinese traditional: 淨師專網極樂學離。
+        * Chinese simplified:  净师专网极乐学离。
 * Prompt Profiles: Use prompt profiles to save initial prompts and switch between them.
 
 ![image](https://user-images.githubusercontent.com/21352182/223523322-f54a4b21-58c4-4530-bb43-b61c25f2e84d.png)
