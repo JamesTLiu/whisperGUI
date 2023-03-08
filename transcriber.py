@@ -494,6 +494,10 @@ def write_transcript_to_files(
             transcription result files.
     """
     output_dir = Path(output_dir_path)
+
+    # Ensure output directory exists
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     audio_basename = Path(audio_path).stem
 
     language_specifier = str(transcribe_result["language"]).strip()
