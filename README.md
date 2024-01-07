@@ -179,7 +179,7 @@ For English-only applications, the `.en` models tend to perform better, especial
 
 Whisper's performance varies widely depending on the language.
 
-Update: openai whisper released a new large model named large-v2. The old large model has been renamed to large-v1.The large-v2 model performs better on average than the large-v1 model but not always.Check the result for each file and use large-v1 instead if needed.
+Update: openai whisper released a new large model named large-v2. The old large model has been renamed to large-v1.The large-v2 model performs better on average than the large-v1 model but not always. Check the result for each file and use large-v1 instead if needed.
 * large-v2 has been known to sometimes generate text which does not match the audio or is missing some text.
 
 ## Command line usage of whisper
@@ -357,7 +357,7 @@ pyinstaller builds successfully but running the executable results in an error i
     ![image](https://user-images.githubusercontent.com/21352182/223228931-b3ecce09-d6f2-4797-82d9-e73e758749e1.png)
 3. Save the `logging.py` file and rebuild using pyinstaller.
 
-When the application is finally running, the download model is always stuck. This is because the window is closed. Some codes use functions that need to get print messages from cmd or display them in cmd. Therefore, it should be when whisper is downloading the model. It is caused by using tqdm to display the progress bar, so find this code in whisper's `__init__.py` file and comment out the two lines of code as shown in the figure below.
+When the application is finally running, it gets stuck when downloading a model. Some code may use functions that need to get print messages from cmd or display them in cmd. It may be caused by using tqdm to display the progress bar. So find this code in whisper's `__init__.py` file and comment out the two lines of code as shown in the figure below.
 
 * Search for this Code
     ```python
