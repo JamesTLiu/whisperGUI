@@ -1,5 +1,5 @@
 # whisperGUI
-A Graphical User Interface (GUI) for audio/video file transcription powered by openai whisper.
+A Graphical User Interface (GUI) for audio/video file transcription powered by Whisper, an open-source speech recognition model from OpenAI.
 
 * Speech-to-text for audio/video files. Easily get subtitle files.
     * Creates .txt, .vtt, and .srt files for each transcribed file.
